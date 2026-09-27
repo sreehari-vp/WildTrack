@@ -1,0 +1,24 @@
+{
+  "name": "wildtrack-phase-1",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^5.0.1",
+    "vite": "^7.1.5",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^7.9.1",
+    "tailwindcss": "^3.4.17",
+    "postcss": "^8.5.6",
+    "autoprefixer": "^10.4.21",
+    "maplibre-gl": "^5.7.1",
+    "lucide-react": "^0.544.0",
+    "recharts": "^3.2.1"
+  }
+}

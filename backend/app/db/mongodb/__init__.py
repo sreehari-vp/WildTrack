@@ -1,0 +1,1 @@
+"""MongoDB event-store access."""

@@ -20,6 +20,30 @@ class ZoneSummary(BaseModel):
     risk_level: str
 
 
+class AlertOut(BaseModel):
+    alert_id: str
+    animal_id: str
+    zone_id: str | None = None
+    rule_id: str | None = None
+    alert_type: str
+    severity: str
+    message: str
+    status: str
+    created_at: datetime
+    updated_at: datetime
+    resolved_at: datetime | None = None
+    animal_code: str | None = None
+    animal_name: str | None = None
+    species: str | None = None
+    zone_name: str | None = None
+    zone_type: str | None = None
+    rule_name: str | None = None
+
+
+class AlertStatusUpdate(BaseModel):
+    status: str
+
+
 class ObservationOut(BaseModel):
     observation_id: str
     animal_id: str
@@ -44,12 +68,13 @@ class AnimalOut(BaseModel):
 
 
 class MovementPoint(BaseModel):
+    observation_id: str | None = None
     latitude: float
     longitude: float
     timestamp: datetime
     speed: float | None = None
     zone: ZoneSummary | None = None
-    distance_from_previous_meters: float | None = None
+    distance_from_previous_meters: float = 0
 
 
 class MovementOut(BaseModel):
@@ -59,12 +84,16 @@ class MovementOut(BaseModel):
     movement_duration_seconds: float = 0
     started_at: datetime | None = None
     ended_at: datetime | None = None
+    point_count: int = 0
 
 
 class ZoneTransition(BaseModel):
     from_zone: ZoneSummary | None = None
     to_zone: ZoneSummary | None = None
     transitioned_at: datetime
+    entered_at: datetime | None = None
+    exited_at: datetime | None = None
+    duration_seconds: float | None = None
 
 
 class ZoneHistorySegment(BaseModel):

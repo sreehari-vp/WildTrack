@@ -58,18 +58,15 @@ const Alerts = () => {
     alert={selected}
     animal={selectedAnimal}
     zone={selectedZone}
-    onResolve={() => {
+    onResolve={async () => {
       if (!selected) return;
-      alertService.resolveAlert(selected.id);
-      setLocalAlerts((current) => current.map((alert) => alert.id === selected.id ? { ...alert, status: "resolved" } : alert));
-      pushToast({
-        title: "Alert resolved",
-        actionLabel: "Undo",
-        onAction: () => {
-          alertService.restoreAlert(selected.id);
-          setLocalAlerts((current) => current.map((alert) => alert.id === selected.id ? { ...alert, status: "open" } : alert));
-        }
-      });
+      try {
+        const resolved = await alertService.resolveAlert(selected.id);
+        setLocalAlerts((current) => current.map((alert) => alert.id === selected.id ? resolved : alert));
+        pushToast({ title: "Alert resolved" });
+      } catch {
+        pushToast({ title: "Could not resolve alert" });
+      }
     }}
   />
     </div>;

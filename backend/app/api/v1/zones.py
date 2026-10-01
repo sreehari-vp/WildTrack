@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from backend.app.db.postgres.session import get_postgres_session
-from backend.app.schemas.api import AnimalOut, NearbyZoneOut, ZoneOut
+from backend.app.schemas.api import AlertOut, AnimalOut, NearbyZoneOut, ZoneOut
+from backend.app.services.alerts import list_alerts_for_zone
 from backend.app.services.spatial import zone_containing_point, zones_near_location
 from backend.app.services.zones import animals_currently_in_zone, get_zone, list_zones, recent_zone_transitions
 
@@ -55,3 +56,14 @@ def get_zone_transitions(
     if not get_zone(session.connection(), zone_id):
         raise HTTPException(status_code=404, detail="Zone not found")
     return recent_zone_transitions(session.connection(), zone_id, limit)
+
+
+@router.get("/{zone_id}/alerts", response_model=list[AlertOut])
+def get_zone_alerts(
+    zone_id: str,
+    limit: int = Query(100, ge=1, le=500),
+    session: Session = Depends(get_postgres_session),
+) -> list[dict[str, object]]:
+    if not get_zone(session.connection(), zone_id):
+        raise HTTPException(status_code=404, detail="Zone not found")
+    return list_alerts_for_zone(session.connection(), zone_id, limit)

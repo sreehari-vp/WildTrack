@@ -64,7 +64,7 @@ def list_observations(
             SELECT observation_id, animal_id, device_id, latitude, longitude, speed, observed_at
             FROM observations
             {where}
-            ORDER BY observed_at {order}
+            ORDER BY observed_at {order}, observation_id {order}
             LIMIT :limit
             """
         ),
@@ -135,6 +135,7 @@ def movement_for_animal(
         "movement_duration_seconds": max(0, duration_seconds),
         "started_at": started_at,
         "ended_at": ended_at,
+        "point_count": len(points),
     }
 
 
@@ -151,7 +152,7 @@ def distance_for_animal(
         "total_distance_meters": movement["total_distance_meters"],
         "started_at": movement["started_at"],
         "ended_at": movement["ended_at"],
-        "point_count": len(movement["points"]),
+        "point_count": movement["point_count"],
     }
 
 
@@ -177,14 +178,13 @@ def zone_history_for_animal(
         if _zone_key(current_zone) == _zone_key(previous_zone):
             continue
         transitioned_at = row["observed_at"]
-        segments.append(
-            _zone_segment(active_zone, active_entered_at, transitioned_at)
-        )
+        segments.append(_zone_segment(active_zone, active_entered_at, transitioned_at))
         transitions.append(
             {
                 "from_zone": previous_zone,
                 "to_zone": current_zone,
                 "transitioned_at": transitioned_at,
+                "entered_at": transitioned_at,
             }
         )
         active_zone = current_zone
@@ -193,6 +193,19 @@ def zone_history_for_animal(
 
     ended_at = rows[-1]["observed_at"]
     segments.append(_zone_segment(active_zone, active_entered_at, ended_at))
+    for transition in transitions:
+        matching_segment = next(
+            (
+                segment
+                for segment in segments
+                if segment["entered_at"] == transition["entered_at"]
+                and _zone_key(segment["zone"]) == _zone_key(transition["to_zone"])
+            ),
+            None,
+        )
+        if matching_segment:
+            transition["exited_at"] = matching_segment["exited_at"]
+            transition["duration_seconds"] = matching_segment["duration_seconds"]
     return {"animal_id": animal_id, "segments": segments, "transitions": transitions}
 
 
@@ -226,7 +239,7 @@ def timeline_for_animal(
                 "zone": current_zone,
                 "distance_from_previous_meters": float(row["distance_from_previous_meters"])
                 if row.get("distance_from_previous_meters") is not None
-                else None,
+                else 0,
             }
         )
         previous_zone = current_zone
@@ -274,7 +287,7 @@ def _movement_rows(
                 zone_id, zone_name, zone_type, risk_level,
                 CASE
                     WHEN previous_location IS NULL THEN NULL
-                    ELSE ST_Distance(location::geography, previous_location::geography)
+                    ELSE GREATEST(0, ST_Distance(location::geography, previous_location::geography))
                 END AS distance_from_previous_meters
             FROM ordered
             ORDER BY observed_at ASC, observation_id ASC
@@ -287,6 +300,7 @@ def _movement_rows(
 
 def _movement_point_from_row(row: dict[str, object]) -> dict[str, object]:
     return {
+        "observation_id": row["observation_id"],
         "latitude": float(row["latitude"]),
         "longitude": float(row["longitude"]),
         "timestamp": row["observed_at"],
@@ -294,7 +308,7 @@ def _movement_point_from_row(row: dict[str, object]) -> dict[str, object]:
         "zone": _zone_from_row(row),
         "distance_from_previous_meters": float(row["distance_from_previous_meters"])
         if row.get("distance_from_previous_meters") is not None
-        else None,
+        else 0,
     }
 
 

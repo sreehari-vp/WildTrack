@@ -7,10 +7,17 @@ import { useAnimal, useAnimals } from "../hooks/useAnimals";
 import { useAlerts } from "../hooks/useAlerts";
 import { useBoundary, useZones } from "../hooks/useZones";
 import { useDevices } from "../hooks/useDevices";
-import { useObservationsForAnimal } from "../hooks/useObservations";
+import { useMovementForAnimal } from "../hooks/useObservations";
 import { directionLabel, formatCoordinate, formatRelative, titleCase } from "../utils/format";
 import { movementPathsFromObservations } from "../utils/movement";
 import { DataState } from "./PageState";
+const formatDistanceKm = (meters = 0) => `${(meters / 1e3).toFixed(2)} km`;
+const formatDuration = (seconds = 0) => {
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  return `${hours} hr ${minutes % 60} min`;
+};
 const AnimalDetail = () => {
   const { id = "" } = useParams();
   const animal = useAnimal(id);
@@ -19,16 +26,17 @@ const AnimalDetail = () => {
   const alerts = useAlerts();
   const devices = useDevices();
   const boundary = useBoundary();
-  const observations = useObservationsForAnimal(id);
-  const loading = animal.loading || animals.loading || zones.loading || alerts.loading || devices.loading || boundary.loading || observations.loading;
-  const error = animal.error || animals.error || zones.error || alerts.error || devices.error || boundary.error || observations.error;
-  if (loading || error || !animal.data || !animals.data || !zones.data || !alerts.data || !devices.data || !boundary.data || !observations.data) {
+  const movement = useMovementForAnimal(id, { limit: 2000 });
+  const loading = animal.loading || animals.loading || zones.loading || alerts.loading || devices.loading || boundary.loading || movement.loading;
+  const error = animal.error || animals.error || zones.error || alerts.error || devices.error || boundary.error || movement.error;
+  if (loading || error || !animal.data || !animals.data || !zones.data || !alerts.data || !devices.data || !boundary.data || !movement.data) {
     return <div className="p-6"><DataState loading={loading} error={error} empty={!loading && !animal.data} onRetry={() => window.location.reload()} /></div>;
   }
   const currentAnimal = animal.data;
   const device = devices.data.find((item) => item.id === currentAnimal.deviceId);
   const zone = zones.data.find((item) => item.id === currentAnimal.currentZoneId);
   const relatedAlerts = alerts.data.filter((alert) => alert.animalId === currentAnimal.id);
+  const movementObservations = movement.data.observations ?? [];
   return <div className="space-y-6 p-6">
       <header className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-5">
         <div className="flex items-center gap-4">
@@ -51,12 +59,12 @@ const AnimalDetail = () => {
             <div><dt className="text-xs text-ink-400">Device</dt><dd>{device?.model} · {device?.id}</dd></div>
           </dl>
         </section>
-        <section className="overflow-hidden rounded-panel border border-line"><ForestMap animals={[currentAnimal]} devices={devices.data} zones={zones.data} boundary={boundary.data} movementPaths={movementPathsFromObservations(observations.data)} selectedAnimalId={currentAnimal.id} preview className="h-[360px]" /></section>
+        <section className="overflow-hidden rounded-panel border border-line"><ForestMap animals={[currentAnimal]} devices={devices.data} zones={zones.data} boundary={boundary.data} movementPaths={movementPathsFromObservations(movementObservations)} selectedAnimalId={currentAnimal.id} preview className="h-[360px]" /></section>
       </div>
       <div className="grid gap-6 xl:grid-cols-[1fr_0.8fr]">
         <section><h3 className="mb-3 font-medium">Recent alerts</h3><AlertList alerts={relatedAlerts} animals={animals.data} zones={zones.data} onSelect={() => void 0} /></section>
         <section className="divider-row grid grid-cols-2 rounded-panel border border-line bg-paper">
-          {[["Distance travelled", "6.8 km"], ["Time active", "7.4 hr"], ["Zones visited", new Set(observations.data.map((item) => item.zoneId)).size], ["Alerts generated", relatedAlerts.length]].map(([label, value]) => <div key={label} className="p-4"><div className="font-display text-3xl tabular">{value}</div><div className="text-xs text-ink-600">{label}</div></div>)}
+          {[["Distance travelled", formatDistanceKm(movement.data.total_distance_meters)], ["Time active", formatDuration(movement.data.movement_duration_seconds)], ["Zones visited", new Set(movementObservations.map((item) => item.zoneId).filter(Boolean)).size], ["Alerts generated", relatedAlerts.length]].map(([label, value]) => <div key={label} className="p-4"><div className="font-display text-3xl tabular">{value}</div><div className="text-xs text-ink-600">{label}</div></div>)}
         </section>
       </div>
     </div>;

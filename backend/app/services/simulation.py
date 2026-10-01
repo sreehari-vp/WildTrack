@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from math import asin, cos, radians, sin, sqrt
 from typing import Any
 
@@ -13,6 +13,7 @@ from backend.app.db.mongodb.client import ensure_event_indexes, find_forbidden_c
 from backend.app.db.postgres.session import engine
 from backend.app.schemas.api import SimulationStatus
 from backend.app.services.animals import update_device_seen
+from backend.app.services.eca import evaluate_observation_context
 from backend.app.services.observations import create_observation
 from backend.app.services.simulation_config import SIMULATION_PATHS, SPECIES_SPEED_CAP_KMH, SimulationPoint
 from backend.app.services.spatial import zone_containing_point
@@ -36,6 +37,7 @@ class MovementSimulator:
         self._lock = asyncio.Lock()
         self._steps = {animal_id: 0 for animal_id in SIMULATION_PATHS}
         self._current_zones: dict[str, str | None] = {animal_id: None for animal_id in SIMULATION_PATHS}
+        self._mongo_retry_after: datetime | None = None
 
     @property
     def running(self) -> bool:
@@ -90,9 +92,10 @@ class MovementSimulator:
             rows = conn.execute(
                 text(
                     """
-                    SELECT animal_id, animal_code, species, device_id
-                    FROM animals
-                    WHERE animal_id = ANY(:animal_ids) OR animal_code = ANY(:animal_ids)
+                    SELECT a.animal_id, a.animal_code, a.name, a.species, a.device_id, d.battery_level
+                    FROM animals a
+                    LEFT JOIN devices d ON d.device_id = a.device_id
+                    WHERE a.animal_id = ANY(:animal_ids) OR a.animal_code = ANY(:animal_ids)
                     """
                 ),
                 {"animal_ids": list(SIMULATION_PATHS.keys())},
@@ -100,13 +103,7 @@ class MovementSimulator:
             return {row["animal_id"]: dict(row) for row in rows}
 
     def _step_sync(self) -> list[dict[str, Any]]:
-        mongo_client = get_mongo_client()
-        mongo_db = get_mongo_database(mongo_client)
-        forbidden = find_forbidden_core_collections(mongo_db)
-        if forbidden:
-            mongo_client.close()
-            raise RuntimeError(f"MongoDB contains forbidden core collections: {', '.join(forbidden)}")
-        ensure_event_indexes(mongo_db)
+        mongo_client, mongo_db = self._event_store()
         emitted: list[dict[str, Any]] = []
         try:
             meta = self._load_animal_meta()
@@ -135,7 +132,7 @@ class MovementSimulator:
                     previous_zone_id = self._current_zones.get(animal_id)
                     if previous_zone_id is None and step_index == 0:
                         previous_zone_id = self._latest_zone_before_simulation(conn, animal_id)
-                    if current_zone_id != previous_zone_id:
+                    if mongo_db is not None and current_zone_id != previous_zone_id:
                         self._record_boundary_event(
                             mongo_db,
                             animal_id=animal_id,
@@ -146,12 +143,45 @@ class MovementSimulator:
                             longitude=current_point.longitude,
                             speed=speed,
                         )
+                    evaluate_observation_context(
+                        conn,
+                        animal=animal,
+                        observation=observation,
+                        current_zone=dict(zones[0]) if zones else None,
+                        previous_zone_id=previous_zone_id,
+                        mongo_db=mongo_db,
+                    )
                     self._current_zones[animal_id] = current_zone_id
                     self._steps[animal_id] = (step_index + 1) % len(path)
                     emitted.append({"animal_id": animal_id, "observation": observation, "zone_id": current_zone_id})
         finally:
-            mongo_client.close()
+            if mongo_client is not None:
+                mongo_client.close()
         return emitted
+
+    def _event_store(self) -> tuple[Any | None, Database | None]:
+        now = datetime.now(timezone.utc)
+        if self._mongo_retry_after and now < self._mongo_retry_after:
+            return None, None
+        mongo_client = None
+        try:
+            mongo_client = get_mongo_client()
+            mongo_db = get_mongo_database(mongo_client)
+            forbidden = find_forbidden_core_collections(mongo_db)
+            if forbidden:
+                raise RuntimeError(f"MongoDB contains forbidden core collections: {', '.join(forbidden)}")
+            ensure_event_indexes(mongo_db)
+            self._mongo_retry_after = None
+            return mongo_client, mongo_db
+        except RuntimeError:
+            if mongo_client is not None:
+                mongo_client.close()
+            raise
+        except Exception:
+            if mongo_client is not None:
+                mongo_client.close()
+            self._mongo_retry_after = now + timedelta(seconds=60)
+            return None, None
 
     def _latest_zone_before_simulation(self, conn: Any, animal_id: str) -> str | None:
         row = conn.execute(
@@ -161,7 +191,7 @@ class MovementSimulator:
                 FROM observations o
                 LEFT JOIN zones z ON ST_Contains(z.geometry, o.location)
                 WHERE o.animal_id = :animal_id
-                ORDER BY o.observed_at DESC
+                ORDER BY o.observed_at DESC, o.observation_id DESC
                 LIMIT 1
                 """
             ),

@@ -9,6 +9,18 @@ const getApiJson = async (path) => {
   if (!response.ok) throw new Error(`API request failed: ${response.status}`);
   return response.json();
 };
+const sendApiJson = async (path, options = {}) => {
+  const response = await fetch(apiUrl(path), {
+    ...options,
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      ...(options.headers ?? {})
+    }
+  });
+  if (!response.ok) throw new Error(`API request failed: ${response.status}`);
+  return response.json();
+};
 const risk = (value) => {
   if (value === "safe" || value === "medium" || value === "high" || value === "critical" || value === "info") {
     return value;
@@ -51,13 +63,14 @@ const apiObservationToObservation = (item) => ({
   recordedAt: item.observed_at
 });
 const apiMovementToObservations = (movement) => movement.points.map((point, index) => ({
-  id: `MOVE-${movement.animal_id}-${index}`,
+  id: point.observation_id ?? `MOVE-${movement.animal_id}-${index}`,
   animalId: movement.animal_id,
   zoneId: point.zone?.zone_id ?? "",
   coordinates: [point.longitude, point.latitude],
   speedKmh: point.speed ?? 0,
   recordedAt: point.timestamp,
-  distanceFromPreviousMeters: point.distance_from_previous_meters ?? null
+  distanceFromPreviousMeters: point.distance_from_previous_meters ?? 0,
+  sequence: index
 }));
 const apiZoneToZone = (item) => {
   const coordinates = item.geometry.type === "MultiPolygon" ? item.geometry.coordinates[0] : item.geometry.coordinates;
@@ -81,5 +94,6 @@ export {
   apiObservationToObservation,
   apiUrl,
   apiZoneToZone,
-  getApiJson
+  getApiJson,
+  sendApiJson
 };

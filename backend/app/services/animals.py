@@ -58,7 +58,7 @@ WITH latest_observation AS (
     SELECT DISTINCT ON (animal_id)
         observation_id, animal_id, device_id AS observation_device_id, latitude, longitude, speed, observed_at, location
     FROM observations
-    ORDER BY animal_id, observed_at DESC
+    ORDER BY animal_id, observed_at DESC, observation_id DESC
 )
 SELECT
     a.animal_id, a.animal_code, a.species, a.name, a.age, a.sex, a.status,

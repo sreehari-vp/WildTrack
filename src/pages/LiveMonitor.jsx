@@ -20,7 +20,7 @@ const LiveMonitor = () => {
   const navigate = useNavigate();
   const animals = useAnimals(pollingMs);
   const zones = useZones();
-  const alerts = useAlerts();
+  const alerts = useAlerts(pollingMs);
   const boundary = useBoundary();
   const devices = useDevices(pollingMs);
   const observations = useObservations(pollingMs);

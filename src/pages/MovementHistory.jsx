@@ -138,7 +138,20 @@ const MovementHistory = () => {
             <div className="p-3"><div className="font-display text-2xl tabular">{formatDistanceKm(movement.data.total_distance_meters)}</div><div className="text-xs text-ink-600">Distance km</div></div>
             <div className="p-3"><div className="font-display text-2xl tabular">{formatDuration(movement.data.movement_duration_seconds)}</div><div className="text-xs text-ink-600">Duration</div></div>
             <div className="p-3"><div className="font-display text-2xl tabular">{new Set(animalObservations.map((item) => item.zoneId).filter(Boolean)).size}</div><div className="text-xs text-ink-600">Zones visited</div></div>
-            <div className="p-3"><div className="font-display text-2xl tabular">{animalObservations.length}</div><div className="text-xs text-ink-600">Route points</div></div>
+            <div className="p-3"><div className="font-display text-2xl tabular">{movement.data.point_count ?? animalObservations.length}</div><div className="text-xs text-ink-600">Route points</div></div>
+          </div>
+          <div className="rounded-panel border border-line p-3">
+            <h3 className="text-sm font-medium text-ink-900">Observation window</h3>
+            <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <dt className="text-xs text-ink-400">First observation</dt>
+                <dd className="font-mono text-xs tabular">{movement.data.started_at ? formatTime(movement.data.started_at) : "No observation"}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-ink-400">Latest observation</dt>
+                <dd className="font-mono text-xs tabular">{movement.data.ended_at ? formatTime(movement.data.ended_at) : "No observation"}</dd>
+              </div>
+            </dl>
           </div>
           <div className="rounded-panel border border-line p-3">
             <h3 className="text-sm font-medium text-ink-900">Zone timeline</h3>
@@ -156,6 +169,15 @@ const MovementHistory = () => {
                     <div className="font-mono text-xs tabular text-ink-600">{formatTime(transition.transitioned_at)}</div>
                     <div className="truncate">{zoneLabel(transition.from_zone)} → {zoneLabel(transition.to_zone)}</div>
                   </div>) : <div className="text-sm text-ink-600">No zone transitions for this range.</div>}
+            </div>
+          </div>
+          <div className="rounded-panel border border-line p-3">
+            <h3 className="text-sm font-medium text-ink-900">Chronological timeline</h3>
+            <div className="mt-3 max-h-44 space-y-2 overflow-auto pr-1">
+              {timeline.data.events.length ? timeline.data.events.slice(0, 20).map((event, index) => <div key={`${event.timestamp}-${event.event_type}-${index}`} className="text-sm">
+                    <div className="font-mono text-xs tabular text-ink-600">{formatTime(event.timestamp)}</div>
+                    {event.event_type === "zone_transition" ? <div className="truncate">{zoneLabel(event.from_zone)} → {zoneLabel(event.to_zone)}</div> : <div className="truncate">{zoneLabel(event.zone)} · {formatDistanceKm(event.distance_from_previous_meters)} km from previous</div>}
+                  </div>) : <div className="text-sm text-ink-600">No timeline events for this range.</div>}
             </div>
           </div>
         </div>

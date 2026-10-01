@@ -61,6 +61,7 @@ ECA_RULES = [
     ("RULE-001", "Restricted zone entry", "restricted_zone_entry", '{"zone_type":"restricted"}', '{"create_alert":true}', "high", True),
     ("RULE-002", "Protected zone tiger presence", "protected_zone_entry", '{"zone_type":"protected","species":"tiger"}', '{"create_alert":true}', "high", True),
     ("RULE-003", "Low battery warning", "low_battery", '{"battery_level_lt":25}', '{"create_alert":true}', "medium", True),
+    ("RULE-004", "High-risk zone entry", "high_risk_zone_entry", '{"risk_level":"critical"}', '{"create_alert":true}', "critical", True),
 ]
 
 ALERTS = [

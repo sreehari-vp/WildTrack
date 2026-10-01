@@ -20,7 +20,6 @@ Configure environment variables in `.env`:
 
 ```bash
 VITE_API_BASE_URL=http://localhost:8000/api/v1
-VITE_WS_BASE_URL=ws://localhost:8000/api/v1
 VITE_MAP_STYLE_URL=https://tiles.openfreemap.org/styles/liberty
 ```
 
@@ -105,6 +104,8 @@ GET  /api/v1/animals/{animal_id}/location
 GET  /api/v1/observations
 GET  /api/v1/animals/{animal_id}/observations
 GET  /api/v1/animals/{animal_id}/movement
+GET  /api/v1/alerts
+PATCH /api/v1/alerts/{alert_id}
 GET  /api/v1/zones
 GET  /api/v1/zones/{zone_id}
 GET  /api/v1/zones/lookup?latitude=11.414&longitude=76.651
@@ -182,6 +183,80 @@ Example movement response:
 
 The frontend consumes these APIs through `src/services/observationService.js` and `src/services/zoneService.js`. Live Monitor continues polling every few seconds and updates markers/paths without remounting the MapLibre map. Movement History now loads real backend movement, zone history, transition timeline, distance, and duration data.
 
+## Phase 5 — ECA, risk detection, and alerts
+
+Phase 5 adds a real Event-Condition-Action flow on top of simulator observations and Phase 4 spatial intelligence:
+
+```text
+GPS simulator
+  -> PostgreSQL observation
+  -> PostGIS zone detection
+  -> ECA event context
+  -> active eca_rules evaluation
+  -> PostgreSQL alert
+  -> MongoDB event document
+  -> FastAPI alert APIs
+  -> React alerts and Live Monitor polling
+```
+
+Rules are loaded from PostgreSQL `eca_rules`; alerts are persisted in PostgreSQL `alerts`. MongoDB stores event history only in the existing flexible collections. MongoDB logging is best-effort: if MongoDB is temporarily unavailable, the PostgreSQL alert remains the source of truth.
+
+Supported Phase 5 event types:
+
+```text
+zone_entry
+zone_exit
+restricted_zone_entry
+protected_zone_entry
+high_risk_zone_entry
+low_battery
+```
+
+The seeded rules create alerts for restricted-zone entry, tiger presence in protected zones, high-risk zone entry, and low battery devices. Severity comes from the matching rule. Duplicate prevention uses the unresolved alert key of animal, rule, event type, zone, and status (`open` or `acknowledged`), so repeated simulator ticks inside the same condition do not create alert spam.
+
+Alert APIs:
+
+```text
+GET   /api/v1/alerts
+GET   /api/v1/alerts/{alert_id}
+PATCH /api/v1/alerts/{alert_id}
+GET   /api/v1/animals/{animal_id}/alerts
+GET   /api/v1/zones/{zone_id}/alerts
+```
+
+Filters supported by `GET /api/v1/alerts` include severity, status, animal, zone, and date/time range. Valid alert status transitions are `open -> acknowledged -> resolved` and `open -> resolved`.
+
+Example alert response:
+
+```json
+{
+  "alert_id": "ALT-ECA-...",
+  "animal_id": "EL-001",
+  "zone_id": "ZONE-RESTRICTED",
+  "rule_id": "RULE-001",
+  "alert_type": "restricted_zone_entry",
+  "severity": "high",
+  "message": "Muthu entered Kargudi Restricted Zone.",
+  "status": "open",
+  "created_at": "2026-10-01T10:32:00Z",
+  "resolved_at": null
+}
+```
+
+Demo scenario:
+
+```bash
+python -m backend.app.seed.seed_all
+python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
+curl -X POST http://127.0.0.1:8000/api/v1/simulation/start
+curl http://127.0.0.1:8000/api/v1/alerts
+curl -X PATCH http://127.0.0.1:8000/api/v1/alerts/ALT-001 \
+  -H "Content-Type: application/json" \
+  -d "{\"status\":\"resolved\"}"
+```
+
+The frontend alert service reads from `/alerts`; Live Monitor polls active alerts along with live animal data and highlights affected animals without remounting the MapLibre map.
+
 ## Frontend service layer
 
 UI components use hooks, hooks call `src/services/*`, and services call the API client. The frontend expects `VITE_API_BASE_URL` to include the versioned API root, for example:
@@ -192,7 +267,7 @@ VITE_API_BASE_URL=http://localhost:8000/api/v1
 
 Service calls should use paths relative to that base, such as `/animals`, `/zones`, and `/observations?limit=500`. The API client also strips an accidental leading `/api/v1` from service paths to avoid duplicate version prefixes.
 
-If the backend is unavailable, the existing service fallbacks keep the UI usable with mock data. Live Monitor and Movement History poll backend-backed services with `VITE_API_POLLING_INTERVAL_MS` or a default of `5000` ms.
+If the backend is unavailable, the existing non-alert service fallbacks keep much of the UI usable with mock data. Alerts are backend-backed in Phase 5 so officers see real ECA output. Live Monitor and Movement History poll backend-backed services with `VITE_API_POLLING_INTERVAL_MS` or a default of `5000` ms.
 
 ## Checks
 
@@ -213,4 +288,11 @@ Run Phase 4 checks:
 
 ```bash
 python -m unittest backend.app.tests.test_phase4
+```
+
+Run the animal movement and Phase 5 alert checks:
+
+```bash
+python -m unittest backend.app.tests.test_animal_movement
+python -m unittest backend.app.tests.test_phase5
 ```

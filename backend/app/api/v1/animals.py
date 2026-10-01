@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from backend.app.db.postgres.session import get_postgres_session
-from backend.app.schemas.api import AnimalOut, DistanceOut, MovementOut, NearbyAnimalOut, TimelineOut, ZoneHistoryOut
+from backend.app.schemas.api import AlertOut, AnimalOut, DistanceOut, MovementOut, NearbyAnimalOut, TimelineOut, ZoneHistoryOut
+from backend.app.services.alerts import list_alerts_for_animal
 from backend.app.services.animals import get_animal, list_animals, resolve_animal_id
 from backend.app.services.observations import distance_for_animal, list_observations, movement_for_animal, timeline_for_animal, zone_history_for_animal
 from backend.app.services.spatial import animals_near_location
@@ -68,6 +69,18 @@ def get_animal_observations(
     if not resolved_id:
         raise HTTPException(status_code=404, detail="Animal not found")
     return list_observations(session.connection(), resolved_id, start_time, end_time, limit, descending=order == "desc")
+
+
+@router.get("/{animal_id}/alerts", response_model=list[AlertOut])
+def get_animal_alerts(
+    animal_id: str,
+    limit: int = Query(100, ge=1, le=500),
+    session: Session = Depends(get_postgres_session),
+) -> list[dict[str, object]]:
+    resolved_id = resolve_animal_id(session.connection(), animal_id)
+    if not resolved_id:
+        raise HTTPException(status_code=404, detail="Animal not found")
+    return list_alerts_for_animal(session.connection(), resolved_id, limit)
 
 
 @router.get("/{animal_id}/movement", response_model=MovementOut)

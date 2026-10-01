@@ -25,7 +25,7 @@ def latest_animal_zones(conn: Connection) -> list[dict[str, object]]:
                 SELECT DISTINCT ON (animal_id)
                     animal_id, location, observed_at
                 FROM observations
-                ORDER BY animal_id, observed_at DESC
+                ORDER BY animal_id, observed_at DESC, observation_id DESC
             )
             SELECT a.animal_id, a.animal_code, a.species, z.zone_id, z.zone_name, latest_observation.observed_at
             FROM latest_observation
@@ -60,7 +60,7 @@ def animals_near_location(conn: Connection, longitude: float, latitude: float, r
                 SELECT DISTINCT ON (animal_id)
                     animal_id, latitude, longitude, observed_at, location
                 FROM observations
-                ORDER BY animal_id, observed_at DESC
+                ORDER BY animal_id, observed_at DESC, observation_id DESC
             ),
             origin AS (
                 SELECT ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography AS geog

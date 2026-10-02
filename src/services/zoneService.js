@@ -1,38 +1,18 @@
-import { reserveBoundary, zones } from "../data/zones";
-import { apiAnimalToAnimal, apiZoneToZone, getApiJson } from "./apiClient";
-import { withDelay } from "./mockDelay";
-const zoneService = {
-  getZones: async () => {
-    try {
-      return (await getApiJson("/zones")).map(apiZoneToZone);
-    } catch {
-      return withDelay(zones);
-    }
-  },
-  getBoundary: () => withDelay(reserveBoundary),
-  getZone: async (id) => {
-    try {
-      return apiZoneToZone(await getApiJson(`/zones/${id}`));
-    } catch {
-      return withDelay(zones.find((zone) => zone.id === id));
-    }
-  },
-  getAnimalsInZone: async (id) => {
-    try {
-      return (await getApiJson(`/zones/${id}/animals`)).map(apiAnimalToAnimal);
-    } catch {
-      return withDelay([]);
-    }
-  },
-  getZoneTransitions: async (id) => {
-    try {
-      return getApiJson(`/zones/${id}/transitions`);
-    } catch {
-      return withDelay([]);
-    }
-  },
-  createLocalZone: async (zone) => withDelay(zone, 150, 220)
-};
-export {
-  zoneService
+import { apiAnimalToAnimal, apiZoneToZone, getApiJson, sendApiJson } from "./apiClient";
+const zonePayload = (zone) => ({
+  zone_name: zone.name.trim(),
+  zone_type: zone.type,
+  risk_level: zone.risk,
+  description: zone.description ?? "",
+  geometry: zone.geometry
+});
+export const zoneService = {
+  getZones: async () => (await getApiJson("/zones")).map(apiZoneToZone),
+  getBoundary: () => getApiJson("/boundaries"),
+  getZone: async (id) => apiZoneToZone(await getApiJson(`/zones/${encodeURIComponent(id)}`)),
+  getAnimalsInZone: async (id) => (await getApiJson(`/zones/${encodeURIComponent(id)}/animals`)).map(apiAnimalToAnimal),
+  getZoneTransitions: (id) => getApiJson(`/zones/${encodeURIComponent(id)}/transitions`),
+  createZone: async (zone) => apiZoneToZone(await sendApiJson("/zones", { method: "POST", body: JSON.stringify(zonePayload(zone)) })),
+  updateZone: async (zone) => apiZoneToZone(await sendApiJson(`/zones/${encodeURIComponent(zone.id)}`, { method: "PUT", body: JSON.stringify(zonePayload(zone)) })),
+  deleteZone: (id) => sendApiJson(`/zones/${encodeURIComponent(id)}`, { method: "DELETE" })
 };

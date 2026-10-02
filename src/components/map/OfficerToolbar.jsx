@@ -10,7 +10,9 @@ const OfficerToolbar = ({
     { id: "radius", label: "Radius zone", icon: Radius },
     { id: "draw", label: "Draw zone", icon: PencilLine }
   ];
-  return <div className="absolute left-4 top-24 z-20 flex rounded-panel border border-line bg-paper/95 p-1 shadow-md">
+  return <details className="absolute left-4 top-20 z-20 rounded-panel border border-line bg-paper/95 p-2 shadow-md">
+      <summary className="cursor-pointer text-sm">Map tools</summary>
+      <div className="mt-2 flex">
       {tools.map((tool) => {
     const Icon = tool.icon;
     return <Tooltip key={tool.id} label={tool.label}>
@@ -24,7 +26,8 @@ const OfficerToolbar = ({
             </button>
           </Tooltip>;
   })}
-    </div>;
+      </div>
+    </details>;
 };
 export {
   OfficerToolbar

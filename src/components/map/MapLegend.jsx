@@ -3,10 +3,10 @@ import { useState } from "react";
 import { zoneCssVar, zoneLabels } from "../../utils/risk";
 import { SpeciesIcon } from "../animals/SpeciesIcon";
 const MapLegend = () => {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const zoneTypes = Object.entries(zoneLabels);
-  return <div className="absolute bottom-4 left-4 z-20 w-64 rounded-panel border border-line bg-paper/95 p-3 shadow-md">
-      <button className="flex w-full items-center justify-between text-sm font-medium" onClick={() => setOpen((current) => !current)}>
+  return <div className={`absolute bottom-4 left-4 z-20 ${open ? "w-64" : "w-28"} rounded-panel border border-line bg-paper/95 p-3 shadow-md`}>
+      <button aria-expanded={open} className="flex w-full items-center justify-between text-sm font-medium" onClick={() => setOpen((current) => !current)}>
         Legend
         <ChevronDown className={`h-4 w-4 transition ${open ? "rotate-180" : ""}`} strokeWidth={1.75} />
       </button>

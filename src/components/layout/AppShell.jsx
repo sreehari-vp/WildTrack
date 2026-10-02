@@ -3,8 +3,6 @@ import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
 import { CommandPalette } from "./CommandPalette";
 const AppShell = ({ children }) => {
-  const [collapsed, setCollapsed] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
   useEffect(() => {
     const onKey = (event) => {
@@ -12,28 +10,16 @@ const AppShell = ({ children }) => {
         event.preventDefault();
         setCommandOpen(true);
       }
-      if (event.key === "Escape") {
-        setCommandOpen(false);
-        setMobileOpen(false);
-      }
+      if (event.key === "Escape") setCommandOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
-  return <div className={`shell-grid ${collapsed ? "sidebar-collapsed" : ""}`}>
-      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((current) => !current)} mobileOpen={mobileOpen} />
-      {mobileOpen ? <button
-    className="mobile-scrim fixed inset-0 z-40 hidden bg-forest-950/30"
-    aria-label="Close navigation"
-    onClick={() => setMobileOpen(false)}
-  /> : null}
-      <div className="min-w-0">
-        <TopBar onSearch={() => setCommandOpen(true)} onMenu={() => setMobileOpen(true)} />
-        <main className="min-h-[calc(100vh-56px)]">{children}</main>
-      </div>
+  return <div className="app-shell">
+      <TopBar onSearch={() => setCommandOpen(true)} />
+      <Sidebar />
+      <main className="app-main">{children}</main>
       <CommandPalette open={commandOpen} onClose={() => setCommandOpen(false)} />
     </div>;
 };
-export {
-  AppShell
-};
+export { AppShell };

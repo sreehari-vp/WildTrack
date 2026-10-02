@@ -8,8 +8,8 @@ def zone_containing_point(conn: Connection, longitude: float, latitude: float) -
             """
             SELECT zone_id, zone_name, zone_type, risk_level
             FROM zones
-            WHERE ST_Contains(geometry, ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326))
-            ORDER BY zone_name
+            WHERE ST_Covers(geometry, ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326))
+            ORDER BY CASE risk_level WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END, ST_Area(geometry), zone_id
             """
         ),
         {"longitude": longitude, "latitude": latitude},
@@ -30,7 +30,11 @@ def latest_animal_zones(conn: Connection) -> list[dict[str, object]]:
             SELECT a.animal_id, a.animal_code, a.species, z.zone_id, z.zone_name, latest_observation.observed_at
             FROM latest_observation
             JOIN animals a ON a.animal_id = latest_observation.animal_id
-            LEFT JOIN zones z ON ST_Contains(z.geometry, latest_observation.location)
+            LEFT JOIN LATERAL (
+                    SELECT * FROM zones WHERE ST_Covers(geometry, latest_observation.location)
+                    ORDER BY CASE risk_level WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END,
+                             ST_Area(geometry), zone_id LIMIT 1
+                ) z ON true
             ORDER BY a.animal_code
             """
         )

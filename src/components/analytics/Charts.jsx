@@ -24,7 +24,7 @@ const colors = {
   protected: "var(--zone-protected)"
 };
 const AnalyticsCharts = ({ analytics }) => <div className="grid gap-4 xl:grid-cols-2">
-    <ChartPanel title="Animal activity by hour">
+    <ChartPanel title="GPS observations by hour (UTC)">
       <div className="h-72">
         <ResponsiveContainer>
           <AreaChart data={analytics.hourlyActivity}>
@@ -56,7 +56,7 @@ const AnalyticsCharts = ({ analytics }) => <div className="grid gap-4 xl:grid-co
         </ResponsiveContainer>
       </div>
     </ChartPanel>
-    <ChartPanel title="Species activity">
+    <ChartPanel title="GPS observations by species">
       <div className="h-72">
         <ResponsiveContainer>
           <BarChart layout="vertical" data={analytics.speciesActivity}>
@@ -69,7 +69,7 @@ const AnalyticsCharts = ({ analytics }) => <div className="grid gap-4 xl:grid-co
         </ResponsiveContainer>
       </div>
     </ChartPanel>
-    <ChartPanel title="Time spent by zone type">
+    <ChartPanel title="Estimated zone dwell time (hours)">
       <div className="h-72">
         <ResponsiveContainer>
           <PieChart>

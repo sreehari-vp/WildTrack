@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { ForestMap } from "../components/map/ForestMap";
 import { RiskBadge, StatusBadge } from "../components/animals/StatusBadge";
 import { SpeciesIcon } from "../components/animals/SpeciesIcon";
@@ -19,6 +19,7 @@ const formatDuration = (seconds = 0) => {
   return `${hours} hr ${minutes % 60} min`;
 };
 const AnimalDetail = () => {
+  const navigate = useNavigate();
   const { id = "" } = useParams();
   const animal = useAnimal(id);
   const animals = useAnimals();
@@ -62,7 +63,7 @@ const AnimalDetail = () => {
         <section className="overflow-hidden rounded-panel border border-line"><ForestMap animals={[currentAnimal]} devices={devices.data} zones={zones.data} boundary={boundary.data} movementPaths={movementPathsFromObservations(movementObservations)} selectedAnimalId={currentAnimal.id} preview className="h-[360px]" /></section>
       </div>
       <div className="grid gap-6 xl:grid-cols-[1fr_0.8fr]">
-        <section><h3 className="mb-3 font-medium">Recent alerts</h3><AlertList alerts={relatedAlerts} animals={animals.data} zones={zones.data} onSelect={() => void 0} /></section>
+        <section><h3 className="mb-3 font-medium">Recent alerts</h3><AlertList alerts={relatedAlerts} animals={animals.data} zones={zones.data} onSelect={(alert) => navigate(`/alerts/${alert.id}`)} /></section>
         <section className="divider-row grid grid-cols-2 rounded-panel border border-line bg-paper">
           {[["Distance travelled", formatDistanceKm(movement.data.total_distance_meters)], ["Time active", formatDuration(movement.data.movement_duration_seconds)], ["Zones visited", new Set(movementObservations.map((item) => item.zoneId).filter(Boolean)).size], ["Alerts generated", relatedAlerts.length]].map(([label, value]) => <div key={label} className="p-4"><div className="font-display text-3xl tabular">{value}</div><div className="text-xs text-ink-600">{label}</div></div>)}
         </section>

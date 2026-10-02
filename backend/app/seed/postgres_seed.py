@@ -33,6 +33,18 @@ DEVICES = [
     ("DEV-D-001", "WT-D-001", "gps_tag", "online", 92, utc("2026-09-24T10:12:00")),
     ("DEV-D-002", "WT-D-002", "gps_tag", "online", 58, utc("2026-09-24T10:08:00")),
     ("DEV-D-003", "WT-D-003", "gps_tag", "low_battery", 18, utc("2026-09-24T10:05:00")),
+    ("DEV-E-003", "WT-E-003", "gps_collar", "online", 83, utc("2026-10-01T10:15:00")),
+    ("DEV-E-004", "WT-E-004", "gps_collar", "online", 69, utc("2026-10-01T10:14:00")),
+    ("DEV-E-005", "WT-E-005", "gps_collar", "online", 77, utc("2026-10-01T10:13:00")),
+    ("DEV-E-006", "WT-E-006", "gps_collar", "online", 61, utc("2026-10-01T10:12:00")),
+    ("DEV-T-003", "WT-T-003", "gps_collar", "online", 88, utc("2026-10-01T10:11:00")),
+    ("DEV-T-004", "WT-T-004", "gps_collar", "online", 73, utc("2026-10-01T10:10:00")),
+    ("DEV-T-005", "WT-T-005", "gps_collar", "online", 55, utc("2026-10-01T10:09:00")),
+    ("DEV-T-006", "WT-T-006", "gps_collar", "low_battery", 22, utc("2026-10-01T10:08:00")),
+    ("DEV-D-004", "WT-D-004", "gps_tag", "online", 94, utc("2026-10-01T10:07:00")),
+    ("DEV-D-005", "WT-D-005", "gps_tag", "online", 81, utc("2026-10-01T10:06:00")),
+    ("DEV-D-006", "WT-D-006", "gps_tag", "online", 67, utc("2026-10-01T10:05:00")),
+    ("DEV-D-007", "WT-D-007", "gps_tag", "online", 74, utc("2026-10-01T10:04:00")),
 ]
 
 ANIMALS = [
@@ -43,6 +55,18 @@ ANIMALS = [
     ("DR-001", "DR-001", "deer", "Dawn Group 1", 4, "female", "active", "DEV-D-001"),
     ("DR-002", "DR-002", "deer", "Spotted Doe", 5, "female", "active", "DEV-D-002"),
     ("DR-003", "DR-003", "deer", "Glen Slope Group", 3, "unknown", "offline", "DEV-D-003"),
+    ("EL-003", "EL-003", "elephant", "Meera", 24, "female", "active", "DEV-E-003"),
+    ("EL-004", "EL-004", "elephant", "Rajan", 36, "male", "active", "DEV-E-004"),
+    ("EL-005", "EL-005", "elephant", "Nila", 18, "female", "active", "DEV-E-005"),
+    ("EL-006", "EL-006", "elephant", "Kannan", 42, "male", "idle", "DEV-E-006"),
+    ("TG-003", "TG-003", "tiger", "Fern Female", 6, "female", "active", "DEV-T-003"),
+    ("TG-004", "TG-004", "tiger", "Kargudi Male", 8, "male", "active", "DEV-T-004"),
+    ("TG-005", "TG-005", "tiger", "Ridge Female", 5, "female", "active", "DEV-T-005"),
+    ("TG-006", "TG-006", "tiger", "Sand Road Male", 10, "male", "idle", "DEV-T-006"),
+    ("DR-004", "DR-004", "deer", "Bamboo Herd", 4, "unknown", "active", "DEV-D-004"),
+    ("DR-005", "DR-005", "deer", "Moyar Doe", 3, "female", "active", "DEV-D-005"),
+    ("DR-006", "DR-006", "deer", "Waterline Herd", 5, "unknown", "active", "DEV-D-006"),
+    ("DR-007", "DR-007", "deer", "Teak Slope Stag", 6, "male", "active", "DEV-D-007"),
 ]
 
 OBSERVATIONS = [
@@ -55,6 +79,18 @@ OBSERVATIONS = [
     ("OBS-007", "DR-003", "DEV-D-003", 11.388000, 76.714000, 0.0, utc("2026-09-24T10:05:00")),
     ("OBS-008", "EL-002", "DEV-E-002", 11.410000, 76.647000, 4.4, utc("2026-09-24T09:50:00")),
     ("OBS-009", "TG-001", "DEV-T-001", 11.381000, 76.685000, 5.7, utc("2026-09-24T09:45:00")),
+    ("OBS-010", "EL-003", "DEV-E-003", 11.456000, 76.657000, 2.8, utc("2026-10-01T10:15:00")),
+    ("OBS-011", "EL-004", "DEV-E-004", 11.447000, 76.694000, 1.6, utc("2026-10-01T10:14:00")),
+    ("OBS-012", "EL-005", "DEV-E-005", 11.419000, 76.638000, 3.7, utc("2026-10-01T10:13:00")),
+    ("OBS-013", "EL-006", "DEV-E-006", 11.407000, 76.683000, 0.4, utc("2026-10-01T10:12:00")),
+    ("OBS-014", "TG-003", "DEV-T-003", 11.379000, 76.671000, 7.2, utc("2026-10-01T10:11:00")),
+    ("OBS-015", "TG-004", "DEV-T-004", 11.402000, 76.716000, 5.9, utc("2026-10-01T10:10:00")),
+    ("OBS-016", "TG-005", "DEV-T-005", 11.423000, 76.697000, 4.6, utc("2026-10-01T10:09:00")),
+    ("OBS-017", "TG-006", "DEV-T-006", 11.374000, 76.704000, 0.7, utc("2026-10-01T10:08:00")),
+    ("OBS-018", "DR-004", "DEV-D-004", 11.459000, 76.632000, 4.8, utc("2026-10-01T10:07:00")),
+    ("OBS-019", "DR-005", "DEV-D-005", 11.433000, 76.682000, 6.1, utc("2026-10-01T10:06:00")),
+    ("OBS-020", "DR-006", "DEV-D-006", 11.381000, 76.631000, 5.3, utc("2026-10-01T10:05:00")),
+    ("OBS-021", "DR-007", "DEV-D-007", 11.390000, 76.701000, 3.5, utc("2026-10-01T10:04:00")),
 ]
 
 ECA_RULES = [
@@ -75,13 +111,6 @@ def seed_postgres() -> None:
     settings = get_settings()
     engine = create_engine(settings.sqlalchemy_migration_url, pool_pre_ping=True)
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM alerts"))
-        conn.execute(text("DELETE FROM observations"))
-        conn.execute(text("DELETE FROM eca_rules"))
-        conn.execute(text("DELETE FROM animals"))
-        conn.execute(text("DELETE FROM devices"))
-        conn.execute(text("DELETE FROM zones"))
-        conn.execute(text("DELETE FROM forest_boundaries"))
 
         conn.execute(
             text(
@@ -90,6 +119,7 @@ def seed_postgres() -> None:
                 VALUES ('BOUNDARY-NILGIRI', 'Nilgiri Ridge Wildlife Reserve',
                         'Demonstration monitoring boundary in the Nilgiri region.',
                         ST_Multi(ST_GeomFromText(:wkt, 4326)))
+                ON CONFLICT DO NOTHING
                 """
             ),
             {"wkt": FOREST_BOUNDARY_WKT},
@@ -102,6 +132,7 @@ def seed_postgres() -> None:
                     INSERT INTO zones (zone_id, zone_name, zone_type, risk_level, description, geometry)
                     VALUES (:zone_id, :zone_name, :zone_type, :risk_level, :description,
                             ST_Multi(ST_GeomFromText(:wkt, 4326)))
+                ON CONFLICT DO NOTHING
                     """
                 ),
                 {
@@ -119,6 +150,7 @@ def seed_postgres() -> None:
                 """
                 INSERT INTO devices (device_id, device_code, device_type, status, battery_level, last_seen)
                 VALUES (:device_id, :device_code, :device_type, :status, :battery_level, :last_seen)
+                ON CONFLICT DO NOTHING
                 """
             ),
             [dict(zip(("device_id", "device_code", "device_type", "status", "battery_level", "last_seen"), row)) for row in DEVICES],
@@ -128,6 +160,7 @@ def seed_postgres() -> None:
                 """
                 INSERT INTO animals (animal_id, animal_code, species, name, age, sex, status, device_id)
                 VALUES (:animal_id, :animal_code, :species, :name, :age, :sex, :status, :device_id)
+                ON CONFLICT DO NOTHING
                 """
             ),
             [dict(zip(("animal_id", "animal_code", "species", "name", "age", "sex", "status", "device_id"), row)) for row in ANIMALS],
@@ -141,6 +174,7 @@ def seed_postgres() -> None:
                     (observation_id, animal_id, device_id, latitude, longitude, speed, observed_at, location)
                     VALUES (:observation_id, :animal_id, :device_id, :latitude, :longitude, :speed,
                             :observed_at, ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326))
+                ON CONFLICT DO NOTHING
                     """
                 ),
                 dict(zip(("observation_id", "animal_id", "device_id", "latitude", "longitude", "speed", "observed_at"), observation)),
@@ -152,6 +186,7 @@ def seed_postgres() -> None:
                 INSERT INTO eca_rules (rule_id, rule_name, event_type, condition, action, severity, enabled)
                 VALUES (:rule_id, :rule_name, :event_type, CAST(:condition AS jsonb),
                         CAST(:action AS jsonb), :severity, :enabled)
+                ON CONFLICT DO NOTHING
                 """
             ),
             [dict(zip(("rule_id", "rule_name", "event_type", "condition", "action", "severity", "enabled"), row)) for row in ECA_RULES],
@@ -162,6 +197,7 @@ def seed_postgres() -> None:
                 INSERT INTO alerts
                 (alert_id, animal_id, zone_id, rule_id, alert_type, severity, message, status, resolved_at)
                 VALUES (:alert_id, :animal_id, :zone_id, :rule_id, :alert_type, :severity, :message, :status, :resolved_at)
+                ON CONFLICT DO NOTHING
                 """
             ),
             [dict(zip(("alert_id", "animal_id", "zone_id", "rule_id", "alert_type", "severity", "message", "status", "resolved_at"), row)) for row in ALERTS],

@@ -1,17 +1,13 @@
 from __future__ import annotations
 
-import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
-from pymongo.database import Database
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
 from backend.app.services.alerts import create_alert, find_active_duplicate_alert
-
-
-logger = logging.getLogger(__name__)
+from backend.app.services.outbox import enqueue_event
 
 
 ZONE_ENTRY_EVENT_TYPES = {
@@ -30,7 +26,7 @@ def load_active_rules(conn: Connection, event_type: str | None = None) -> list[d
     rows = conn.execute(
         text(
             f"""
-            SELECT rule_id, rule_name, event_type, condition, action, severity, enabled
+            SELECT rule_id, rule_name, event_type, condition, action, severity, enabled, version_no
             FROM eca_rules
             {where}
             ORDER BY rule_id
@@ -48,11 +44,10 @@ def evaluate_observation_context(
     observation: dict[str, Any],
     current_zone: dict[str, Any] | None,
     previous_zone_id: str | None,
-    mongo_db: Database | None = None,
 ) -> list[dict[str, Any]]:
     alerts: list[dict[str, Any]] = []
     for event in observation_events(animal=animal, observation=observation, current_zone=current_zone, previous_zone_id=previous_zone_id):
-        alerts.extend(evaluate_event(conn, event, mongo_db=mongo_db))
+        alerts.extend(evaluate_event(conn, event))
     return alerts
 
 
@@ -105,7 +100,7 @@ def observation_events(
     return events
 
 
-def evaluate_event(conn: Connection, event: dict[str, Any], mongo_db: Database | None = None) -> list[dict[str, Any]]:
+def evaluate_event(conn: Connection, event: dict[str, Any]) -> list[dict[str, Any]]:
     created_or_existing: list[dict[str, Any]] = []
     for rule in load_active_rules(conn, event_type=str(event["event_type"])):
         if not conditions_match(rule.get("condition") or {}, event):
@@ -130,14 +125,19 @@ def evaluate_event(conn: Connection, event: dict[str, Any], mongo_db: Database |
             rule_id=str(rule["rule_id"]),
             alert_type=str(rule["event_type"]),
             severity=str(rule["severity"]),
+            rule_version=int(rule["version_no"]),
             message=build_alert_message(rule, event),
         )
-        log_event_to_mongodb(mongo_db, event=event, rule=rule, alert=alert)
-        created_or_existing.append({**alert, "duplicate": False})
+        if not alert["duplicate"]:
+            enqueue_alert_event(conn, event=event, rule=rule, alert=alert)
+        created_or_existing.append(alert)
     return created_or_existing
 
 
 def conditions_match(conditions: dict[str, Any], context: dict[str, Any]) -> bool:
+    supported = {"zone_type", "risk_level", "species", "battery_level_lt", "distance_to_boundary_lt", "time_in_zone_gt", "distance_travelled_gt"}
+    if not set(conditions).issubset(supported):
+        return False
     for key, expected in conditions.items():
         if key == "zone_type" and _normalize(context.get("zone_type")) != _normalize(expected):
             return False
@@ -180,36 +180,32 @@ def build_alert_message(rule: dict[str, Any], event: dict[str, Any]) -> str:
     return f"{animal_label} triggered {rule['rule_name']}."
 
 
-def log_event_to_mongodb(
-    mongo_db: Database | None,
+def enqueue_alert_event(
+    conn: Connection,
     *,
     event: dict[str, Any],
     rule: dict[str, Any],
     alert: dict[str, Any],
 ) -> None:
-    if mongo_db is None:
-        return
     collection_name = _collection_for_event(str(event["event_type"]))
     document = {
         "event_type": event["event_type"],
         "animal_id": event["animal_id"],
         "zone_id": event.get("zone_id"),
-        "timestamp": event.get("timestamp") or datetime.utcnow(),
+        "timestamp": event.get("timestamp") or datetime.now(timezone.utc),
         "severity": rule.get("severity"),
         "rule_id": rule.get("rule_id"),
+        "rule_version": rule.get("version_no"),
         "alert_id": alert.get("alert_id"),
         "observation_id": event.get("observation_id"),
         "metadata": {
-            "source": "phase_5_eca",
+            "source": "eca_rule_engine",
             "previous_zone_id": event.get("previous_zone_id"),
             "battery_level": event.get("battery_level"),
             "location": {"lat": event.get("latitude"), "lng": event.get("longitude")},
         },
     }
-    try:
-        mongo_db[collection_name].insert_one(document)
-    except Exception as exc:
-        logger.warning("MongoDB event logging failed for alert %s: %s", alert.get("alert_id"), exc)
+    enqueue_event(conn, collection_name, document)
 
 
 def _collection_for_event(event_type: str) -> str:

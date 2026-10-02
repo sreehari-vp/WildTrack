@@ -19,7 +19,7 @@ const LocationCard = ({ location, onClose }) => {
       <dl className="mt-3 space-y-2 text-sm">
         <div className="flex justify-between gap-3">
           <dt className="text-ink-400">Current zone</dt>
-          <dd className="text-right text-ink-900">{location.zoneName ?? "Outside reserve"}</dd>
+          <dd className="text-right text-ink-900">{location.zoneName ?? "Outside monitored zones"}</dd>
         </div>
         <div className="flex justify-between gap-3">
           <dt className="text-ink-400">Zone type</dt>

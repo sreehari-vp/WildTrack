@@ -11,6 +11,7 @@ import { useDevices } from "../hooks/useDevices";
 import { useObservations } from "../hooks/useObservations";
 import { movementPathsFromObservations } from "../utils/movement";
 import { DataState } from "./PageState";
+import { WildTrackLoader } from "../components/common/WildTrackLoader";
 const Overview = () => {
   const navigate = useNavigate();
   const animals = useAnimals();
@@ -20,8 +21,8 @@ const Overview = () => {
   const devices = useDevices();
   const observations = useObservations();
   const analytics = useAnalytics();
-  const loading = animals.loading || zones.loading || alerts.loading || boundary.loading || devices.loading || observations.loading || analytics.loading;
-  const error = animals.error || zones.error || alerts.error || boundary.error || devices.error || observations.error || analytics.error;
+  const loading = animals.loading || zones.loading || alerts.loading || boundary.loading || devices.loading || observations.loading;
+  const error = animals.error || zones.error || alerts.error || boundary.error || devices.error || observations.error;
   const openAlerts = (alerts.data ?? []).filter((alert) => alert.status !== "resolved");
   const figures = [
     ["Total animals", animals.data?.length ?? 0],
@@ -31,7 +32,7 @@ const Overview = () => {
     ["Zones monitored", zones.data?.length ?? 0]
   ];
   const state = <DataState loading={loading} error={error} onRetry={() => window.location.reload()} />;
-  if (loading || error || !animals.data || !zones.data || !alerts.data || !boundary.data || !devices.data || !observations.data || !analytics.data) {
+  if (loading || error || !animals.data || !zones.data || !alerts.data || !boundary.data || !devices.data || !observations.data) {
     return <div className="p-6">{state}</div>;
   }
   const zoneData = zones.data;
@@ -64,18 +65,18 @@ const Overview = () => {
         </div>
       </div>
       <ChartPanel title="Animal activity">
-        <div className="h-64">
-          <ResponsiveContainer>
-            <BarChart data={analytics.data.hourlyActivity}>
-              <XAxis dataKey="hour" tickLine={false} axisLine={false} />
-              <YAxis tickLine={false} axisLine={false} />
-              <Tooltip />
-              <Bar dataKey="elephants" fill="var(--forest-700)" />
-              <Bar dataKey="tigers" fill="var(--risk-high)" />
-              <Bar dataKey="deer" fill="var(--risk-safe)" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        {analytics.loading ? <div className="flex h-64 items-center justify-center"><WildTrackLoader compact /></div> : analytics.error ? <div className="flex h-64 items-center justify-center text-sm text-ink-600">Activity data unavailable</div> : <div className="h-64">
+            <ResponsiveContainer>
+              <BarChart data={analytics.data?.hourlyActivity ?? []}>
+                <XAxis dataKey="hour" tickLine={false} axisLine={false} />
+                <YAxis tickLine={false} axisLine={false} />
+                <Tooltip />
+                <Bar dataKey="elephants" fill="var(--forest-700)" />
+                <Bar dataKey="tigers" fill="var(--risk-high)" />
+                <Bar dataKey="deer" fill="var(--risk-safe)" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>}
       </ChartPanel>
     </div>;
 };

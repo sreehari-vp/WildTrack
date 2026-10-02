@@ -271,7 +271,11 @@ def _movement_rows(
                     o.speed, o.observed_at, o.location,
                     z.zone_id, z.zone_name, z.zone_type, z.risk_level
                 FROM observations o
-                LEFT JOIN zones z ON ST_Contains(z.geometry, o.location)
+                LEFT JOIN LATERAL (
+                    SELECT * FROM zones WHERE ST_Covers(geometry, o.location)
+                    ORDER BY CASE risk_level WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END,
+                             ST_Area(geometry), zone_id LIMIT 1
+                ) z ON true
                 WHERE {where}
                 ORDER BY o.observed_at ASC, o.observation_id ASC
                 LIMIT :limit

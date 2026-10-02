@@ -1,298 +1,125 @@
 # WildTrack
 
-WildTrack is a wildlife monitoring operations tool with a React/Vite frontend and a FastAPI backend. Phase 4 adds spatial and temporal intelligence on top of the Phase 3 GPS simulator while keeping the frontend behind a service layer so screens can continue to use the same data shapes.
+React and MapLibre wildlife monitoring with FastAPI, PostgreSQL/PostGIS and MongoDB. An optional Neo4j Aura projection powers the separate Movement Network page.
+PostgreSQL remains authoritative for wildlife records. Authentication, demo mode and separate test databases are not in scope.
 
-## Development setup
+## Run locally
 
-WildTrack runs as two local services:
+Use the existing backend/venv environment; system Python has incompatible packages.
 
-- FastAPI backend: serves health checks, versioned API routes, and the development GPS simulator.
-- Vite React frontend: serves the ranger operations UI and reads the backend through `VITE_API_BASE_URL`.
+    python -m venv backend/venv
+    .\backend\venv\Scripts\python.exe -m pip install -r backend/requirements-dev.txt
+    npm install
 
-Install dependencies from the project root:
+Create .env from .env.example with the existing database URLs. VITE_ variables are public and must not contain database credentials.
 
-```bash
-npm install
-python -m pip install -r backend/requirements.txt
-```
+    .\backend\venv\Scripts\python.exe -m alembic -c backend/alembic.ini upgrade head
+    .\backend\venv\Scripts\python.exe -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8001
+    npm run dev -- --host 127.0.0.1 --port 5173
 
-Configure environment variables in `.env`:
+Run frontend and backend in separate terminals. API documentation: http://127.0.0.1:8001/docs.
 
-```bash
-VITE_API_BASE_URL=http://localhost:8000/api/v1
-VITE_MAP_STYLE_URL=https://tiles.openfreemap.org/styles/liberty
-```
+For Windows, `run-backend.ps1` and `run-frontend.ps1` start this checkout from their own folder and fail if the required ports are already occupied. In development, Vite proxies `/api/v1` to `127.0.0.1:8001`; the production build uses `VITE_API_BASE_URL`. If zone or pin saves return HTTP 405, check which backend is serving port 8001.
 
-Backend database variables are also read from `.env`. Set these with your own local or hosted database values:
+## Data safety
 
-```bash
-DATABASE_URL=
-DATABASE_MIGRATION_URL=
-MONGODB_URI=
-MONGODB_DATABASE=
-```
+All screens read API data. Failures display errors; there is no sample-data fallback. Animals without GPS fixes are omitted from the map, and unknown timestamps stay unknown.
+Seed commands insert missing records only. They never delete existing data or run automatically.
 
-## Start the app
+    .\backend\venv\Scripts\python.exe -m backend.app.seed.seed_all
 
-Start from the project root. First make sure PostgreSQL/PostGIS and MongoDB are reachable, then run the backend:
+Migration 0002 adds constraints, a partial unique index for active alerts and trigger-maintained alert history. Migration 0003 adds persistent map pins, map preferences and a zone ownership flag. Migration 0004 adds temporal zone/rule versions, configuration audit, the event outbox and hourly summaries. Incompatible data fails the transaction instead of being silently changed. Existing zone/rule history begins at migration-time baseline version 1; past changes cannot be reconstructed.
+Migration 0005 adds an export batch/ID ledger for incremental historical Parquet files. It does not alter wildlife records.
 
-```bash
-python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
-```
+## Advanced database concepts implemented
 
-Verify the backend health endpoint:
+- PostGIS spatial indexes and geography distances.
+- Boundary-inclusive ST_Covers with deterministic overlap priority: highest risk, smallest area, then zone ID.
+- Window functions for movement, zone transitions and dwell estimates.
+- JSONB event-condition-action rules evaluated by the application.
+- Atomic upserts and partial unique indexes for active-alert deduplication.
+- Row locks for concurrent alert transitions.
+- Database triggers for alert status history.
+- Database triggers for zone/rule versions and configuration audit (zones, rules, pins, preferences).
+- PostgreSQL transactional outbox with concurrent-worker row locks, MongoDB idempotent upserts and retries.
+- SQL hourly operational summary view and server-sent monitoring updates.
+- Resumable, locally stored Parquet archives of observations and alert facts.
+- Generation-switched Neo4j Aura projection of zone corridors, with daily species and animal contributions. PostgreSQL provides the observations and related alerts.
+- Repeatable-read snapshots for consistent analytical results.
+- MongoDB document collections for flexible events.
+- Foreign keys and coordinate, battery, speed, status and geometry constraints.
 
-```bash
-curl http://127.0.0.1:8000/health
-```
+## Map behavior
 
-Expected shape:
+Only the selected route is shown. Legend, layers, tools and the alerts drawer start collapsed. Hover or keyboard focus reveals secondary marker information; clicking opens details. Search, species and zone filters work. MultiPolygon parts and holes are retained, areas come from PostGIS, and OpenStreetMap attribution is visible.
 
-```json
-{
-  "status": "ok",
-  "postgres": {
-    "reachable": true,
-    "postgis": true,
-    "postgis_version": "..."
-  },
-  "mongodb": {
-    "reachable": true,
-    "database": "wildtrack"
-  }
-}
-```
+## Verification without a test database
 
-In a second terminal, start the frontend from the project root:
+    npm test
+    npm run build
+    .\backend\venv\Scripts\python.exe -m unittest discover -s backend/app/tests -v
 
-```bash
-npm run dev
-```
-
-Open the local Vite URL shown in that terminal. The port is chosen by Vite unless you pin one in `vite.config.js`.
-
-## Database setup
-
-Run PostgreSQL/PostGIS migrations:
-
-```bash
-python -m alembic -c backend/alembic.ini upgrade head
-```
-
-Seed PostgreSQL/PostGIS and MongoDB:
-
-```bash
-python -m backend.app.seed.seed_all
-```
-
-Verify database connectivity, PostGIS, required tables, seed counts, and MongoDB event collections:
-
-```bash
-python -m backend.app.verify
-```
-
-PostgreSQL/PostGIS owns animals, devices, zones, forest boundary, observations, ECA rules, and alerts. MongoDB owns flexible event documents in `wildlife_events`, `boundary_events`, `sensor_events`, and `device_events`.
-
-## Phase 3 API and simulator
-
-Core APIs are mounted under `/api/v1`:
-
-```text
-GET  /api/v1/animals
-GET  /api/v1/animals/{animal_id}
-GET  /api/v1/animals/{animal_id}/location
-GET  /api/v1/observations
-GET  /api/v1/animals/{animal_id}/observations
-GET  /api/v1/animals/{animal_id}/movement
-GET  /api/v1/alerts
-PATCH /api/v1/alerts/{alert_id}
-GET  /api/v1/zones
-GET  /api/v1/zones/{zone_id}
-GET  /api/v1/zones/lookup?latitude=11.414&longitude=76.651
-POST /api/v1/simulation/start
-POST /api/v1/simulation/stop
-POST /api/v1/simulation/reset
-GET  /api/v1/simulation/status
-```
-
-Useful demo commands:
-
-```bash
-curl -X POST http://127.0.0.1:8000/api/v1/simulation/start
-curl http://127.0.0.1:8000/api/v1/animals
-curl http://127.0.0.1:8000/api/v1/animals/EL-001/location
-curl http://127.0.0.1:8000/api/v1/animals/EL-001/movement
-curl -X POST http://127.0.0.1:8000/api/v1/simulation/stop
-```
-
-The simulator runs inside the FastAPI process for development. Tune it with `SIMULATION_INTERVAL_SECONDS`; the default is `5`.
-
-## Phase 4 — Spatial and temporal intelligence
-
-Phase 4 turns GPS observations into movement intelligence using PostgreSQL/PostGIS as the source of truth:
-
-- Current zone detection with `ST_Contains` against the latest animal observation.
-- Point-in-polygon lookup for coordinates and observations.
-- Movement reconstruction ordered by `observed_at`.
-- Consecutive-point distance with PostGIS geography distance calculations.
-- Total distance, movement duration, zone history, and zone transition timelines.
-- Nearby zone and nearby animal queries.
-- Zone detail intelligence for animals currently inside and recent entries/exits.
-
-MongoDB remains event-only storage. Phase 4 does not execute ECA rules, generate new risk alerts, or duplicate animal, zone, or observation records into MongoDB.
-
-New and enriched APIs under `/api/v1`:
-
-```text
-GET /api/v1/animals/{animal_id}/movement
-GET /api/v1/animals/{animal_id}/zone-history
-GET /api/v1/animals/{animal_id}/timeline
-GET /api/v1/animals/{animal_id}/distance
-GET /api/v1/animals/nearby?latitude=11.414&longitude=76.651&radius_meters=1000
-GET /api/v1/zones/{zone_id}/animals
-GET /api/v1/zones/{zone_id}/transitions
-GET /api/v1/zones/nearby?latitude=11.414&longitude=76.651&radius_meters=1000
-```
-
-Example movement response:
-
-```json
-{
-  "animal_id": "EL-001",
-  "total_distance_meters": 3420.5,
-  "movement_duration_seconds": 2040,
-  "started_at": "2026-09-24T10:12:00Z",
-  "ended_at": "2026-09-24T10:46:00Z",
-  "points": [
-    {
-      "latitude": 11.451,
-      "longitude": 76.644,
-      "timestamp": "2026-09-24T10:12:00Z",
-      "speed": 3.2,
-      "zone": {
-        "zone_id": "ZONE-SAFE",
-        "name": "North Bamboo Safe Zone",
-        "zone_type": "safe",
-        "risk_level": "safe"
-      },
-      "distance_from_previous_meters": null
-    }
-  ]
-}
-```
-
-The frontend consumes these APIs through `src/services/observationService.js` and `src/services/zoneService.js`. Live Monitor continues polling every few seconds and updates markers/paths without remounting the MapLibre map. Movement History now loads real backend movement, zone history, transition timeline, distance, and duration data.
-
-## Phase 5 — ECA, risk detection, and alerts
-
-Phase 5 adds a real Event-Condition-Action flow on top of simulator observations and Phase 4 spatial intelligence:
-
-```text
-GPS simulator
-  -> PostgreSQL observation
-  -> PostGIS zone detection
-  -> ECA event context
-  -> active eca_rules evaluation
-  -> PostgreSQL alert
-  -> MongoDB event document
-  -> FastAPI alert APIs
-  -> React alerts and Live Monitor polling
-```
-
-Rules are loaded from PostgreSQL `eca_rules`; alerts are persisted in PostgreSQL `alerts`. MongoDB stores event history only in the existing flexible collections. MongoDB logging is best-effort: if MongoDB is temporarily unavailable, the PostgreSQL alert remains the source of truth.
-
-Supported Phase 5 event types:
-
-```text
-zone_entry
-zone_exit
-restricted_zone_entry
-protected_zone_entry
-high_risk_zone_entry
-low_battery
-```
-
-The seeded rules create alerts for restricted-zone entry, tiger presence in protected zones, high-risk zone entry, and low battery devices. Severity comes from the matching rule. Duplicate prevention uses the unresolved alert key of animal, rule, event type, zone, and status (`open` or `acknowledged`), so repeated simulator ticks inside the same condition do not create alert spam.
-
-Alert APIs:
-
-```text
-GET   /api/v1/alerts
-GET   /api/v1/alerts/{alert_id}
-PATCH /api/v1/alerts/{alert_id}
-GET   /api/v1/animals/{animal_id}/alerts
-GET   /api/v1/zones/{zone_id}/alerts
-```
-
-Filters supported by `GET /api/v1/alerts` include severity, status, animal, zone, and date/time range. Valid alert status transitions are `open -> acknowledged -> resolved` and `open -> resolved`.
-
-Example alert response:
-
-```json
-{
-  "alert_id": "ALT-ECA-...",
-  "animal_id": "EL-001",
-  "zone_id": "ZONE-RESTRICTED",
-  "rule_id": "RULE-001",
-  "alert_type": "restricted_zone_entry",
-  "severity": "high",
-  "message": "Muthu entered Kargudi Restricted Zone.",
-  "status": "open",
-  "created_at": "2026-10-01T10:32:00Z",
-  "resolved_at": null
-}
-```
-
-Demo scenario:
-
-```bash
-python -m backend.app.seed.seed_all
-python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
-curl -X POST http://127.0.0.1:8000/api/v1/simulation/start
-curl http://127.0.0.1:8000/api/v1/alerts
-curl -X PATCH http://127.0.0.1:8000/api/v1/alerts/ALT-001 \
-  -H "Content-Type: application/json" \
-  -d "{\"status\":\"resolved\"}"
-```
-
-The frontend alert service reads from `/alerts`; Live Monitor polls active alerts along with live animal data and highlights affected animals without remounting the MapLibre map.
-
-## Frontend service layer
-
-UI components use hooks, hooks call `src/services/*`, and services call the API client. The frontend expects `VITE_API_BASE_URL` to include the versioned API root, for example:
-
-```bash
-VITE_API_BASE_URL=http://localhost:8000/api/v1
-```
-
-Service calls should use paths relative to that base, such as `/animals`, `/zones`, and `/observations?limit=500`. The API client also strips an accidental leading `/api/v1` from service paths to avoid duplicate version prefixes.
-
-If the backend is unavailable, the existing non-alert service fallbacks keep much of the UI usable with mock data. Alerts are backend-backed in Phase 5 so officers see real ECA output. Live Monitor and Movement History poll backend-backed services with `VITE_API_POLLING_INTERVAL_MS` or a default of `5000` ms.
-
-## Checks
-
-Run the frontend build:
-
-```bash
-npm run build
-```
-
-Run backend compile and Phase 3 integration checks:
-
-```bash
-python -m compileall -q backend
-python -m unittest backend.app.tests.test_phase3
-```
-
-Run Phase 4 checks:
-
-```bash
-python -m unittest backend.app.tests.test_phase4
-```
-
-Run the animal movement and Phase 5 alert checks:
-
-```bash
-python -m unittest backend.app.tests.test_animal_movement
-python -m unittest backend.app.tests.test_phase5
-```
+Default backend checks use pure functions and mocks. Opt into read-only checks of existing application records:
+
+    $env:WILDTRACK_READONLY_CHECKS='1'
+    .\backend\venv\Scripts\python.exe -m unittest discover -s backend/app/tests -v
+    Remove-Item Env:WILDTRACK_READONLY_CHECKS
+
+Checks do not seed, reset, insert fixtures, resolve alerts or start simulation. Destructive legacy fixtures have been replaced.
+
+## Monitoring and analytics
+
+Analytics defaults to the last seven days and supports date range and species filters. Use a preset or choose dates and apply the range. The API accepts timezone-qualified start_time/end_time and an optional species. Activity charts count GPS observations; alert trends include zero-activity days. Distance uses consecutive fixes no more than 30 minutes apart, including a preceding fix just before the selected range. Dwell estimates are clipped to the selected range and use the zone version active at the first fix.
+Monitoring uses server-sent events with HTTP polling fallback and exposes simulator start/stop controls. The simulator advances 15 finite journeys approximately every 3 seconds. Five corridor animals use accelerated steps up to 300 metres so their first Safe → Buffer → High-Risk → Protected zone crossing occurs about 30–45 seconds after starting; resident animals retain smoother steps up to 40 metres inside their habitats. Map markers glide between consecutive fixes. Start emits the next fix immediately, Stop pauses progress, and journeys stop at their destinations. After a backend restart, progress resumes from the last recorded waypoint. The Status tab shows active animals, open alerts, pending/retrying event deliveries and hourly activity. Run the simulator in one API worker. Zone edits, newly drawn zones, pins and map settings persist in PostgreSQL. Seeded zones can be edited; only newly drawn zones without observations or alerts can be deleted.
+
+Phase 6C read endpoints: `GET /api/v1/zones/{id}/history?at=<timezone-qualified timestamp>`, `GET /api/v1/rules/{id}/history`, `GET /api/v1/monitoring/audit`, `GET /api/v1/monitoring/summary`, and `GET /api/v1/monitoring/stream`. Rule changes use `GET/POST /api/v1/rules` and `PUT /api/v1/rules/{id}`; every change creates a new version. The outbox worker starts with the backend and delivers PostgreSQL-committed events to MongoDB; pending/retrying counts reveal delays. Restart the existing backend process after updating the code so the worker and new routes load.
+
+## Phase 7 local historical archive
+
+Install the pinned backend dependencies and apply migration 0005 as shown above. Then export the existing PostgreSQL records to the ignored `historical_exports/` directory:
+
+    .\backend\venv\Scripts\python.exe -m backend.app.export_history export
+    .\backend\venv\Scripts\python.exe -m backend.app.export_history status
+    .\backend\venv\Scripts\python.exe -m backend.app.export_history verify
+
+The exporter reads at most 100 batches of 1,000 records per dataset per invocation; use `--batch-size` and `--max-batches` to adjust. Rerun it to pick up new observations and alerts. PostgreSQL claims each source ID once, and unfinished batches resume with the same filename after a failure. Parquet files are partitioned by UTC `event_date`; observation rows include the matching zone geometry version when available. Alerts capture the rule version that generated them. Existing historical rows predate migration 0004's version baseline, so their zone version can be null.
+
+Phase 8 (Neo4j Aura movement network) and Phase 9 (analytics integration and deployment preparation) are implemented. The completion checklist and limitations are in [IMPLEMENTATION.md](IMPLEMENTATION.md).
+
+## Phase 8 Neo4j Aura movement network
+
+Create one **AuraDB Free** instance, then add its connection details to this checkout's `.env` (never to a `VITE_` variable):
+
+    NEO4J_URI=neo4j+s://YOUR_INSTANCE.databases.neo4j.io
+    NEO4J_USERNAME=YOUR_AURA_USERNAME
+    NEO4J_PASSWORD=YOUR_INSTANCE_PASSWORD
+    NEO4J_DATABASE=YOUR_AURA_DATABASE
+
+Install `backend/requirements.txt` in the existing virtual environment and restart the backend. The backend performs a source-change check and refreshes the graph periodically. You can inspect or force the first sync without starting a project server:
+
+    .\backend\venv\Scripts\python.exe -m backend.app.sync_network status
+    .\backend\venv\Scripts\python.exe -m backend.app.sync_network sync
+
+Open `/movement-network` for the separate network page. `GET /api/v1/network/status` and `GET /api/v1/network` expose current projection state and filtered corridors; `POST /api/v1/network/sync` refreshes it. The page also shows contributing animals, related PostgreSQL alerts and three-step habitat connections. The React app never receives Aura credentials. PostgreSQL/PostGIS remains authoritative for observations, zone versions, animals and alerts; Neo4j can be rebuilt after interruption or deletion. Zone assignment uses the version valid at each observation time, so pre-version records without a matching zone are excluded from the graph rather than guessed. A corridor requires successive visits to two different zones by the same animal within six hours; it is an observed connection, not a confirmed physical trail.
+
+The Aura projection has been synchronized and verified against this checkout. Aura supplies the exact username and database name for the instance; use those values rather than assuming a default. The rest of the application continues to work while Aura is unavailable. Habitat impact lists the observed corridors reachable within three connections and animals recorded on those corridors; it describes historical connectivity, not a forecast.
+
+## Demonstration walkthrough
+
+1. Ensure PostgreSQL/PostGIS and MongoDB are reachable. Neo4j Aura is optional for the map and alerts, and required for graph corridor analysis.
+2. Apply migrations and start the backend and frontend using the commands under [Run locally](#run-locally).
+3. Open Live Monitor and start the simulation. Observe the five corridor animals reach a zone boundary in about 30–45 seconds; configured ECA rules may create alerts as they move.
+4. Stop the simulation and confirm the journey pauses. Restart the backend later to demonstrate that progress resumes from stored observations.
+5. Open Analytics, choose a date range and species, then apply the filters. Compare GPS activity, alerts, estimated distance and zone dwell for that selection.
+6. Open Movement Network, sync if the projection is stale, filter connections by species/date, and select a corridor or zone to inspect contributors and disruption reach.
+7. Open the Live Monitor Status tab to inspect active animals, alerts and event deliveries awaiting MongoDB. Export or verify the historical Parquet archive with the Phase 7 commands above.
+
+The simulator uses generated routes for software demonstration. Do not interpret generated positions or graph corridors as verified field telemetry or exact animal trails.
+
+## Deployment preparation
+
+`render.yaml` describes one FastAPI service and one static React service. It does not create databases or deploy anything by itself. Before connecting the repository to Render, provision the hosted PostgreSQL/PostGIS and MongoDB services (and Neo4j Aura if graph analysis is wanted), set the secret environment variables in Render, and apply database migrations from a trusted environment:
+
+    .\backend\venv\Scripts\python.exe -m alembic -c backend/alembic.ini upgrade head
+
+Keep `APP_CORS_ORIGINS` aligned with the deployed frontend URL and `VITE_API_BASE_URL` aligned with the deployed API URL. Do not put credentials in frontend variables. The Render blueprint names assume `wildtrack-web.onrender.com` and `wildtrack-api.onrender.com`; update both if Render assigns different service URLs. External hosting remains a user-controlled step because it needs access to hosting accounts and production database credentials.

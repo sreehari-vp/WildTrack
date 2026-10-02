@@ -10,7 +10,10 @@ const pointInPolygon = (point, polygon) => {
   }
   return inside;
 };
-const findZoneForPoint = (point, zones) => zones.find((zone) => pointInPolygon(point, zone.geometry.coordinates[0]));
+const findZoneForPoint = (point, zones) => zones.find((zone) => {
+  const polygons = zone.geometry.type === "MultiPolygon" ? zone.geometry.coordinates : [zone.geometry.coordinates];
+  return polygons.some(([outer, ...holes]) => pointInPolygon(point, outer) && !holes.some((hole) => pointInPolygon(point, hole)));
+});
 const mapLocationFromPoint = (point, zones) => {
   const zone = findZoneForPoint(point, zones);
   return {

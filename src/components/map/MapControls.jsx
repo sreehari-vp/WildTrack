@@ -19,7 +19,7 @@ const MapControls = ({
   setPinsVisible,
   labelsVisible,
   setLabelsVisible
-}) => <div className="absolute right-4 top-24 z-20 flex flex-col gap-2">
+}) => <div className="absolute right-4 top-20 z-20 flex flex-col items-end gap-2">
     <div className="rounded-panel border border-line bg-paper/95 p-1 shadow-md">
       {[
   { label: "Zoom in", icon: Plus, action: onZoomIn },
@@ -35,11 +35,12 @@ const MapControls = ({
           </Tooltip>;
 })}
     </div>
-    <div className="w-44 rounded-panel border border-line bg-paper/95 p-2 shadow-md">
-      <div className="mb-2 flex items-center gap-2 text-xs font-medium text-ink-600">
+    <details className="rounded-panel border border-line bg-paper/95 p-2 shadow-md">
+      <summary title="Map layers" className="flex cursor-pointer list-none items-center gap-2 text-xs font-medium text-ink-600">
         <Layers className="h-3.5 w-3.5" strokeWidth={1.75} />
         Layers
-      </div>
+      </summary>
+      <div className="mt-3 w-40">
       <select className="mb-2 w-full rounded-control border border-line bg-paper px-2 py-1 text-xs" value={layerMode} onChange={(event) => setLayerMode(event.target.value)}>
         <option value="plain">World map</option>
         <option value="terrain">Terrain tone</option>
@@ -59,7 +60,7 @@ const MapControls = ({
       </label>
       <label className="flex items-center gap-2 py-1 text-xs text-ink-600">
         <input type="checkbox" checked={pathsVisible} onChange={(event) => setPathsVisible(event.target.checked)} />
-        Movement paths
+        Selected route
       </label>
       <label className="flex items-center gap-2 py-1 text-xs text-ink-600">
         <input type="checkbox" checked={pinsVisible} onChange={(event) => setPinsVisible(event.target.checked)} />
@@ -69,7 +70,8 @@ const MapControls = ({
         <input type="checkbox" checked={labelsVisible} onChange={(event) => setLabelsVisible(event.target.checked)} />
         Labels
       </label>
-    </div>
+      </div>
+    </details>
   </div>;
 export {
   MapControls

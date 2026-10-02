@@ -20,6 +20,8 @@ def get_mongo_database(client: MongoClient | None = None) -> Database:
 
 
 def ensure_event_indexes(db: Database) -> None:
+    for name in EVENT_COLLECTIONS:
+        db[name].create_index([("event_id", ASCENDING)], unique=True, sparse=True)
     db.wildlife_events.create_index([("event_type", ASCENDING), ("timestamp", DESCENDING)])
     db.wildlife_events.create_index([("animal_id", ASCENDING), ("timestamp", DESCENDING)])
 

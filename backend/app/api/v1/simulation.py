@@ -10,7 +10,8 @@ router = APIRouter(prefix="/simulation", tags=["simulation"])
 @router.post("/start")
 async def start_simulation() -> dict[str, object]:
     started = await simulator.start()
-    return {"running": simulator.running, "started": started, "message": "Simulator already running" if not started else "Simulator started"}
+    return {"running": simulator.running, "started": started,
+            "message": "Routes complete" if simulator.finished else "Simulator already running" if not started else "Simulator started"}
 
 
 @router.post("/stop")

@@ -68,7 +68,11 @@ SELECT
 FROM animals a
 LEFT JOIN devices d ON d.device_id = a.device_id
 LEFT JOIN latest_observation lo ON lo.animal_id = a.animal_id
-LEFT JOIN zones z ON lo.location IS NOT NULL AND ST_Contains(z.geometry, lo.location)
+LEFT JOIN LATERAL (
+                    SELECT * FROM zones WHERE ST_Covers(geometry, lo.location)
+                    ORDER BY CASE risk_level WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END,
+                             ST_Area(geometry), zone_id LIMIT 1
+                ) z ON true
 """
 
 

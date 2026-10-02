@@ -82,8 +82,9 @@ def seed_mongodb() -> None:
     if forbidden:
         raise RuntimeError(f"MongoDB contains forbidden core collections: {', '.join(forbidden)}")
     for collection_name in EVENT_COLLECTIONS:
-        db[collection_name].delete_many({})
-        db[collection_name].insert_many(EVENTS[collection_name])
+        for event in EVENTS[collection_name]:
+            # Match the immutable seed document; preserve existing event history.
+            db[collection_name].update_one(event, {"$setOnInsert": event}, upsert=True)
     ensure_event_indexes(db)
     client.close()
 

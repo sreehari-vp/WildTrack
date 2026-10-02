@@ -103,15 +103,20 @@ def create_alert(
     rule_id: str,
     alert_type: str,
     severity: str,
+    rule_version: int,
     message: str,
 ) -> dict[str, object]:
     alert_id = f"ALT-ECA-{uuid4().hex[:16].upper()}"
-    conn.execute(
+    result = conn.execute(
         text(
             """
             INSERT INTO alerts
-            (alert_id, animal_id, zone_id, rule_id, alert_type, severity, message, status, resolved_at)
-            VALUES (:alert_id, :animal_id, :zone_id, :rule_id, :alert_type, :severity, :message, 'open', NULL)
+            (alert_id, animal_id, zone_id, rule_id, rule_version, alert_type, severity, message, status, resolved_at)
+            VALUES (:alert_id, :animal_id, :zone_id, :rule_id, :rule_version, :alert_type, :severity, :message, 'open', NULL)
+            ON CONFLICT (animal_id, (COALESCE(rule_id, '')), alert_type, (COALESCE(zone_id, '')))
+            WHERE status IN ('open', 'acknowledged')
+            DO UPDATE SET alert_id = alerts.alert_id
+            RETURNING alert_id
             """
         ),
         {
@@ -119,13 +124,16 @@ def create_alert(
             "animal_id": animal_id,
             "zone_id": zone_id,
             "rule_id": rule_id,
+            "rule_version": rule_version,
             "alert_type": alert_type,
             "severity": severity,
             "message": message,
         },
     )
-    alert = get_alert(conn, alert_id)
+    persisted_id = result.scalar_one()
+    alert = get_alert(conn, persisted_id)
     assert alert is not None
+    alert["duplicate"] = persisted_id != alert_id
     return alert
 
 
@@ -134,6 +142,8 @@ def update_alert_status(conn: Connection, alert_id: str, status: str) -> dict[st
     if normalized_status not in VALID_ALERT_STATUSES:
         raise ValueError("Invalid alert status")
 
+    # Serialize state transitions so acknowledgement cannot overwrite resolution.
+    conn.execute(text("SELECT alert_id FROM alerts WHERE alert_id = :id FOR UPDATE"), {"id": alert_id})
     existing = get_alert(conn, alert_id)
     if not existing:
         return None
@@ -163,7 +173,7 @@ def update_alert_status(conn: Connection, alert_id: str, status: str) -> dict[st
 
 ALERT_QUERY = """
 SELECT
-    al.alert_id, al.animal_id, al.zone_id, al.rule_id, al.alert_type,
+    al.alert_id, al.animal_id, al.zone_id, al.rule_id, al.rule_version, al.alert_type,
     al.severity, al.message, al.status, al.created_at, al.updated_at, al.resolved_at,
     a.animal_code, a.name AS animal_name, a.species,
     z.zone_name, z.zone_type,
@@ -181,6 +191,7 @@ def _alert_from_row(row: dict[str, object]) -> dict[str, object]:
         "animal_id": row["animal_id"],
         "zone_id": row["zone_id"],
         "rule_id": row["rule_id"],
+        "rule_version": row["rule_version"],
         "alert_type": row["alert_type"],
         "severity": row["severity"],
         "message": row["message"],

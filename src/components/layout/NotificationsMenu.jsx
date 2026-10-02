@@ -6,10 +6,10 @@ import { SeverityBadge } from "../alerts/SeverityBadge";
 const NotificationsMenu = () => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const { data: alerts = [] } = useAlerts();
+  const { data: alerts = [] } = useAlerts(5000);
   const openAlerts = alerts.filter((alert) => alert.status !== "resolved");
   const highCount = openAlerts.filter((alert) => alert.severity === "high" || alert.severity === "critical").length;
-  const batteryCount = openAlerts.filter((alert) => alert.type === "low-battery").length;
+  const batteryCount = openAlerts.filter((alert) => alert.type === "low_battery").length;
   return <div className="relative">
       <button
     className="relative grid h-9 w-9 place-items-center rounded-control border border-line bg-paper hover:bg-moss-100"

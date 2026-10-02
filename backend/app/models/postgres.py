@@ -72,6 +72,8 @@ class Zone(TimestampMixin, Base):
     zone_type: Mapped[str] = mapped_column(String(32), nullable=False)
     risk_level: Mapped[str] = mapped_column(String(24), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
+    created_in_app: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    version_no: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     geometry: Mapped[Any] = mapped_column(Geometry("MULTIPOLYGON", srid=4326), nullable=False)
 
     alerts: Mapped[list["Alert"]] = relationship(back_populates="zone")
@@ -109,6 +111,7 @@ class EcaRule(TimestampMixin, Base):
     action: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
     severity: Mapped[str] = mapped_column(String(24), nullable=False)
     enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    version_no: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
 
     alerts: Mapped[list["Alert"]] = relationship(back_populates="rule")
 
@@ -124,6 +127,7 @@ class Alert(TimestampMixin, Base):
     animal_id: Mapped[str] = mapped_column(ForeignKey("animals.animal_id", ondelete="CASCADE"), nullable=False)
     zone_id: Mapped[str | None] = mapped_column(ForeignKey("zones.zone_id", ondelete="SET NULL"))
     rule_id: Mapped[str | None] = mapped_column(ForeignKey("eca_rules.rule_id", ondelete="SET NULL"))
+    rule_version: Mapped[int | None] = mapped_column(Integer)
     alert_type: Mapped[str] = mapped_column(String(60), nullable=False)
     severity: Mapped[str] = mapped_column(String(24), nullable=False)
     message: Mapped[str] = mapped_column(Text, nullable=False)

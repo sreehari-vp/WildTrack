@@ -15,7 +15,7 @@ const Alerts = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { pushToast } = useToast();
-  const alerts = useAlerts();
+  const alerts = useAlerts(5000);
   const animals = useAnimals();
   const zones = useZones();
   const [localAlerts, setLocalAlerts] = useState([]);
@@ -37,7 +37,7 @@ const Alerts = () => {
   const selected = localAlerts.find((alert) => alert.id === id) ?? filtered[0];
   const selectedAnimal = selected ? animals.data.find((animal) => animal.id === selected.animalId) : void 0;
   const selectedZone = selected ? zones.data.find((zone) => zone.id === selected.zoneId) : void 0;
-  return <div className="grid h-[calc(100vh-56px)] grid-cols-[420px_minmax(0,1fr)] gap-6 p-6 max-lg:grid-cols-1 max-lg:h-auto">
+  return <div className="grid h-[calc(100dvh-108px)] grid-cols-[420px_minmax(0,1fr)] gap-6 p-6 max-lg:grid-cols-1 max-lg:h-auto">
       <aside className="min-h-0 space-y-3">
         <div><h2 className="font-display text-2xl">Alerts</h2><p className="mt-1 text-sm text-ink-600">Review active and acknowledged field alerts.</p></div>
         <div className="flex flex-wrap gap-2">

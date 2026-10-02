@@ -31,7 +31,7 @@ const AnimalPopup = ({
       <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
         <div>
           <dt className="text-xs text-ink-400">Zone</dt>
-          <dd className="truncate text-ink-900">{zone?.name ?? "Outside reserve"}</dd>
+          <dd className="truncate text-ink-900">{zone?.name ?? "Outside monitored zones"}</dd>
         </div>
         <div>
           <dt className="text-xs text-ink-400">Speed</dt>

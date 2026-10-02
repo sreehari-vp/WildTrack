@@ -10,10 +10,13 @@ import { zoneLabels } from "../utils/risk";
 import { DataState } from "./PageState";
 const Zones = () => {
   const [selectedZoneId, setSelectedZoneId] = useState();
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [riskFilter, setRiskFilter] = useState("all");
   const zones = useZones();
   const animals = useAnimals();
   const alerts = useAlerts();
-  const selectedZone = zones.data?.find((zone) => zone.id === selectedZoneId) ?? zones.data?.[0];
+  const filteredZones = (zones.data ?? []).filter((zone) => (typeFilter === "all" || zone.type === typeFilter) && (riskFilter === "all" || zone.risk === riskFilter));
+  const selectedZone = filteredZones.find((zone) => zone.id === selectedZoneId) ?? filteredZones[0];
   const zoneAnimals = useZoneAnimals(selectedZone?.id);
   const zoneTransitions = useZoneTransitions(selectedZone?.id);
   const loading = zones.loading || animals.loading || alerts.loading || zoneAnimals.loading || zoneTransitions.loading;
@@ -28,8 +31,8 @@ const Zones = () => {
   }
   return <div className="space-y-5 p-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <div><h2 className="font-display text-2xl">Zones</h2><p className="mt-1 text-sm text-ink-600">Read-only reserve zones and current operational load.</p></div>
-        <div className="flex gap-2"><Select><option>All types</option></Select><Select><option>All risk</option></Select></div>
+        <div><h2 className="font-display text-2xl">Zones</h2><p className="mt-1 text-sm text-ink-600">Reserve zones and current operational load. Edit zone boundaries and details on the live map.</p></div>
+        <div className="flex gap-2"><Select aria-label="Filter zone type" value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}><option value="all">All types</option>{Object.entries(zoneLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select><Select aria-label="Filter zone risk" value={riskFilter} onChange={(event) => setRiskFilter(event.target.value)}><option value="all">All risk</option>{["safe","info","medium","high","critical"].map((value) => <option key={value} value={value}>{value}</option>)}</Select></div>
       </div>
       {selectedZone ? <section className="rounded-panel border border-line bg-paper p-4">
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -52,14 +55,14 @@ const Zones = () => {
               <div className="mt-2 space-y-2">
                 {zoneTransitions.data.length ? zoneTransitions.data.slice(0, 4).map((transition, index) => <div key={`${transition.transitioned_at}-${index}`} className="flex items-center justify-between gap-3 text-sm">
                     <span className="truncate font-mono text-xs tabular">{transition.animal_code}</span>
-                    <span className="truncate text-ink-600">{transition.from_zone?.name ?? "Outside reserve"} → {transition.to_zone?.name ?? "Outside reserve"}</span>
+                    <span className="truncate text-ink-600">{transition.from_zone?.name ?? "Outside monitored zones"} → {transition.to_zone?.name ?? "Outside monitored zones"}</span>
                     <span className="shrink-0 font-mono text-xs tabular text-ink-400">{formatTime(transition.transitioned_at)}</span>
                   </div>) : <div className="text-sm text-ink-600">No recent zone transitions in the current observation set.</div>}
               </div>
             </div>
           </div>
         </section> : null}
-      <ZoneList zones={zones.data} animals={animals.data} alerts={alerts.data} selectedZoneId={selectedZone?.id} onSelectZone={(zone) => setSelectedZoneId(zone.id)} />
+      <ZoneList zones={filteredZones} animals={animals.data} alerts={alerts.data} selectedZoneId={selectedZone?.id} onSelectZone={(zone) => setSelectedZoneId(zone.id)} />
     </div>;
 };
 export {

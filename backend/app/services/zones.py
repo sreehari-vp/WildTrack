@@ -8,8 +8,9 @@ def list_zones(conn: Connection) -> list[dict[str, object]]:
     rows = conn.execute(
         text(
             """
-            SELECT zone_id, zone_name, zone_type, risk_level, description,
-                   ST_AsGeoJSON(geometry)::json AS geometry
+            SELECT zone_id, zone_name, zone_type, risk_level, description, created_in_app, version_no,
+                   ST_AsGeoJSON(geometry)::json AS geometry,
+                   ST_Area(geometry::geography) / 1000000.0 AS area_km2
             FROM zones
             ORDER BY zone_name
             """
@@ -22,8 +23,9 @@ def get_zone(conn: Connection, zone_id: str) -> dict[str, object] | None:
     row = conn.execute(
         text(
             """
-            SELECT zone_id, zone_name, zone_type, risk_level, description,
-                   ST_AsGeoJSON(geometry)::json AS geometry
+            SELECT zone_id, zone_name, zone_type, risk_level, description, created_in_app, version_no,
+                   ST_AsGeoJSON(geometry)::json AS geometry,
+                   ST_Area(geometry::geography) / 1000000.0 AS area_km2
             FROM zones
             WHERE zone_id = :zone_id
             """
@@ -42,7 +44,7 @@ def animals_currently_in_zone(conn: Connection, zone_id: str) -> list[dict[str, 
                     observation_id, animal_id, device_id AS observation_device_id,
                     latitude, longitude, speed, observed_at, location
                 FROM observations
-                ORDER BY animal_id, observed_at DESC
+                ORDER BY animal_id, observed_at DESC, observation_id DESC
             )
             SELECT
                 a.animal_id, a.animal_code, a.species, a.name, a.age, a.sex, a.status,
@@ -51,8 +53,12 @@ def animals_currently_in_zone(conn: Connection, zone_id: str) -> list[dict[str, 
                 lo.observation_id, lo.observation_device_id, lo.latitude, lo.longitude,
                 lo.speed, lo.observed_at,
                 z.zone_id, z.zone_name, z.zone_type, z.risk_level
-            FROM zones z
-            JOIN latest_observation lo ON ST_Contains(z.geometry, lo.location)
+            FROM latest_observation lo
+            JOIN LATERAL (
+                SELECT * FROM zones WHERE ST_Covers(geometry, lo.location)
+                ORDER BY CASE risk_level WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END,
+                         ST_Area(geometry), zone_id LIMIT 1
+            ) z ON true
             JOIN animals a ON a.animal_id = lo.animal_id
             LEFT JOIN devices d ON d.device_id = a.device_id
             WHERE z.zone_id = :zone_id
@@ -78,7 +84,11 @@ def recent_zone_transitions(conn: Connection, zone_id: str, limit: int = 20) -> 
                     LAG(z.risk_level) OVER (PARTITION BY o.animal_id ORDER BY o.observed_at ASC, o.observation_id ASC) AS previous_risk_level
                 FROM observations o
                 JOIN animals a ON a.animal_id = o.animal_id
-                LEFT JOIN zones z ON ST_Contains(z.geometry, o.location)
+                LEFT JOIN LATERAL (
+                    SELECT * FROM zones WHERE ST_Covers(geometry, o.location)
+                    ORDER BY CASE risk_level WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END,
+                             ST_Area(geometry), zone_id LIMIT 1
+                ) z ON true
             )
             SELECT *
             FROM observation_zones

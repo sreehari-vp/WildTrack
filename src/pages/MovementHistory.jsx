@@ -21,7 +21,7 @@ const formatDuration = (seconds = 0) => {
   const hours = Math.floor(minutes / 60);
   return `${hours} hr ${minutes % 60} min`;
 };
-const zoneLabel = (zone) => zone?.name ?? "Outside reserve";
+const zoneLabel = (zone) => zone?.name ?? "Outside monitored zones";
 
 const MovementHistory = () => {
   const [params, setParams] = useSearchParams();
@@ -78,7 +78,7 @@ const MovementHistory = () => {
     return <div className="p-6"><DataState loading={loading} error={error} onRetry={() => window.location.reload()} /></div>;
   }
 
-  return <div className="grid h-[calc(100vh-56px)] grid-cols-[360px_minmax(0,1fr)] gap-0 max-lg:grid-cols-1 max-lg:h-auto">
+  return <div className="grid h-[calc(100dvh-108px)] grid-cols-[360px_minmax(0,1fr)] gap-0 max-lg:grid-cols-1 max-lg:h-auto">
       <aside className="overflow-auto border-r border-line bg-paper p-5 max-lg:border-r-0 max-lg:border-b">
         <h2 className="font-display text-2xl">Movement history</h2>
         <p className="mt-1 text-sm text-ink-600">Routes are reconstructed from ordered GPS observations and PostGIS zone detection.</p>

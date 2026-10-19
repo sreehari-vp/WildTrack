@@ -63,6 +63,11 @@ class AnimalOut(BaseModel):
     age: int | None
     sex: str | None
     status: str
+    data_origin: str = "legacy_unverified"
+    source_reference_type: str | None = None
+    source_reference_id: str | None = None
+    source_reference_name: str | None = None
+    source_reference_url: str | None = None
     device: DeviceOut | None = None
     latest_observation: ObservationOut | None = None
     current_zone: ZoneSummary | None = None

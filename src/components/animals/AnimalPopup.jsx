@@ -25,9 +25,11 @@ const AnimalPopup = ({
         </div>
       </div>
       <div className="mt-3 flex flex-wrap gap-2">
+        {animal.dataOrigin === "simulated_from_regional_species_list" ? <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">Simulated wildlife · regional species list</span> : <span className="rounded-full border border-line px-2 py-0.5 text-xs text-ink-500">Legacy source unverified</span>}
         <StatusBadge status={animal.status} />
         <RiskBadge risk={animal.risk} />
       </div>
+      {animal.sourceReferenceUrl && <a className="mt-2 inline-block text-xs font-medium text-forest-700 underline" href={animal.sourceReferenceUrl} target="_blank" rel="noreferrer">View regional species source</a>}
       <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
         <div>
           <dt className="text-xs text-ink-400">Zone</dt>

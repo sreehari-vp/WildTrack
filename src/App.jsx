@@ -9,27 +9,29 @@ const Overview = lazyPage(() => import("./pages/Overview"), "Overview");
 const LiveMonitor = lazyPage(() => import("./pages/LiveMonitor"), "LiveMonitor");
 const Animals = lazyPage(() => import("./pages/Animals"), "Animals");
 const AnimalDetail = lazyPage(() => import("./pages/AnimalDetail"), "AnimalDetail");
-const Zones = lazyPage(() => import("./pages/Zones"), "Zones");
 const Alerts = lazyPage(() => import("./pages/Alerts"), "Alerts");
 const Analytics = lazyPage(() => import("./pages/Analytics"), "Analytics");
 const Settings = lazyPage(() => import("./pages/Settings"), "Settings");
 const MovementHistory = lazyPage(() => import("./pages/MovementHistory"), "MovementHistory");
 const MovementNetwork = lazyPage(() => import("./pages/MovementNetwork"), "MovementNetwork");
+const FieldRecords = lazyPage(() => import("./pages/FieldRecords"), "FieldRecords");
 const App = () => <ToastProvider>
     <AppShell>
       <Suspense fallback={<WildTrackLoader />}>
       <Routes>
-        <Route path="/" element={<Overview />} />
+        <Route path="/" element={<FieldRecords />} />
+        <Route path="/overview" element={<Overview />} />
         <Route path="/monitor" element={<LiveMonitor />} />
         <Route path="/animals" element={<Animals />} />
         <Route path="/animals/:id" element={<AnimalDetail />} />
-        <Route path="/zones" element={<Zones />} />
+        <Route path="/zones" element={<FieldRecords defaultLandCover />} />
         <Route path="/alerts" element={<Alerts />} />
         <Route path="/alerts/:id" element={<Alerts />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/movement-history" element={<MovementHistory />} />
         <Route path="/movement-network" element={<MovementNetwork />} />
+        <Route path="/field-records" element={<FieldRecords />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </Suspense>

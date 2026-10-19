@@ -1,0 +1,24 @@
+{
+  "source_url": "https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_N09E075_Map.tif",
+  "source_sha256": "913f22dd9ba2b05f52eeb104ca88aa5162ec2d0a5dcef1124d4f19546ac49558",
+  "crop_sha256": "bc4b49d4c931905e127500a583e3a98318a76cba7b6b2a07d0ce71ebd8d89b2a",
+  "bounds_requested_wgs84": [
+    76.4,
+    11.18,
+    76.79,
+    11.53
+  ],
+  "product": "ESA WorldCover 10m 2021 v200",
+  "doi": "10.5281/zenodo.7254221",
+  "licence": "CC BY 4.0",
+  "class_pixel_counts": {
+    "Tree cover": 13799320,
+    "Shrubland": 958,
+    "Grassland": 4769122,
+    "Cropland": 556146,
+    "Built-up": 260597,
+    "Bare/sparse vegetation": 14590,
+    "Permanent water bodies": 255267
+  },
+  "limitation": "2021 modelled land cover, not a legal forest boundary or current condition"
+}

@@ -1,0 +1,764 @@
+[
+  {
+    "source_system": "GBIF",
+    "source_id": 4112009489,
+    "source_url": "https://www.gbif.org/occurrence/4112009489",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/159998098",
+    "species": "Hystrix indica",
+    "common_name": null,
+    "observed_on": "2003-12-23T12:25",
+    "longitude": 76.591895,
+    "latitude": 11.299429,
+    "coordinate_uncertainty_m": 218.0,
+    "licence": "http://creativecommons.org/licenses/by/4.0/legalcode",
+    "region_codes": [
+      "kundah"
+    ],
+    "zone_codes": [
+      "kundah:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 2833029373,
+    "source_url": "https://www.gbif.org/occurrence/2833029373",
+    "dataset_key": "8a863029-f435-446a-821e-275f4f641165",
+    "original_occurrence_id": "https://observation.org/observation/141064681",
+    "species": "Sus scrofa",
+    "common_name": "Wild Boar",
+    "observed_on": "2009-06-17",
+    "longitude": 76.585717,
+    "latitude": 11.291847,
+    "coordinate_uncertainty_m": 100.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "kundah"
+    ],
+    "zone_codes": [
+      "kundah:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 2836426522,
+    "source_url": "https://www.gbif.org/occurrence/2836426522",
+    "dataset_key": "8a863029-f435-446a-821e-275f4f641165",
+    "original_occurrence_id": "https://observation.org/observation/141064029",
+    "species": "Macaca radiata",
+    "common_name": "Bonnet Macaque",
+    "observed_on": "2009-06-17",
+    "longitude": 76.585717,
+    "latitude": 11.291847,
+    "coordinate_uncertainty_m": 100.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "kundah"
+    ],
+    "zone_codes": [
+      "kundah:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 4945935010,
+    "source_url": "https://www.gbif.org/occurrence/4945935010",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/241719928",
+    "species": "Herpestes vitticollis",
+    "common_name": null,
+    "observed_on": "2014-02-23T04:40",
+    "longitude": 76.552476,
+    "latitude": 11.268176,
+    "coordinate_uncertainty_m": 1.0,
+    "licence": "http://creativecommons.org/licenses/by/4.0/legalcode",
+    "region_codes": [
+      "kundah"
+    ],
+    "zone_codes": [
+      "kundah:grassland"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 1993735312,
+    "source_url": "https://www.gbif.org/occurrence/1993735312",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/20047589",
+    "species": "Muntiacus muntjak",
+    "common_name": null,
+    "observed_on": "2014-08-04T08:47",
+    "longitude": 76.64026,
+    "latitude": 11.437123,
+    "coordinate_uncertainty_m": 54.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "wenlock_downs"
+    ],
+    "zone_codes": [
+      "wenlock_downs:grassland"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 1993735334,
+    "source_url": "https://www.gbif.org/occurrence/1993735334",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/20047621",
+    "species": "Canis aureus",
+    "common_name": null,
+    "observed_on": "2014-08-05T02:06",
+    "longitude": 76.582105,
+    "latitude": 11.302686,
+    "coordinate_uncertainty_m": 565.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "kundah"
+    ],
+    "zone_codes": [
+      "kundah:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 2818745154,
+    "source_url": "https://www.gbif.org/occurrence/2818745154",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/52969940",
+    "species": "Axis axis",
+    "common_name": null,
+    "observed_on": "2016-10-22",
+    "longitude": 76.639968,
+    "latitude": 11.435474,
+    "coordinate_uncertainty_m": 15.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "wenlock_downs"
+    ],
+    "zone_codes": [
+      "wenlock_downs:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 1891356347,
+    "source_url": "https://www.gbif.org/occurrence/1891356347",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/4791193",
+    "species": "Muntiacus muntjak",
+    "common_name": null,
+    "observed_on": "2016-12-14T16:58:29",
+    "longitude": 76.517071,
+    "latitude": 11.49513,
+    "coordinate_uncertainty_m": 10.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "naduvattam"
+    ],
+    "zone_codes": [],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 2294674323,
+    "source_url": "https://www.gbif.org/occurrence/2294674323",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/29500917",
+    "species": "Muntiacus muntjak",
+    "common_name": null,
+    "observed_on": "2018-12-08",
+    "longitude": 76.735817,
+    "latitude": 11.400727,
+    "coordinate_uncertainty_m": 433.0,
+    "licence": "http://creativecommons.org/licenses/by/4.0/legalcode",
+    "region_codes": [
+      "doddabetta_forest"
+    ],
+    "zone_codes": [
+      "doddabetta_forest:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 2850578787,
+    "source_url": "https://www.gbif.org/occurrence/2850578787",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/53873245",
+    "species": "Herpestes vitticollis",
+    "common_name": null,
+    "observed_on": "2020-02-19T07:05",
+    "longitude": 76.591895,
+    "latitude": 11.299429,
+    "coordinate_uncertainty_m": 349.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "kundah"
+    ],
+    "zone_codes": [
+      "kundah:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 3109215529,
+    "source_url": "https://www.gbif.org/occurrence/3109215529",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/75647192",
+    "species": "Macaca radiata",
+    "common_name": null,
+    "observed_on": "2020-02-22T14:29",
+    "longitude": 76.592255,
+    "latitude": 11.299708,
+    "coordinate_uncertainty_m": 4.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "kundah"
+    ],
+    "zone_codes": [
+      "kundah:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 2860124894,
+    "source_url": "https://www.gbif.org/occurrence/2860124894",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/58043008",
+    "species": "Muntiacus muntjak",
+    "common_name": null,
+    "observed_on": "2020-08-29T11:35",
+    "longitude": 76.671504,
+    "latitude": 11.414131,
+    "coordinate_uncertainty_m": 977.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "wenlock_downs"
+    ],
+    "zone_codes": [
+      "wenlock_downs:grassland"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 3032146007,
+    "source_url": "https://www.gbif.org/occurrence/3032146007",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/68723757",
+    "species": "Funambulus tristriatus",
+    "common_name": null,
+    "observed_on": "2021-01-27T11:51",
+    "longitude": 76.516999,
+    "latitude": 11.494787,
+    "coordinate_uncertainty_m": 8.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "naduvattam"
+    ],
+    "zone_codes": [],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 4018274459,
+    "source_url": "https://www.gbif.org/occurrence/4018274459",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/94896739",
+    "species": "Ratufa indica",
+    "common_name": null,
+    "observed_on": "2021-09-15T08:54:12",
+    "longitude": 76.739619,
+    "latitude": 11.407246,
+    "coordinate_uncertainty_m": 7.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "doddabetta_forest"
+    ],
+    "zone_codes": [
+      "doddabetta_forest:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 3456883886,
+    "source_url": "https://www.gbif.org/occurrence/3456883886",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/94896933",
+    "species": "Ratufa indica",
+    "common_name": null,
+    "observed_on": "2021-09-15T09:00:56",
+    "longitude": 76.738503,
+    "latitude": 11.407697,
+    "coordinate_uncertainty_m": 16.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "doddabetta_forest"
+    ],
+    "zone_codes": [
+      "doddabetta_forest:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 4847188341,
+    "source_url": "https://www.gbif.org/occurrence/4847188341",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/192231776",
+    "species": "Funambulus palmarum",
+    "common_name": null,
+    "observed_on": "2022-03-31T11:03",
+    "longitude": 76.732468,
+    "latitude": 11.406562,
+    "coordinate_uncertainty_m": 15.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "doddabetta_forest"
+    ],
+    "zone_codes": [
+      "doddabetta_forest:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 4453936595,
+    "source_url": "https://www.gbif.org/occurrence/4453936595",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/192231779",
+    "species": "Ratufa indica",
+    "common_name": null,
+    "observed_on": "2022-04-01T15:13",
+    "longitude": 76.732275,
+    "latitude": 11.406793,
+    "coordinate_uncertainty_m": 15.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "doddabetta_forest"
+    ],
+    "zone_codes": [
+      "doddabetta_forest:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 3988434990,
+    "source_url": "https://www.gbif.org/occurrence/3988434990",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/143548910",
+    "species": "Ratufa indica",
+    "common_name": null,
+    "observed_on": "2022-11-10T12:26",
+    "longitude": 76.726767,
+    "latitude": 11.419736,
+    "coordinate_uncertainty_m": 52.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "doddabetta_forest"
+    ],
+    "zone_codes": [
+      "doddabetta_forest:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 4440845057,
+    "source_url": "https://www.gbif.org/occurrence/4440845057",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/190786709",
+    "species": "Lepus nigricollis",
+    "common_name": null,
+    "observed_on": "2023-11-10T21:31",
+    "longitude": 76.576902,
+    "latitude": 11.303367,
+    "coordinate_uncertainty_m": 473.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "kundah"
+    ],
+    "zone_codes": [
+      "kundah:grassland"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 4500528276,
+    "source_url": "https://www.gbif.org/occurrence/4500528276",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/193963229",
+    "species": "Sus scrofa",
+    "common_name": null,
+    "observed_on": "2023-12-07T10:50",
+    "longitude": 76.561232,
+    "latitude": 11.250302,
+    "coordinate_uncertainty_m": 890.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "kundah"
+    ],
+    "zone_codes": [
+      "kundah:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 4908452975,
+    "source_url": "https://www.gbif.org/occurrence/4908452975",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/227325456",
+    "species": "Muntiacus muntjak",
+    "common_name": null,
+    "observed_on": "2024-05-29T09:22",
+    "longitude": 76.5744,
+    "latitude": 11.305518,
+    "coordinate_uncertainty_m": 244.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "kundah"
+    ],
+    "zone_codes": [],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 4901043248,
+    "source_url": "https://www.gbif.org/occurrence/4901043248",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/219988214",
+    "species": "Muntiacus muntjak",
+    "common_name": null,
+    "observed_on": "2024-05-29T09:22:48",
+    "longitude": 76.580451,
+    "latitude": 11.303374,
+    "coordinate_uncertainty_m": 20.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "kundah"
+    ],
+    "zone_codes": [
+      "kundah:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 5760307991,
+    "source_url": "https://www.gbif.org/occurrence/5760307991",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/308909333",
+    "species": "Ratufa indica",
+    "common_name": null,
+    "observed_on": "2025-01-17T08:29",
+    "longitude": 76.722422,
+    "latitude": 11.408888,
+    "coordinate_uncertainty_m": 210.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "doddabetta_forest"
+    ],
+    "zone_codes": [
+      "doddabetta_forest:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 5063661368,
+    "source_url": "https://www.gbif.org/occurrence/5063661368",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/260143845",
+    "species": "Macaca radiata",
+    "common_name": null,
+    "observed_on": "2025-01-28T12:15:01",
+    "longitude": 76.590675,
+    "latitude": 11.300157,
+    "coordinate_uncertainty_m": 5.0,
+    "licence": "http://creativecommons.org/licenses/by/4.0/legalcode",
+    "region_codes": [
+      "kundah"
+    ],
+    "zone_codes": [],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 5087655599,
+    "source_url": "https://www.gbif.org/occurrence/5087655599",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/264077155",
+    "species": "Funambulus palmarum",
+    "common_name": null,
+    "observed_on": "2025-02-11T04:15",
+    "longitude": 76.736496,
+    "latitude": 11.402797,
+    "coordinate_uncertainty_m": 4.0,
+    "licence": "http://creativecommons.org/licenses/by/4.0/legalcode",
+    "region_codes": [
+      "doddabetta_forest"
+    ],
+    "zone_codes": [
+      "doddabetta_forest:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 5133732264,
+    "source_url": "https://www.gbif.org/occurrence/5133732264",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/270804315",
+    "species": "Herpestes vitticollis",
+    "common_name": null,
+    "observed_on": "2025-04-16T16:50:36",
+    "longitude": 76.5803,
+    "latitude": 11.303201,
+    "coordinate_uncertainty_m": 41.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "kundah"
+    ],
+    "zone_codes": [
+      "kundah:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 6168472374,
+    "source_url": "https://www.gbif.org/occurrence/6168472374",
+    "dataset_key": "b219d9b5-ab67-46a2-85b6-278cd7e30f93",
+    "original_occurrence_id": "urn:ncf:arp:mammals:2fd194ce-a427-4d99-a668-5ec327766306:2688",
+    "species": "Ratufa indica",
+    "common_name": null,
+    "observed_on": "2025-09-15",
+    "longitude": 76.5251,
+    "latitude": 11.48958,
+    "coordinate_uncertainty_m": 8.0,
+    "licence": "http://creativecommons.org/licenses/by/4.0/legalcode",
+    "region_codes": [
+      "naduvattam"
+    ],
+    "zone_codes": [
+      "naduvattam:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 6168473283,
+    "source_url": "https://www.gbif.org/occurrence/6168473283",
+    "dataset_key": "b219d9b5-ab67-46a2-85b6-278cd7e30f93",
+    "original_occurrence_id": "urn:ncf:arp:mammals:a22db407-35fa-4768-a5fe-a388e9e555ae:2690",
+    "species": "Semnopithecus johnii",
+    "common_name": null,
+    "observed_on": "2025-09-15",
+    "longitude": 76.6323,
+    "latitude": 11.43467,
+    "coordinate_uncertainty_m": 7.0,
+    "licence": "http://creativecommons.org/licenses/by/4.0/legalcode",
+    "region_codes": [
+      "wenlock_downs"
+    ],
+    "zone_codes": [
+      "wenlock_downs:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 6168475519,
+    "source_url": "https://www.gbif.org/occurrence/6168475519",
+    "dataset_key": "b219d9b5-ab67-46a2-85b6-278cd7e30f93",
+    "original_occurrence_id": "urn:ncf:arp:mammals:5476b17e-1817-4c37-b949-a883427e461f:2685",
+    "species": "Macaca radiata",
+    "common_name": null,
+    "observed_on": "2025-09-15",
+    "longitude": 76.52366,
+    "latitude": 11.49212,
+    "coordinate_uncertainty_m": 14.0,
+    "licence": "http://creativecommons.org/licenses/by/4.0/legalcode",
+    "region_codes": [
+      "naduvattam"
+    ],
+    "zone_codes": [
+      "naduvattam:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 5889275283,
+    "source_url": "https://www.gbif.org/occurrence/5889275283",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/322232901",
+    "species": "Macaca radiata",
+    "common_name": null,
+    "observed_on": "2025-10-19T15:51:16",
+    "longitude": 76.636006,
+    "latitude": 11.435659,
+    "coordinate_uncertainty_m": 51.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "wenlock_downs"
+    ],
+    "zone_codes": [
+      "wenlock_downs:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 5890397838,
+    "source_url": "https://www.gbif.org/occurrence/5890397838",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/322232989",
+    "species": "Macaca radiata",
+    "common_name": null,
+    "observed_on": "2025-10-19T16:12:49",
+    "longitude": 76.659654,
+    "latitude": 11.440234,
+    "coordinate_uncertainty_m": 16.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "wenlock_downs"
+    ],
+    "zone_codes": [
+      "wenlock_downs:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 6168476169,
+    "source_url": "https://www.gbif.org/occurrence/6168476169",
+    "dataset_key": "b219d9b5-ab67-46a2-85b6-278cd7e30f93",
+    "original_occurrence_id": "urn:ncf:arp:mammals:54822747-7761-48ac-b16b-71e833e7294a:3337",
+    "species": "Herpestes edwardsi",
+    "common_name": null,
+    "observed_on": "2025-11-28",
+    "longitude": 76.6935,
+    "latitude": 11.51893,
+    "coordinate_uncertainty_m": 24.0,
+    "licence": "http://creativecommons.org/licenses/by/4.0/legalcode",
+    "region_codes": [
+      "kalhatty"
+    ],
+    "zone_codes": [
+      "kalhatty:grassland"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 5936048948,
+    "source_url": "https://www.gbif.org/occurrence/5936048948",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/331776587",
+    "species": "Axis axis",
+    "common_name": null,
+    "observed_on": "2025-11-30T06:52:42",
+    "longitude": 76.693613,
+    "latitude": 11.520713,
+    "coordinate_uncertainty_m": 752.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "kalhatty"
+    ],
+    "zone_codes": [
+      "kalhatty:grassland"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 6399852796,
+    "source_url": "https://www.gbif.org/occurrence/6399852796",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/336463881",
+    "species": "Macaca radiata",
+    "common_name": null,
+    "observed_on": "2026-01-28T15:42:43",
+    "longitude": 76.660767,
+    "latitude": 11.439242,
+    "coordinate_uncertainty_m": 3.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "wenlock_downs"
+    ],
+    "zone_codes": [
+      "wenlock_downs:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  },
+  {
+    "source_system": "GBIF",
+    "source_id": 6352993372,
+    "source_url": "https://www.gbif.org/occurrence/6352993372",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+    "original_occurrence_id": "https://www.inaturalist.org/observations/365380809",
+    "species": "Herpestes vitticollis",
+    "common_name": null,
+    "observed_on": "2026-04-26T10:24:27",
+    "longitude": 76.580437,
+    "latitude": 11.303358,
+    "coordinate_uncertainty_m": 9.0,
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+    "region_codes": [
+      "kundah"
+    ],
+    "zone_codes": [
+      "kundah:tree_cover"
+    ],
+    "data_origin": "historical_public_observation_candidate",
+    "candidate_only": true
+  }
+]

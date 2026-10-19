@@ -1,0 +1,66 @@
+[
+  {
+    "source": "Nature Conservation Foundation via GBIF",
+    "source_id": "urn:ncf:arp:mammals:5476b17e-1817-4c37-b949-a883427e461f:2685",
+    "gbif_key": "urn:ncf:arp:mammals:5476b17e-1817-4c37-b949-a883427e461f:2685",
+    "dataset_doi": "10.15468/yv8qss",
+    "source_url": "https://www.gbif.org/occurrence/urn:ncf:arp:mammals:5476b17e-1817-4c37-b949-a883427e461f:2685",
+    "species": "Macaca radiata",
+    "class": "Mammalia",
+    "event_date": "2025-09-15",
+    "latitude": 11.49212,
+    "longitude": 76.52366,
+    "coordinate_uncertainty_m": 14.0,
+    "basis_of_record": "HumanObservation",
+    "locality": "Eucalyptus plantation",
+    "field_notes": "NA",
+    "licence": "https://creativecommons.org/licenses/by/4.0/legalcode",
+    "region_codes": [
+      "pykara"
+    ],
+    "candidate_only": true
+  },
+  {
+    "source": "Nature Conservation Foundation via GBIF",
+    "source_id": "urn:ncf:arp:mammals:2fd194ce-a427-4d99-a668-5ec327766306:2688",
+    "gbif_key": "urn:ncf:arp:mammals:2fd194ce-a427-4d99-a668-5ec327766306:2688",
+    "dataset_doi": "10.15468/yv8qss",
+    "source_url": "https://www.gbif.org/occurrence/urn:ncf:arp:mammals:2fd194ce-a427-4d99-a668-5ec327766306:2688",
+    "species": "Ratufa indica",
+    "class": "Mammalia",
+    "event_date": "2025-09-15",
+    "latitude": 11.48958,
+    "longitude": 76.5251,
+    "coordinate_uncertainty_m": 8.0,
+    "basis_of_record": "HumanObservation",
+    "locality": "Rainforest remnant",
+    "field_notes": "Amidst Wilson euc plantations",
+    "licence": "https://creativecommons.org/licenses/by/4.0/legalcode",
+    "region_codes": [
+      "pykara"
+    ],
+    "candidate_only": true
+  },
+  {
+    "source": "Nature Conservation Foundation via GBIF",
+    "source_id": "urn:ncf:arp:mammals:a22db407-35fa-4768-a5fe-a388e9e555ae:2690",
+    "gbif_key": "urn:ncf:arp:mammals:a22db407-35fa-4768-a5fe-a388e9e555ae:2690",
+    "dataset_doi": "10.15468/yv8qss",
+    "source_url": "https://www.gbif.org/occurrence/urn:ncf:arp:mammals:a22db407-35fa-4768-a5fe-a388e9e555ae:2690",
+    "species": "Semnopithecus johnii",
+    "class": "Mammalia",
+    "event_date": "2025-09-15",
+    "latitude": 11.43467,
+    "longitude": 76.6323,
+    "coordinate_uncertainty_m": 7.0,
+    "basis_of_record": "HumanObservation",
+    "locality": "Rainforest remnant",
+    "field_notes": "NA",
+    "licence": "https://creativecommons.org/licenses/by/4.0/legalcode",
+    "region_codes": [
+      "ooty_north",
+      "pykara"
+    ],
+    "candidate_only": true
+  }
+]

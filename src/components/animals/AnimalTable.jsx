@@ -15,6 +15,7 @@ const AnimalTable = ({ animals, devices, zones }) => {
   const [risk, setRisk] = useState("all");
   const [zone, setZone] = useState("all");
   const [sortKey, setSortKey] = useState("id");
+  const speciesOptions = useMemo(() => [...new Set(animals.map((animal) => animal.species).filter(Boolean))].sort(), [animals]);
   const filtered = useMemo(() => {
     return animals.filter((animal) => [animal.id, animal.name, animal.species].join(" ").toLowerCase().includes(query.toLowerCase())).filter((animal) => species === "all" ? true : animal.species === species).filter((animal) => status === "all" ? true : animal.status === status).filter((animal) => risk === "all" ? true : animal.risk === risk).filter((animal) => zone === "all" ? true : animal.currentZoneId === zone).sort((a, b) => {
       if (sortKey === "battery") {
@@ -28,7 +29,7 @@ const AnimalTable = ({ animals, devices, zones }) => {
   return <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         <Input className="w-64" placeholder="Search animal ID or tag" value={query} onChange={(event) => setQuery(event.target.value)} />
-        <Select value={species} onChange={(event) => setSpecies(event.target.value)}><option value="all">All species</option><option value="elephant">Elephants</option><option value="tiger">Tigers</option><option value="deer">Deer</option></Select>
+        <Select value={species} onChange={(event) => setSpecies(event.target.value)}><option value="all">All species</option>{speciesOptions.map((item) => <option key={item} value={item}>{titleCase(item)}</option>)}</Select>
         <Select value={status} onChange={(event) => setStatus(event.target.value)}><option value="all">All status</option><option value="active">Active</option><option value="idle">Idle</option><option value="offline">Offline</option></Select>
         <Select value={risk} onChange={(event) => setRisk(event.target.value)}><option value="all">All risk</option><option value="safe">Safe</option><option value="medium">Medium</option><option value="high">High</option><option value="critical">Critical</option><option value="info">Info</option></Select>
         <Select value={zone} onChange={(event) => setZone(event.target.value)}><option value="all">All zones</option>{zones.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</Select>
@@ -60,6 +61,7 @@ const AnimalTable = ({ animals, devices, zones }) => {
                   <td className="px-4 py-3">
                     <div className="font-mono font-medium tabular">{animal.id}</div>
                     <div className="text-xs text-ink-600">{animal.name}</div>
+                    {animal.dataOrigin === "simulated_from_regional_species_list" ? <div className="text-[10px] font-medium text-amber-700">SIMULATED WILDLIFE</div> : <div className="text-[10px] text-ink-400">Legacy source unverified</div>}
                   </td>
                   <td className="px-4 py-3"><span className="flex items-center gap-2"><SpeciesIcon species={animal.species} className="h-4 w-4" />{titleCase(animal.species)}</span></td>
                   <td className="px-4 py-3"><StatusBadge status={animal.status} /></td>

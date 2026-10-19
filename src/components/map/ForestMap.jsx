@@ -103,6 +103,7 @@ const ForestMap = ({
   const [labelsVisible, setLabelsVisible] = useState(false);
   const [search, setSearch] = useState("");
   const [speciesFilter, setSpeciesFilter] = useState("all");
+  const speciesOptions = [...new Set(animals.map((animal) => animal.species).filter(Boolean))].sort();
   const visibleAnimals = animals.filter((animal) => Array.isArray(animal.coordinates) && animal.coordinates.every(Number.isFinite) && (speciesFilter === "all" || animal.species === speciesFilter) && `${animal.id} ${animal.name}`.toLowerCase().includes(search.toLowerCase()));
   const [activeTool, setActiveTool] = useState(null);
   const [location, setLocation] = useState(null);
@@ -407,7 +408,7 @@ const ForestMap = ({
           <span className="block text-xs">{animal.speedKmh.toFixed(1)} km/h · Battery {device?.battery ?? "—"}%</span>
           <span className="block text-xs">{allZones.find((zone) => zone.id === animal.currentZoneId)?.name ?? "Outside monitored zones"}</span>
           <span className="block text-xs">Last seen: {animal.lastSeen ? new Date(animal.lastSeen).toLocaleString() : "Unknown"}</span>
-          <span className="block text-xs text-ink-600">{animal.species === "elephant" ? "Asian elephant" : animal.species === "tiger" ? "Bengal tiger" : "Spotted deer"}</span>
+          <span className="block text-xs text-ink-600">{animal.species}</span>
           <span className="mt-1 flex items-center gap-1 text-xs text-ink-600">
             <span className={animal.status === "active" ? "h-2 w-2 rounded-full bg-[color:var(--risk-safe)]" : "h-2 w-2 rounded-full bg-ink-400"} />
             {animal.status.charAt(0).toUpperCase() + animal.status.slice(1)}
@@ -629,7 +630,7 @@ const ForestMap = ({
       {!preview ? <>
           <div className="absolute left-4 top-4 z-20 flex items-center gap-2">
             <Input aria-label="Search animals" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Find animal…" className="w-40 sm:w-52 bg-paper/95" />
-            <Select aria-label="Filter species" value={speciesFilter} onChange={(event) => setSpeciesFilter(event.target.value)}><option value="all">All species</option><option value="elephant">Elephants</option><option value="tiger">Tigers</option><option value="deer">Deer</option></Select>
+            <Select aria-label="Filter species" value={speciesFilter} onChange={(event) => setSpeciesFilter(event.target.value)}><option value="all">All species</option>{speciesOptions.map((item) => <option key={item} value={item}>{item}</option>)}</Select>
             {activeTool ? <span className="rounded-control bg-forest-700 px-2 py-1 text-xs text-paper">Click map to place {activeTool}</span> : null}
           </div>
           <OfficerToolbar activeTool={activeTool} onChange={setActiveTool} />

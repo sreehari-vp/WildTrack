@@ -1,0 +1,95 @@
+{
+  "api": "https://api.gbif.org/v1/dataset/{datasetKey}",
+  "datasets": [
+    {
+      "key": "11d28533-4dff-467c-943f-121d6bc2f5f9",
+      "title": "Occurrence records of spiders mobilized through SpiderIndia citizen science initiative on Facebook",
+      "description": "India harbors an incredible biodiversity across its diverse bioms, yet much research is directed at charismatic vertebrate species. In contrast, invertebrates, despite their manifold diversity, remain understudied. The current state of knowledge on spiders in India exemplifies this issue. Even among common species, their precise spatial distribution, seasonal occurrence and natural history are poorly studied. In this dataset, we curated observational records from the SpiderIndia citizen science platform and established a systematic workflow to enrich occurrence data by leveraging the popularity of existing social media communities such as SpiderIndia. This occurrence data is being validated by taxonomic experts and is being made publicly available on GBIF.",
+      "type": "OCCURRENCE",
+      "doi": "10.15468/7jz829",
+      "license": "http://creativecommons.org/publicdomain/zero/1.0/legalcode",
+      "citation": {
+        "text": "Barman N, Jadhav Kulkarni N, Basu Roy A, Vattakaven T, Kulkarni S, Barve V (2022). Occurrence records of spiders mobilized through SpiderIndia citizen science initiative on Facebook. Version 1.2. India Biodiversity Portal. Occurrence dataset https://doi.org/10.15468/7jz829 accessed via GBIF.org on 2026-10-17.",
+        "citationProvidedBySource": false
+      },
+      "pubDate": "2022-11-30T00:00:00.000+00:00"
+    },
+    {
+      "key": "4099f348-4ec0-4fca-99e6-ad5c3eb3c05a",
+      "title": "Mammal occurrence records (2024) in the Valparai Plateau and Anamalai Tiger Reserve, Western Ghats, India",
+      "description": "\n            This dataset includes occurrence data of mammals on the Valparai Plateau and Anamalai Tiger Reserve, Tamil Nadu, India, collected between November 2023 and October 2024. Data were recorded on a mobile phone application (EpiCollect5) as direct sightings or from indirect signs in the field. Photographs were taken whenever possible.\n        ",
+      "type": "OCCURRENCE",
+      "doi": "10.15468/6sy2zh",
+      "license": "http://creativecommons.org/licenses/by/4.0/legalcode",
+      "citation": {
+        "text": "Raman T R S, Mudappa D (2024). Mammal occurrence records (2024) in the Valparai Plateau and Anamalai Tiger Reserve, Western Ghats, India. Nature Conservation Foundation. Occurrence dataset https://doi.org/10.15468/6sy2zh accessed via GBIF.org on 2026-10-17.",
+        "citationProvidedBySource": false
+      },
+      "pubDate": "2024-10-10T00:00:00.000+00:00"
+    },
+    {
+      "key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+      "title": "iNaturalist Research-grade Observations",
+      "description": "<p>\n        Observations from iNaturalist.org, an online social network of people sharing biodiversity information to help each other learn about nature.\n      </p><p>\n        Observations included in this archive met the following requirements:\n      </p><p>\n        * Published under one of the following licenses or waivers:\n        1) , 2) , 3) \n      </p><p>\n        * Achieved one of following iNaturalist quality grades: Research\n      </p><p>\n        * Created on or before 2026-10-05 15:00:18 -0700\n      </p><p>\n        You can view observations meeting these requirements at https://www.inaturalist.org/observations?created_d2&#61;2026-10-05&#43;15%3A00%3A18&#43;-0700&amp;d1&#61;1600-01-01&amp;license&#61;cc0%2Ccc-by%2Ccc-by-nc&amp;quality_grade&#61;research\n      </p>",
+      "type": "OCCURRENCE",
+      "doi": "10.15468/ab3s5x",
+      "license": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+      "citation": {
+        "text": "iNaturalist contributors, iNaturalist (2026). iNaturalist Research-grade Observations. iNaturalist.org. Occurrence dataset https://doi.org/10.15468/ab3s5x accessed via GBIF.org on 2026-10-17.",
+        "citationProvidedBySource": false
+      },
+      "pubDate": "2026-10-05T00:00:00.000+00:00"
+    },
+    {
+      "key": "6ac3f774-d9fb-4796-b3e9-92bf6c81c084",
+      "title": "NABU|naturgucker",
+      "description": "naturgucker.de / enjoynature.net is a rapidly growing social network with several millions of observations of wild plants and animals, thus naturgucker.de / enjoynature.net supports and promotes nature conservancy. naturgucker.de / enjoynature.net offers nature observers (mainly citizen scientists) a personal data center for their data in which they can pool and manage all their observations and nature photographs for the surrounding region, or even worldwide from their vacations. In addition, beginners can find a myriad of information, such as hundreds of thousands of photographs, up to date distribution maps, tenthousands observation areas with helpful hints, and a strong community in naturgucker.de /enjoaynature.net.",
+      "type": "OCCURRENCE",
+      "doi": "10.15468/uc1apo",
+      "license": "http://creativecommons.org/licenses/by/4.0/legalcode",
+      "citation": {
+        "text": "naturgucker.de. NABU|naturgucker. Occurrence dataset https://doi.org/10.15468/uc1apo accessed via GBIF.org on 2026-10-17.",
+        "citationProvidedBySource": false
+      }
+    },
+    {
+      "key": "8a863029-f435-446a-821e-275f4f641165",
+      "title": "Observation.org, Nature data from around the World",
+      "description": "<p>This dataset contains occurrence data of flora and fauna species. From the Netherlands on a 5 x 5 km scale, data from other countries are exact. Observations from Belgium are excluded and can be accessed on GBIF through Natuurpunt and Natagora. It summarizes the observations recorded by &gt;175.000 volunteers.\n            </p>",
+      "type": "OCCURRENCE",
+      "doi": "10.15468/5nilie",
+      "license": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+      "citation": {
+        "text": "Observation.org (2026). Observation.org, Nature data from around the World. Occurrence dataset https://doi.org/10.15468/5nilie accessed via GBIF.org on 2026-10-17.",
+        "citationProvidedBySource": false
+      },
+      "pubDate": "2026-10-13T00:00:00.000+00:00"
+    },
+    {
+      "key": "b219d9b5-ab67-46a2-85b6-278cd7e30f93",
+      "title": "Occurrence records of mammals from the Western Ghats (primarily Sakleshpur, Anamalais and Nilgiris, India) between November 2023 and February 2026",
+      "description": "<p>This dataset contains mammal occurrence records (November 2023 - February 2026) from the Western Ghats, collected using a mobile collection application (EpiCollect5). A few reptiles are also added opportunistically. This includes data from three data sources:</p><p>1. Western Ghats Mammals(https://five.epicollect.net/project/western-ghats-mammals (private project), 12th July 2024 - 28th February 2026, n&#61;4139)</p><p>2. Gaur Project (https://five.epicollect.net/project/gaur-project (public project), 4th Jan 2024 - 24th Apr 2024, n&#61;88)</p><p>3. Monika_Gaur_Survey(https://five.epicollect.net/project/monika-gaur-survey (public project), 28th Nov 2023 - 2nd Dec 2023, n&#61;32)</p><p>47 taxa are recorded in this dataset.</p>",
+      "type": "OCCURRENCE",
+      "doi": "10.15468/yv8qss",
+      "license": "http://creativecommons.org/licenses/by/4.0/legalcode",
+      "citation": {
+        "text": "Raman T R S, Mudappa D (2026). Occurrence records of mammals from the Western Ghats (primarily Sakleshpur, Anamalais and Nilgiris, India) between November 2023 and February 2026. Nature Conservation Foundation. Occurrence dataset https://doi.org/10.15468/yv8qss accessed via GBIF.org on 2026-10-17.",
+        "citationProvidedBySource": false
+      },
+      "pubDate": "2026-03-10T00:00:00.000+00:00"
+    },
+    {
+      "key": "f842ea5a-e38c-4be2-924d-c065b41215b0",
+      "title": "IISERTPT Squirrels of South Asia Database - Version1",
+      "description": "The Squirrels of South Asia Database is a collection of occurrence records of all squirrel species (34 specices) that occur in South Asia. Complete occurrence data has been collected for species whose range extends out of South Asia (eg. into Southeast Asia). The data are collated from traditional sources (museums, literature, primary field records), citizen science records, and social media records (14 platforms). Only data that are not already funnelled/present to GBIF are included in this upload. Years covered: 1766 - 2022.\nDetails of the database creation are here: \nThe database is built and curated by the Sciurid Lab at IISER Tirupati (https://sciuridlab.in)",
+      "type": "OCCURRENCE",
+      "doi": "10.15468/mnqzjv",
+      "license": "http://creativecommons.org/licenses/by/4.0/legalcode",
+      "citation": {
+        "text": "Swati U, D'Souza S, Aravind P S, Rajamani N (2023). IISERTPT Squirrels of South Asia Database - Version1. Version 1.5. IISER Tirupati. Occurrence dataset https://doi.org/10.15468/mnqzjv accessed via GBIF.org on 2026-10-17.",
+        "citationProvidedBySource": false
+      },
+      "pubDate": "2023-07-24T00:00:00.000+00:00"
+    }
+  ]
+}

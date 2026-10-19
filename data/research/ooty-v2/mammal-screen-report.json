@@ -1,0 +1,38 @@
+{
+  "downloaded": 1325,
+  "accepted_candidates": 35,
+  "distinct_species": 13,
+  "per_region": {
+    "doddabetta_forest": 8,
+    "kalhatty": 2,
+    "kundah": 14,
+    "naduvattam": 4,
+    "wenlock_downs": 7
+  },
+  "per_species": {
+    "Axis axis": 2,
+    "Canis aureus": 1,
+    "Funambulus palmarum": 2,
+    "Funambulus tristriatus": 1,
+    "Herpestes edwardsi": 1,
+    "Herpestes vitticollis": 4,
+    "Hystrix indica": 1,
+    "Lepus nigricollis": 1,
+    "Macaca radiata": 7,
+    "Muntiacus muntjak": 6,
+    "Ratufa indica": 6,
+    "Semnopithecus johnii": 1,
+    "Sus scrofa": 2
+  },
+  "excluded": {
+    "domestic_species": 3,
+    "outside_selected_forests": 464,
+    "quality_or_licence": 703,
+    "roadkill_dataset": 120
+  },
+  "limitations": [
+    "Records are historical candidate observations, not tracked individual animals.",
+    "Forest coverage is uneven; no artificial sightings are added to empty regions.",
+    "Reported coordinates carry uncertainty and are not guaranteed exact animal positions."
+  ]
+}

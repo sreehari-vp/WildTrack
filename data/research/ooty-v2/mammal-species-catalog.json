@@ -1,0 +1,39 @@
+{
+  "title": "Coarse Nilgiris mammal species catalog for WildTrack simulation",
+  "status": "regional species-list reference; not a census",
+  "sources": [
+    {
+      "name": "Tamil Nadu Agricultural University, Mukurthi National Park fauna summary",
+      "url": "https://agritech.tnau.ac.in/forestry/forestry_ecotourism_mukurthi.html",
+      "scope": "Regional species presence and habitat context; lists Nilgiri tahr, sambar, barking deer, Nilgiri marten and jungle cat."
+    },
+    {
+      "name": "Sumithran, Status and Ecology of the Nilgiri Tahr in Mukurthi National Park (1997)",
+      "url": "https://vtechworks.lib.vt.edu/bitstream/handle/10919/40511/finaltar.PDF",
+      "scope": "Historical field study and associated mammal records in Mukurthi and nearby Nilgiri highlands."
+    }
+  ],
+  "limitations": [
+    "Species are selected from regional checklists and historical field sources, not confirmed in every study region.",
+    "The 75 simulated tracker counts are illustrative and are not abundance estimates.",
+    "Generated coordinates and routes are synthetic; they do not represent tagged animals or real sightings."
+  ],
+  "species": [
+    {"common_name":"Nilgiri tahr","scientific_name":"Nilgiritragus hylocrius","illustrative_count":10,"regions":["pykara","avalanche","upper_bhavani","mukurthi"],"source_ids":["tnau_mukurthi","sumithran_1997"]},
+    {"common_name":"Sambar deer","scientific_name":"Rusa unicolor","illustrative_count":9,"regions":["ooty_north","doddabetta","pykara","avalanche","upper_bhavani","mukurthi"],"source_ids":["tnau_mukurthi","sumithran_1997"]},
+    {"common_name":"Indian muntjac (barking deer)","scientific_name":"Muntiacus muntjak","illustrative_count":8,"regions":["ooty_north","doddabetta","pykara","avalanche","upper_bhavani","mukurthi"],"source_ids":["tnau_mukurthi","sumithran_1997"]},
+    {"common_name":"Asian elephant","scientific_name":"Elephas maximus","illustrative_count":7,"regions":["ooty_north","doddabetta","pykara","avalanche","upper_bhavani","mukurthi"],"source_ids":["sumithran_1997"]},
+    {"common_name":"Gaur","scientific_name":"Bos gaurus","illustrative_count":6,"regions":["ooty_north","doddabetta","pykara","avalanche","upper_bhavani","mukurthi"],"source_ids":["sumithran_1997"]},
+    {"common_name":"Wild boar","scientific_name":"Sus scrofa","illustrative_count":6,"regions":["ooty_north","doddabetta","pykara","avalanche","upper_bhavani","mukurthi"],"source_ids":["sumithran_1997"]},
+    {"common_name":"Nilgiri langur","scientific_name":"Semnopithecus johnii","illustrative_count":5,"regions":["ooty_north","doddabetta","pykara","avalanche","upper_bhavani","mukurthi"],"source_ids":["sumithran_1997"]},
+    {"common_name":"Bonnet macaque","scientific_name":"Macaca radiata","illustrative_count":5,"regions":["ooty_north","doddabetta","pykara","avalanche","upper_bhavani","mukurthi"],"source_ids":["sumithran_1997"]},
+    {"common_name":"Bengal tiger","scientific_name":"Panthera tigris","illustrative_count":4,"regions":["pykara","avalanche","upper_bhavani","mukurthi"],"source_ids":["sumithran_1997"]},
+    {"common_name":"Indian leopard","scientific_name":"Panthera pardus","illustrative_count":4,"regions":["ooty_north","doddabetta","pykara","avalanche","upper_bhavani","mukurthi"],"source_ids":["sumithran_1997"]},
+    {"common_name":"Dhole (Indian wild dog)","scientific_name":"Cuon alpinus","illustrative_count":3,"regions":["pykara","avalanche","upper_bhavani","mukurthi"],"source_ids":["sumithran_1997"]},
+    {"common_name":"Sloth bear","scientific_name":"Melursus ursinus","illustrative_count":2,"regions":["ooty_north","doddabetta","pykara","avalanche","upper_bhavani","mukurthi"],"source_ids":["sumithran_1997"]},
+    {"common_name":"Nilgiri marten","scientific_name":"Martes gwatkinsii","illustrative_count":2,"regions":["avalanche","upper_bhavani","mukurthi"],"source_ids":["tnau_mukurthi","sumithran_1997"]},
+    {"common_name":"Golden jackal","scientific_name":"Canis aureus","illustrative_count":1,"regions":["pykara","avalanche","upper_bhavani","mukurthi"],"source_ids":["sumithran_1997"]},
+    {"common_name":"Stripe-necked mongoose","scientific_name":"Urva vitticolla","illustrative_count":1,"regions":["pykara","avalanche","upper_bhavani","mukurthi"],"source_ids":["sumithran_1997"]},
+    {"common_name":"Jungle cat","scientific_name":"Felis chaus","illustrative_count":2,"regions":["ooty_north","doddabetta","pykara","avalanche","upper_bhavani","mukurthi"],"source_ids":["tnau_mukurthi","sumithran_1997"]}
+  ]
+}

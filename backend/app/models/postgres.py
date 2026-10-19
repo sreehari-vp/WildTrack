@@ -44,6 +44,11 @@ class Animal(TimestampMixin, Base):
     age: Mapped[int | None] = mapped_column(Integer)
     sex: Mapped[str | None] = mapped_column(String(16))
     status: Mapped[str] = mapped_column(String(24), nullable=False)
+    data_origin: Mapped[str] = mapped_column(Text, nullable=False, default="legacy_unverified")
+    source_reference_type: Mapped[str | None] = mapped_column(Text)
+    source_reference_id: Mapped[str | None] = mapped_column(Text)
+    source_reference_name: Mapped[str | None] = mapped_column(Text)
+    source_reference_url: Mapped[str | None] = mapped_column(Text)
     device_id: Mapped[str | None] = mapped_column(ForeignKey("devices.device_id", ondelete="SET NULL"), unique=True)
 
     device: Mapped[Device | None] = relationship(back_populates="animal")

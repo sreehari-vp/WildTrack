@@ -1,0 +1,271 @@
+{
+  "source_url": "https://pub-0429b8e3b5a946e69ea007df844a6f1c.r2.dev/environment/forests/SOI_Forests.parquet",
+  "publisher": "BharatAtlas; source attribution: Survey of India",
+  "licence": "CC0-1.0 as stated by BharatAtlas; source-specific metadata should be checked before any redistribution",
+  "source_sha256": "013d164ec5b667082ea048d21325d62601ee5b0582a4b50bf24b08677eaeff80",
+  "source_bytes": 81409189,
+  "bounds_wgs84": [
+    76.35,
+    11.15,
+    76.9,
+    11.57
+  ],
+  "features_intersecting_bounds": 205,
+  "closest_forest_polygons": {
+    "Ooty North / Marlimund": [
+      {
+        "distance_degrees": 0.0,
+        "name": "MARLIMUND RESERVED FOREST",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 171420.79302782,
+        "unique_id": " "
+      },
+      {
+        "distance_degrees": 0.00654,
+        "name": "ARAMBY RESERVED FOREST",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 1788238.853536945,
+        "unique_id": " "
+      },
+      {
+        "distance_degrees": 0.00777,
+        "name": "MARLIMUND SHOLA RESERVED FOREST",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 562933.629557105,
+        "unique_id": " "
+      },
+      {
+        "distance_degrees": 0.00913,
+        "name": "SNOWDON RESERVED FOREST",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 2999484.196835865,
+        "unique_id": " "
+      },
+      {
+        "distance_degrees": 0.01718,
+        "name": "PAKALAMUND RESERVED FOREST",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 605275.39835594,
+        "unique_id": " "
+      }
+    ],
+    "Doddabetta Peak": [
+      {
+        "distance_degrees": 0.0,
+        "name": "HONNATALAI NORTH R F",
+        "type": "RESERVED",
+        "tree_type": "FAIRLY DENSE JUNGLE",
+        "source_area_m2": 8200501.16745462,
+        "unique_id": "4101011407550076729303"
+      },
+      {
+        "distance_degrees": 0.0,
+        "name": "DODABETTA RESERVED FOREST",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 5021001.256902485,
+        "unique_id": " "
+      },
+      {
+        "distance_degrees": 0.00411,
+        "name": "CARIGMORE RESERVED FOREST",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 1094434.621725085,
+        "unique_id": " "
+      },
+      {
+        "distance_degrees": 0.00421,
+        "name": "MAINLAI RESERVED FOREST",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 324087.963718905,
+        "unique_id": " "
+      },
+      {
+        "distance_degrees": 0.01163,
+        "name": "RF",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 116856.67694274,
+        "unique_id": " "
+      }
+    ],
+    "Pykara River": [
+      {
+        "distance_degrees": 0.0,
+        "name": "PATHARMUND RESERVED FOREST",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 3262755.96538652,
+        "unique_id": " "
+      },
+      {
+        "distance_degrees": 3e-05,
+        "name": "NADUVATTAM EXTENSION RESERVED FOREST",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 2267897.9732884,
+        "unique_id": " "
+      },
+      {
+        "distance_degrees": 0.0042,
+        "name": "WENLAND DOWNS RESERVED FOREST",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 96196779.8622303,
+        "unique_id": " "
+      },
+      {
+        "distance_degrees": 0.00867,
+        "name": "NADUVATTAM RESERVED",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 21894712.637894444,
+        "unique_id": " "
+      },
+      {
+        "distance_degrees": 0.01766,
+        "name": "NADUVATTAM RESERVED FOREST",
+        "type": "RESERVED",
+        "tree_type": "DENSE MIXED JUNGLE MAINLY BAMBOO",
+        "source_area_m2": 18053022.903044786,
+        "unique_id": "4101011526006076572567"
+      }
+    ],
+    "Avalanche Lake": [
+      {
+        "distance_degrees": 0.00244,
+        "name": " ",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 212109.158429645,
+        "unique_id": "4101011324539076615733"
+      },
+      {
+        "distance_degrees": 0.01106,
+        "name": "KUNDA RESERVED FOREST",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 168448360.530363,
+        "unique_id": " "
+      },
+      {
+        "distance_degrees": 0.01106,
+        "name": "KUNDA RESERVED FOREST",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 168448360.530363,
+        "unique_id": " "
+      },
+      {
+        "distance_degrees": 0.01446,
+        "name": " ",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 162959.954864425,
+        "unique_id": "4101011335897076621567"
+      },
+      {
+        "distance_degrees": 0.01771,
+        "name": "UMMANDU RESERVED FOREST",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 306717.704255555,
+        "unique_id": " "
+      }
+    ],
+    "Upper Bhavani Dam": [
+      {
+        "distance_degrees": 0.0,
+        "name": "KUNDA RESERVED FOREST",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 168448360.530363,
+        "unique_id": " "
+      },
+      {
+        "distance_degrees": 0.0,
+        "name": "KUNDA RESERVED FOREST",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 168448360.530363,
+        "unique_id": " "
+      },
+      {
+        "distance_degrees": 0.02068,
+        "name": "ATTAP>DI RESERVED FOREST",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 144091219.13312566,
+        "unique_id": " "
+      },
+      {
+        "distance_degrees": 0.03843,
+        "name": "NEW AMARAMBALAM RESERVED FOREST",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 250039312.82821372,
+        "unique_id": " "
+      },
+      {
+        "distance_degrees": 0.06843,
+        "name": "VADAKKEKOTTAMALA VF",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 26147596.109947983,
+        "unique_id": " "
+      }
+    ],
+    "Mukurthi Park interior": [
+      {
+        "distance_degrees": 0.0,
+        "name": "NEW AMARAMBALAM RESERVED FOREST",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 250039312.82821372,
+        "unique_id": " "
+      },
+      {
+        "distance_degrees": 0.00589,
+        "name": "KUNDA RESERVED FOREST",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 168448360.530363,
+        "unique_id": " "
+      },
+      {
+        "distance_degrees": 0.00589,
+        "name": "KUNDA RESERVED FOREST",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 168448360.530363,
+        "unique_id": " "
+      },
+      {
+        "distance_degrees": 0.05849,
+        "name": "ATTAP>DI RESERVED FOREST",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 144091219.13312566,
+        "unique_id": " "
+      },
+      {
+        "distance_degrees": 0.06436,
+        "name": "VADAKKEKOTTAMALA VF",
+        "type": "RESERVED",
+        "tree_type": " ",
+        "source_area_m2": 26147596.109947983,
+        "unique_id": " "
+      }
+    ]
+  },
+  "output": "data\\research\\nilgiris-soi-forest-features.geojson",
+  "output_sha256": "0ba9601a23c6ee766eadefb0846460f454bf158efbf2c8925d4db616efc170f9",
+  "limitation": "Survey of India topographic forest features are map references, not cadastral or current Forest Department demarcation. Distances are planar degrees used only for ranking nearby features."
+}

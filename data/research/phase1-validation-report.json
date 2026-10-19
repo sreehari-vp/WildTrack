@@ -1,0 +1,358 @@
+{
+  "phase": "1 - real-data source and boundary validation (complete)",
+  "candidate_source": "GBIF occurrence search API; source-screened observation candidates are direct human observations, species-level, dated, with stated coordinate uncertainty <=1 km and an explicit Creative Commons licence. They are not expert-verified identifications or individual animal records.",
+  "candidate_source_retrieval_method": "Spatially bounded GBIF query over 76.35-76.90 E, 11.15-11.57 N; 2020-2026; Animalia only; intersected locally with selected reserve-forest blocks and the GatiShakti Mukurthi polygon. For five focus regions, mapped reserve blocks are selected by intersection with a 3000 m landmark search area.",
+  "candidate_source_hash": "4a9fce577765828aa2d57216ae5a486137ec8466aa1b50732a36886301cf3ac1",
+  "artifacts": {
+    "observation_candidates": {
+      "path": "data\\research\\phase1-observation-candidates.json",
+      "sha256": "d2c7e5e9af6634b1206b7c764a9f93c154f7edce8d9e883c0ce68ce318643cbc"
+    },
+    "study_regions": {
+      "path": "data\\research\\phase1-study-regions.geojson",
+      "sha256": "abf72f3819351f3f0bacb59d32f4140788cac8d8cb28970ae1f3f6cde0217929"
+    },
+    "dataset_metadata": {
+      "path": "data\\research\\gbif-dataset-metadata.json",
+      "sha256": "cc7f7b6c18ef9ef35f0f70d9ddecd6c3becf24cee52b5cd22608ed0f96ba1a86"
+    },
+    "forest_feature_source": {
+      "path": "data\\research\\nilgiris-soi-forest-features.geojson",
+      "sha256": "0ba9601a23c6ee766eadefb0846460f454bf158efbf2c8925d4db616efc170f9"
+    },
+    "mukurthi_geometry_source": {
+      "path": "data\\research\\mukurthi-national-park-gatishakti.geojson",
+      "sha256": "5656fd8c03985141c019df51e856d3ca517590196e667d017411cd391caf4fb2"
+    },
+    "worldcover_crop": {
+      "path": "data\\research\\ooty-worldcover-2021.tif",
+      "sha256": "bc4b49d4c931905e127500a583e3a98318a76cba7b6b2a07d0ce71ebd8d89b2a"
+    }
+  },
+  "source_register": [
+    {
+      "name": "GBIF occurrence search API",
+      "url": "https://api.gbif.org/v1/occurrence/search",
+      "use": "Public observation records and dataset metadata; record-level source IDs and citations are retained in the candidate file."
+    },
+    {
+      "name": "BharatAtlas Survey of India forest features",
+      "url": "https://bharatlas.com/",
+      "use": "Cartographic reserved-forest features clipped into five WildTrack study extents; not cadastral or legal boundary data.",
+      "license": "CC0 as stated by BharatAtlas"
+    },
+    {
+      "name": "PM GatiShakti Mukurthi National Park snapshot 2024",
+      "url": "https://bharatlas.com/",
+      "use": "Protected-area polygon snapshot; geometry area differs from the source-reported 78.46 km2 and needs reconciliation before authoritative use.",
+      "license": "CC0 as stated by BharatAtlas"
+    },
+    {
+      "name": "ESA WorldCover 2021 v200",
+      "url": "https://esa-worldcover.org/en/data-access",
+      "use": "Modelled land-cover class at reported observation coordinates; not used as a legal forest boundary or hazard classification.",
+      "doi": "10.5281/zenodo.7254221",
+      "license": "CC BY 4.0"
+    },
+    {
+      "name": "Mukurthi source-reported protected-area area",
+      "url": "https://moef.gov.in/uploads/2020/12/minutes-of-43rd-meeting.pdf",
+      "use": "MoEFCC meeting record reports Mukurthi National Park area as 78.46 km2."
+    }
+  ],
+  "source_screened_observation_candidate_count": 94,
+  "unique_species_count": 40,
+  "source_dataset_dois_used": [
+    "10.15468/5nilie",
+    "10.15468/ab3s5x"
+  ],
+  "taxonomic_class_counts": {
+    "Aves": 66,
+    "Mammalia": 8,
+    "Squamata": 9,
+    "Insecta": 11
+  },
+  "record_count_by_region_membership": {
+    "pykara": 3,
+    "doddabetta": 72,
+    "ooty_north": 8,
+    "upper_bhavani": 3,
+    "mukurthi": 8,
+    "avalanche": 3
+  },
+  "record_count_by_licence": {
+    "http://creativecommons.org/licenses/by-nc/4.0/legalcode": 79,
+    "http://creativecommons.org/licenses/by/4.0/legalcode": 13,
+    "http://creativecommons.org/publicdomain/zero/1.0/legalcode": 2
+  },
+  "date_range": [
+    "2020-02-22T12:49",
+    "2026-08-20T15:03:34"
+  ],
+  "landcover_classes_at_reported_locations": {
+    "Tree cover": 79,
+    "Built-up": 5,
+    "Bare/sparse vegetation": 1,
+    "Grassland": 8,
+    "Permanent water bodies": 1
+  },
+  "screening_counts": {
+    "outside_study_extent_excluded": 2626,
+    "uncertainty_crosses_region_edge_flagged": 45
+  },
+  "boundary_membership": {
+    "reported_coordinate_inside_region": 94,
+    "full_coordinate_uncertainty_circle_inside_region": 49,
+    "uncertainty_circle_crosses_region_edge": 45
+  },
+  "boundaries": {
+    "study_regions_geojson": "data\\research\\phase1-study-regions.geojson",
+    "study_regions_sha256": "abf72f3819351f3f0bacb59d32f4140788cac8d8cb28970ae1f3f6cde0217929",
+    "region_areas_km2": {
+      "ooty_north": 7.785,
+      "doddabetta": 6.643,
+      "pykara": 15.345,
+      "avalanche": 6.982,
+      "upper_bhavani": 28.229,
+      "mukurthi": 82.627
+    },
+    "regions": {
+      "ooty_north": {
+        "label": "Ooty North / Marlimund",
+        "source_features": [
+          {
+            "name": "ARAMBY RESERVED FOREST",
+            "source_area_m2": 1788238.853536945,
+            "study_clip_area_m2": 1786574.38,
+            "source_id": " "
+          },
+          {
+            "name": "MARLIMUND RESERVED FOREST",
+            "source_area_m2": 171420.79302782,
+            "study_clip_area_m2": 171263.13,
+            "source_id": " "
+          },
+          {
+            "name": "SNOWDON RESERVED FOREST",
+            "source_area_m2": 2999484.196835865,
+            "study_clip_area_m2": 2345136.15,
+            "source_id": " "
+          },
+          {
+            "name": "HONNATALAI NORTH R F",
+            "source_area_m2": 8200501.16745462,
+            "study_clip_area_m2": 232686.51,
+            "source_id": "4101011407550076729303"
+          },
+          {
+            "name": "DODABETTA RESERVED FOREST",
+            "source_area_m2": 5021001.256902485,
+            "study_clip_area_m2": 232065.81,
+            "source_id": " "
+          },
+          {
+            "name": "MARLIMUND SHOLA RESERVED FOREST",
+            "source_area_m2": 562933.629557105,
+            "study_clip_area_m2": 562512.1,
+            "source_id": " "
+          },
+          {
+            "name": "PAKALAMUND RESERVED FOREST",
+            "source_area_m2": 605275.39835594,
+            "study_clip_area_m2": 602679.61,
+            "source_id": " "
+          },
+          {
+            "name": "WENLAND DOWNS RESERVED FOREST",
+            "source_area_m2": 96196779.8622303,
+            "study_clip_area_m2": 2084105.02,
+            "source_id": " "
+          }
+        ]
+      },
+      "doddabetta": {
+        "label": "Doddabetta",
+        "source_features": [
+          {
+            "name": "CARIGMORE RESERVED FOREST",
+            "source_area_m2": 1094434.621725085,
+            "study_clip_area_m2": 1093024.4,
+            "source_id": " "
+          },
+          {
+            "name": "ELKHILL RESERVED FOREST",
+            "source_area_m2": 790669.911849685,
+            "study_clip_area_m2": 254022.78,
+            "source_id": " "
+          },
+          {
+            "name": "MAINLAI RESERVED FOREST",
+            "source_area_m2": 324087.963718905,
+            "study_clip_area_m2": 323674.32,
+            "source_id": " "
+          },
+          {
+            "name": "HONNATALAI NORTH R F",
+            "source_area_m2": 8200501.16745462,
+            "study_clip_area_m2": 5161508.01,
+            "source_id": "4101011407550076729303"
+          },
+          {
+            "name": "DODABETTA RESERVED FOREST",
+            "source_area_m2": 5021001.256902485,
+            "study_clip_area_m2": 4647110.11,
+            "source_id": " "
+          },
+          {
+            "name": "RF",
+            "source_area_m2": 116856.67694274,
+            "study_clip_area_m2": 116731.64,
+            "source_id": " "
+          }
+        ]
+      },
+      "pykara": {
+        "label": "Pykara",
+        "source_features": [
+          {
+            "name": "NADUVATTAM RESERVED FOREST",
+            "source_area_m2": 18053022.903044786,
+            "study_clip_area_m2": 831615.4,
+            "source_id": "4101011526006076572567"
+          },
+          {
+            "name": "SING>RA RESERVED FOREST",
+            "source_area_m2": 9632229.82243396,
+            "study_clip_area_m2": 392215.59,
+            "source_id": "4101011533758076622067"
+          },
+          {
+            "name": "WENLAND DOWNS RESERVED FOREST",
+            "source_area_m2": 96196779.8622303,
+            "study_clip_area_m2": 4384136.9,
+            "source_id": " "
+          },
+          {
+            "name": "PATHARMUND RESERVED FOREST",
+            "source_area_m2": 3262755.96538652,
+            "study_clip_area_m2": 3261687.33,
+            "source_id": " "
+          },
+          {
+            "name": "NADUVATTAM EXTENSION RESERVED FOREST",
+            "source_area_m2": 2267897.9732884,
+            "study_clip_area_m2": 2267164.67,
+            "source_id": " "
+          },
+          {
+            "name": "NATUVATTAM RESERVED FOREST",
+            "source_area_m2": 800216.91475126,
+            "study_clip_area_m2": 359365.82,
+            "source_id": " "
+          },
+          {
+            "name": "NADUVATTAM RESERVED",
+            "source_area_m2": 21894712.637894444,
+            "study_clip_area_m2": 3848459.71,
+            "source_id": " "
+          }
+        ]
+      },
+      "avalanche": {
+        "label": "Avalanche",
+        "source_features": [
+          {
+            "name": "KUNDA RESERVED FOREST",
+            "source_area_m2": 168448360.530363,
+            "study_clip_area_m2": 4735276.74,
+            "source_id": " "
+          },
+          {
+            "name": "PORTHIMUND RESERVED FOREST",
+            "source_area_m2": 29209831.51375678,
+            "study_clip_area_m2": 596854.88,
+            "source_id": " "
+          },
+          {
+            "name": "KADC@PA RESERVED FOREST",
+            "source_area_m2": 7640833.463585195,
+            "study_clip_area_m2": 574950.48,
+            "source_id": " "
+          },
+          {
+            "name": "Unnamed reserved forest feature",
+            "source_area_m2": 212109.158429645,
+            "study_clip_area_m2": 211676.93,
+            "source_id": "4101011324539076615733"
+          },
+          {
+            "name": "ULIBETTU RESERVED FOREST",
+            "source_area_m2": 277884.49075767,
+            "study_clip_area_m2": 277305.18,
+            "source_id": " "
+          },
+          {
+            "name": "RF",
+            "source_area_m2": 310733.1236736,
+            "study_clip_area_m2": 117104.93,
+            "source_id": " "
+          },
+          {
+            "name": "UMMANDU RESERVED FOREST",
+            "source_area_m2": 306717.704255555,
+            "study_clip_area_m2": 305961.85,
+            "source_id": " "
+          },
+          {
+            "name": "Unnamed reserved forest feature",
+            "source_area_m2": 162959.954864425,
+            "study_clip_area_m2": 162650.0,
+            "source_id": "4101011335897076621567"
+          }
+        ]
+      },
+      "upper_bhavani": {
+        "label": "Upper Bhavani",
+        "source_features": [
+          {
+            "name": "KUNDA RESERVED FOREST",
+            "source_area_m2": 168448360.530363,
+            "study_clip_area_m2": 27430543.02,
+            "source_id": " "
+          },
+          {
+            "name": "ATTAP>DI RESERVED FOREST",
+            "source_area_m2": 144091219.13312566,
+            "study_clip_area_m2": 798393.39,
+            "source_id": " "
+          }
+        ]
+      },
+      "mukurthi": {
+        "label": "Mukurthi National Park",
+        "source_features": [
+          {
+            "name": "Mukurthi National Park",
+            "source": "PM GatiShakti snapshot 2024"
+          }
+        ]
+      }
+    },
+    "mukurthi_source_reported_area_km2": 78.46,
+    "mukurthi_polygon_geodesic_area_km2": 82.137,
+    "mukurthi_geometry_area_difference_percent": 4.69
+  },
+  "checks": {
+    "species_level_taxon": "passed for included records",
+    "observation_date_present": "passed for included records",
+    "public_unobscured_location": "passed for included records",
+    "coordinate_accuracy_at_most_1000m": "passed for included records",
+    "record_licence_creative_commons_explicit": "passed; CC BY-NC records are restricted to non-commercial reuse and must keep attribution",
+    "uncertainty_buffer_inside_source_boundary": "coordinates are inside by reported point; boundary_membership_uncertain marks reports whose uncertainty radius crosses the polygon edge",
+    "GBIF_duplicate_crosswalk": "GBIF occurrence keys deduplicate records in this API result; potential duplicate source records between separate GBIF dataset keys require cross-provider DOI/occurrence review",
+    "taxon_manual_expert_review": "not performed; these remain candidates, not expert-verified identifications",
+    "source_boundary_scale_and_currentness": "Survey of India features are cartographic; protected-area polygon is a 2024 snapshot; neither is cadastral demarcation"
+  },
+  "phase_1_outcome": "The research package is ready for Phase 2 application data modelling and import preparation. Region boundaries are mapped study extents, the observation records remain source-screened candidates, and thematic hazard/terrain zones are still to be derived in the next phase.",
+  "limitation": "These are sourced occurrence candidates for a classroom map layer, not telemetry or proof that an individually tagged animal lives at the displayed coordinate. Do not call the records live, tagged animals, or movement tracks. For five regions, the stated local buffer clips mapped reserve-forest polygons; it defines a WildTrack analysis area, not an official forest boundary. Focus buffers can overlap. The Mukurthi snapshot geometry's geodesic area differs from the source-reported area; verify the boundary before using it for legal or conservation decisions."
+}

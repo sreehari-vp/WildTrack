@@ -1,0 +1,39 @@
+{
+  "screened_candidates": 143,
+  "inside_raster": 143,
+  "outside_raster": 0,
+  "class_at_reported_point": {
+    "Built-up": 5,
+    "Grassland": 15,
+    "Permanent water bodies": 10,
+    "Tree cover": 113
+  },
+  "by_overlapping_provisional_circle": {
+    "avalanche": {
+      "Grassland": 2,
+      "Tree cover": 92
+    },
+    "doddabetta": {
+      "Built-up": 5,
+      "Grassland": 13,
+      "Tree cover": 19
+    },
+    "mukurthi": {
+      "Tree cover": 1
+    },
+    "ooty_north": {
+      "Built-up": 5,
+      "Grassland": 13,
+      "Permanent water bodies": 10,
+      "Tree cover": 20
+    },
+    "pykara": {
+      "Permanent water bodies": 10,
+      "Tree cover": 1
+    },
+    "upper_bhavani": {
+      "Grassland": 1
+    }
+  },
+  "interpretation": "Exploratory 2021 land-cover screen only; circles overlap. No study polygon, current habitat, or point accuracy validation is implied."
+}

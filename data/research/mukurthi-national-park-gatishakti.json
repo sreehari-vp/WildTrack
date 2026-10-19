@@ -1,0 +1,22 @@
+{
+  "source_url": "https://pub-0429b8e3b5a946e69ea007df844a6f1c.r2.dev/environment/forests/GatiShakti_Wildlife_Sanctuaries_and_National_Parks.parquet",
+  "publisher": "BharatAtlas; attributed source PM GatiShakti",
+  "licence": "CC0-1.0 as stated by BharatAtlas",
+  "feature_count": 1,
+  "records": [
+    {
+      "id": "india_sanctuary_nationalpark_final.542",
+      "name": "Mukurthi National Park",
+      "state": "Tamil Nadu",
+      "district": "The Nilgiris",
+      "category": "National Park",
+      "source": "State Forest Department Data",
+      "area_sqkm": "78.46",
+      "area_ha": "0.0",
+      "animals": "Nilgiri Tahr, Tiger, Asian Elephant, Sambar, Leopard, Nilgiri Marten, Barking Deer, Nilgiri Langur; Malabar Whistling Thrush, Nilgiri Wood Pigeon, Black and Orange Flycatcher, Nilgiri Flycatcher, Nilgiri Pipit; Nilgiri Salea, Horseshoe Pit Viper, Rat Sna"
+    }
+  ],
+  "output": "data\\research\\mukurthi-national-park-gatishakti.geojson",
+  "output_sha256": "5656fd8c03985141c019df51e856d3ca517590196e667d017411cd391caf4fb2",
+  "limitations": "Snapshot boundary for display/research; verify official notification geometry before legal, cadastral or enforcement use. Source field and stated area retained verbatim."
+}

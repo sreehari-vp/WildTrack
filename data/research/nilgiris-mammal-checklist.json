@@ -1,0 +1,219 @@
+{
+  "title": "Mukurthi National Park and Nilgiris mammal checklist for classroom simulation",
+  "scope_note": "Regional species-presence checklist assembled for a rough simulation population. It is not an abundance estimate, a contemporary census, or proof that an individual animal was observed in each study region.",
+  "sources": [
+    {
+      "id": "tnau-mukurthi-fauna",
+      "title": "Mukurthi National Park fauna and habitat summary",
+      "publisher": "Tamil Nadu Agricultural University, Agritech Portal",
+      "url": "https://agritech.tnau.ac.in/forestry/forestry_ecotourism_mukurthi.html",
+      "license_note": "Public educational page; cite source and confirm reuse terms before redistribution of source text."
+    },
+    {
+      "id": "sumithran-1997-mukurthi",
+      "title": "Status and Ecology of the Nilgiri Tahr in the Mukurthi National Park, South India",
+      "publisher": "Stephen Sumithran, Virginia Polytechnic Institute and State University, 1997",
+      "url": "https://vtechworks.lib.vt.edu/bitstream/10919/40511/1/finaltar.PDF",
+      "license_note": "Academic dissertation used as a species-presence reference; do not redistribute its text or maps without checking rights."
+    }
+  ],
+  "simulation_mix_note": "The counts below are chosen for a 75-animal software demonstration. They are not derived from census abundance. The same regional checklist species are assigned across the six study areas using a coarse randomized distribution.",
+  "animals": [
+    {
+      "scientific_name": "Rusa unicolor",
+      "common_name": "Sambar deer",
+      "population_weight": 18,
+      "habitat_regions": [
+        "mukurthi",
+        "upper_bhavani",
+        "avalanche",
+        "pykara",
+        "ooty_north",
+        "doddabetta"
+      ],
+      "source_id": "mukurthi-checklist:rusa-unicolor",
+      "source_title": "Mukurthi mammal checklist",
+      "source_url": "https://vtechworks.lib.vt.edu/bitstream/10919/40511/1/finaltar.PDF"
+    },
+    {
+      "scientific_name": "Muntiacus muntjak",
+      "common_name": "Barking deer",
+      "population_weight": 11,
+      "habitat_regions": [
+        "mukurthi",
+        "upper_bhavani",
+        "avalanche",
+        "pykara",
+        "ooty_north",
+        "doddabetta"
+      ],
+      "source_id": "mukurthi-checklist:muntiacus-muntjak",
+      "source_title": "Mukurthi mammal checklist",
+      "source_url": "https://vtechworks.lib.vt.edu/bitstream/10919/40511/1/finaltar.PDF"
+    },
+    {
+      "scientific_name": "Nilgiritragus hylocrius",
+      "common_name": "Nilgiri tahr",
+      "population_weight": 12,
+      "habitat_regions": [
+        "mukurthi",
+        "upper_bhavani",
+        "avalanche",
+        "pykara"
+      ],
+      "source_id": "tnau-mukurthi-fauna:nilgiri-tahr",
+      "source_title": "TNAU Mukurthi National Park fauna summary",
+      "source_url": "https://agritech.tnau.ac.in/forestry/forestry_ecotourism_mukurthi.html"
+    },
+    {
+      "scientific_name": "Elephas maximus",
+      "common_name": "Asian elephant",
+      "population_weight": 9,
+      "habitat_regions": [
+        "mukurthi",
+        "upper_bhavani",
+        "avalanche",
+        "pykara",
+        "ooty_north"
+      ],
+      "source_id": "mukurthi-checklist:elephas-maximus",
+      "source_title": "Mukurthi mammal checklist",
+      "source_url": "https://vtechworks.lib.vt.edu/bitstream/10919/40511/1/finaltar.PDF"
+    },
+    {
+      "scientific_name": "Bos gaurus",
+      "common_name": "Gaur",
+      "population_weight": 5,
+      "habitat_regions": [
+        "mukurthi",
+        "upper_bhavani",
+        "avalanche",
+        "pykara",
+        "ooty_north"
+      ],
+      "source_id": "mukurthi-checklist:bos-gaurus",
+      "source_title": "Mukurthi mammal checklist",
+      "source_url": "https://vtechworks.lib.vt.edu/bitstream/10919/40511/1/finaltar.PDF"
+    },
+    {
+      "scientific_name": "Sus scrofa",
+      "common_name": "Wild boar",
+      "population_weight": 5,
+      "habitat_regions": [
+        "mukurthi",
+        "upper_bhavani",
+        "avalanche",
+        "pykara",
+        "ooty_north",
+        "doddabetta"
+      ],
+      "source_id": "mukurthi-checklist:sus-scrofa",
+      "source_title": "Mukurthi mammal checklist",
+      "source_url": "https://vtechworks.lib.vt.edu/bitstream/10919/40511/1/finaltar.PDF"
+    },
+    {
+      "scientific_name": "Semnopithecus johnii",
+      "common_name": "Nilgiri langur",
+      "population_weight": 4,
+      "habitat_regions": [
+        "mukurthi",
+        "upper_bhavani",
+        "avalanche",
+        "pykara",
+        "ooty_north"
+      ],
+      "source_id": "mukurthi-checklist:semnopithecus-johnii",
+      "source_title": "Mukurthi mammal checklist",
+      "source_url": "https://vtechworks.lib.vt.edu/bitstream/10919/40511/1/finaltar.PDF"
+    },
+    {
+      "scientific_name": "Macaca radiata",
+      "common_name": "Bonnet macaque",
+      "population_weight": 3,
+      "habitat_regions": [
+        "mukurthi",
+        "upper_bhavani",
+        "avalanche",
+        "pykara",
+        "ooty_north",
+        "doddabetta"
+      ],
+      "source_id": "mukurthi-checklist:macaca-radiata",
+      "source_title": "Mukurthi mammal checklist",
+      "source_url": "https://vtechworks.lib.vt.edu/bitstream/10919/40511/1/finaltar.PDF"
+    },
+    {
+      "scientific_name": "Panthera tigris",
+      "common_name": "Bengal tiger",
+      "population_weight": 2,
+      "habitat_regions": [
+        "mukurthi",
+        "upper_bhavani",
+        "avalanche",
+        "pykara"
+      ],
+      "source_id": "mukurthi-checklist:panthera-tigris",
+      "source_title": "Mukurthi mammal checklist",
+      "source_url": "https://vtechworks.lib.vt.edu/bitstream/10919/40511/1/finaltar.PDF"
+    },
+    {
+      "scientific_name": "Panthera pardus",
+      "common_name": "Indian leopard",
+      "population_weight": 3,
+      "habitat_regions": [
+        "mukurthi",
+        "upper_bhavani",
+        "avalanche",
+        "pykara",
+        "ooty_north"
+      ],
+      "source_id": "mukurthi-checklist:panthera-pardus",
+      "source_title": "Mukurthi mammal checklist",
+      "source_url": "https://vtechworks.lib.vt.edu/bitstream/10919/40511/1/finaltar.PDF"
+    },
+    {
+      "scientific_name": "Cuon alpinus",
+      "common_name": "Dhole",
+      "population_weight": 1,
+      "habitat_regions": [
+        "mukurthi",
+        "upper_bhavani",
+        "avalanche",
+        "pykara"
+      ],
+      "source_id": "mukurthi-checklist:cuon-alpinus",
+      "source_title": "Mukurthi mammal checklist",
+      "source_url": "https://vtechworks.lib.vt.edu/bitstream/10919/40511/1/finaltar.PDF"
+    },
+    {
+      "scientific_name": "Felis chaus",
+      "common_name": "Jungle cat",
+      "population_weight": 1,
+      "habitat_regions": [
+        "mukurthi",
+        "upper_bhavani",
+        "avalanche",
+        "pykara",
+        "ooty_north",
+        "doddabetta"
+      ],
+      "source_id": "tnau-mukurthi-fauna:felis-chaus",
+      "source_title": "TNAU Mukurthi National Park fauna summary",
+      "source_url": "https://agritech.tnau.ac.in/forestry/forestry_ecotourism_mukurthi.html"
+    },
+    {
+      "scientific_name": "Martes gwatkinsii",
+      "common_name": "Nilgiri marten",
+      "population_weight": 1,
+      "habitat_regions": [
+        "mukurthi",
+        "upper_bhavani",
+        "avalanche",
+        "pykara"
+      ],
+      "source_id": "tnau-mukurthi-fauna:martes-gwatkinsii",
+      "source_title": "TNAU Mukurthi National Park fauna summary",
+      "source_url": "https://agritech.tnau.ac.in/forestry/forestry_ecotourism_mukurthi.html"
+    }
+  ]
+}

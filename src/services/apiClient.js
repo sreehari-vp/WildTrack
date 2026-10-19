@@ -44,7 +44,11 @@ const zoneType = (value) => {
 const apiAnimalToAnimal = (item) => ({
   id: item.animal_id,
   name: item.name,
-  species: item.species === "tiger" ? "tiger" : item.species === "deer" ? "deer" : "elephant",
+  species: item.species || "unknown",
+  dataOrigin: item.data_origin || "legacy_unverified",
+  sourceReferenceType: item.source_reference_type || null,
+  sourceReferenceName: item.source_reference_name || null,
+  sourceReferenceUrl: item.source_reference_url || null,
   status: item.status === "idle" || item.status === "offline" ? item.status : "active",
   risk: risk(item.current_zone?.risk_level),
   currentZoneId: item.current_zone?.zone_id ?? "outside",

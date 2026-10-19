@@ -14,6 +14,22 @@ test("missing GPS and timestamps remain unknown rather than fabricated", () => {
   assert.equal(formatCoordinate(null), "Unknown");
 });
 
+test("animal adapter preserves scientific species and provenance", () => {
+  const animal = apiAnimalToAnimal({
+    animal_id: "SIM-001",
+    species: "Parus cinereus",
+    data_origin: "simulated_from_regional_species_list",
+    source_reference_type: "regional_species_checklist",
+    source_reference_name: "Mukurthi mammal checklist",
+    source_reference_url: "https://example.org/checklist",
+  });
+  assert.equal(animal.species, "Parus cinereus");
+  assert.equal(animal.dataOrigin, "simulated_from_regional_species_list");
+  assert.equal(animal.sourceReferenceType, "regional_species_checklist");
+  assert.equal(animal.sourceReferenceName, "Mukurthi mammal checklist");
+  assert.equal(animal.sourceReferenceUrl, "https://example.org/checklist");
+});
+
 test("API mapping preserves multipolygons and their area", () => {
   const geometry = { type: "MultiPolygon", coordinates: [
     [[[0,0],[2,0],[2,2],[0,2],[0,0]]],

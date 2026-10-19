@@ -1,0 +1,23 @@
+{
+  "source": "Nature Conservation Foundation, Occurrence records of mammals from the Western Ghats (primarily Sakleshpur, Anamalais and Nilgiris, India) between November 2023 and February 2026",
+  "dataset_doi": "10.15468/yv8qss",
+  "licence": "CC BY 4.0",
+  "archive_sha256": "037715c3ca77190bca3335cefb37426542d3d0e196cb378fce1881491f12adc7",
+  "input_rows": 4139,
+  "unique_candidate_records_inside_regions": 3,
+  "by_species": {
+    "Macaca radiata": 1,
+    "Ratufa indica": 1,
+    "Semnopithecus johnii": 1
+  },
+  "by_region_membership": {
+    "pykara": 3,
+    "ooty_north": 1
+  },
+  "rejected": {
+    "outside_study_region_geometry": 4019,
+    "coordinate_uncertainty_over_1km": 117
+  },
+  "output_sha256": "a4a8ec12ae2f79f2fbca308d374987f0a18d633f0ac237598252027a41037b2e",
+  "limitation": "Candidates are reported observations, not live or tagged animal telemetry. HumanObservation records may describe direct sightings or animal signs; inspect field notes and source context before display."
+}

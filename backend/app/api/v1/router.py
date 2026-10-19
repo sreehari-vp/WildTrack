@@ -12,6 +12,7 @@ from backend.app.api.v1.simulation import router as simulation_router
 from backend.app.api.v1.monitoring_state import router as monitoring_state_router
 from backend.app.api.v1.monitoring_history import router as monitoring_history_router
 from backend.app.api.v1.network import router as network_router
+from backend.app.api.v1.research import router as research_router
 from backend.app.api.v1.zones import router as zones_router
 
 
@@ -25,6 +26,7 @@ api_router.include_router(simulation_router)
 api_router.include_router(monitoring_state_router)
 api_router.include_router(monitoring_history_router)
 api_router.include_router(network_router)
+api_router.include_router(research_router)
 
 
 @api_router.get("/boundaries")

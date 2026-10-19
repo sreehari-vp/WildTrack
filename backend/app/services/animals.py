@@ -38,6 +38,11 @@ def _animal_from_row(row: dict[str, object]) -> dict[str, object]:
         "age": row["age"],
         "sex": row["sex"],
         "status": row["status"],
+        "data_origin": row["data_origin"],
+        "source_reference_type": row["source_reference_type"],
+        "source_reference_id": row["source_reference_id"],
+        "source_reference_name": row["source_reference_name"],
+        "source_reference_url": row["source_reference_url"],
         "device": {
             "device_id": row["device_id"],
             "device_code": row["device_code"],
@@ -62,6 +67,7 @@ WITH latest_observation AS (
 )
 SELECT
     a.animal_id, a.animal_code, a.species, a.name, a.age, a.sex, a.status,
+    a.data_origin, a.source_reference_type, a.source_reference_id, a.source_reference_name, a.source_reference_url,
     d.device_id, d.device_code, d.device_type, d.status AS device_status, d.battery_level, d.last_seen,
     lo.observation_id, lo.observation_device_id, lo.latitude, lo.longitude, lo.speed, lo.observed_at,
     z.zone_id, z.zone_name, z.zone_type, z.risk_level
@@ -77,7 +83,9 @@ LEFT JOIN LATERAL (
 
 
 def list_animals(conn: Connection) -> list[dict[str, object]]:
-    rows = conn.execute(text(f"{ANIMAL_QUERY} ORDER BY a.animal_code")).mappings()
+    has_v2 = conn.execute(text("select exists(select 1 from animals where animal_id like 'SIM-V2-%')")).scalar_one()
+    active_filter = " WHERE a.animal_id LIKE 'SIM-V2-%'" if has_v2 else ""
+    rows = conn.execute(text(f"{ANIMAL_QUERY}{active_filter} ORDER BY a.animal_code")).mappings()
     return [_animal_from_row(dict(row)) for row in rows]
 
 

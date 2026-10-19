@@ -30,6 +30,7 @@ Seed commands insert missing records only. They never delete existing data or ru
 
 Migration 0002 adds constraints, a partial unique index for active alerts and trigger-maintained alert history. Migration 0003 adds persistent map pins, map preferences and a zone ownership flag. Migration 0004 adds temporal zone/rule versions, configuration audit, the event outbox and hourly summaries. Incompatible data fails the transaction instead of being silently changed. Existing zone/rule history begins at migration-time baseline version 1; past changes cannot be reconstructed.
 Migration 0005 adds an export batch/ID ledger for incremental historical Parquet files. It does not alter wildlife records.
+Migration 0006 adds sourced Ooty study regions, 2021 land-cover overlays, dataset citations and historical wildlife sightings with uncertainty polygons. It keeps those events separate from tagged animals and operational observations. Migration 0007 records animal data origin and source-occurrence references so simulated trackers are not presented as real tagged wildlife.
 
 ## Advanced database concepts implemented
 
@@ -52,6 +53,16 @@ Migration 0005 adds an export batch/ID ledger for incremental historical Parquet
 ## Map behavior
 
 Only the selected route is shown. Legend, layers, tools and the alerts drawer start collapsed. Hover or keyboard focus reveals secondary marker information; clicking opens details. Search, species and zone filters work. MultiPolygon parts and holes are retained, areas come from PostGIS, and OpenStreetMap attribution is visible.
+
+## Ooty forest dataset V2
+
+The home page now shows eight named forest analysis extents and 30 modelled ESA WorldCover 2021 land-cover zones. The previous six extents, 29 zones and 94 historical observations remain in PostgreSQL and in the original research files. The research API selects V2 by default after its additive import; `?dataset=previous` reads the earlier layer. The V2 boundaries are clipped source forest polygons, **not certified legal boundaries**. Land cover is not a risk or landslide classification.
+
+A fresh GBIF mammal query returned 1,325 records within the local envelope. Screening against the new polygons, date/coordinate/licence quality rules, domestic taxa and roadkill-event exclusion left 35 historical mammal sighting candidates across 13 species. Coverage is uneven: three regions have no accepted mammal sighting. Green map dots represent these dated records; each retains its source and positional uncertainty. No sighting is treated as a tracked individual.
+
+The separate V2 scenario has 75 synthetic mammal trackers across 16 regionally referenced species, balanced at 9–10 starting points in each of the eight forest extents. Seven are elephants. Coloured map dots are simulated positions, not telemetry. Start/Stop on the Ooty map controls local scenario routes at the configured three-second GPS interval. The previous animal and observation rows remain in PostgreSQL for recovery; the API lists V2 animals when present. The original Overview and Simulation pages still contain legacy operational alerts and zones, so interpret those as software scenarios rather than source-verified risk assessments.
+
+The data package, source links, screening report and rebuild commands are in [data/research/ooty-v2/README.md](data/research/ooty-v2/README.md). `scripts/import_ooty_v2_desktop.py` and `scripts/import_ooty_v2_animals.py` default to dry runs; applying them requires an existing database backup. The database was backed up and the additive V2 import was verified on 19 October 2026. The previous dataset is retained and no rows were deleted.
 
 ## Verification without a test database
 
@@ -108,7 +119,7 @@ The Aura projection has been synchronized and verified against this checkout. Au
 
 1. Ensure PostgreSQL/PostGIS and MongoDB are reachable. Neo4j Aura is optional for the map and alerts, and required for graph corridor analysis.
 2. Apply migrations and start the backend and frontend using the commands under [Run locally](#run-locally).
-3. Open Live Monitor and start the simulation. Observe the five corridor animals reach a zone boundary in about 30–45 seconds; configured ECA rules may create alerts as they move.
+3. Open Live Monitor and start the simulation. Observe source-informed synthetic trackers follow generated routes; configured ECA rules may create alerts as they move.
 4. Stop the simulation and confirm the journey pauses. Restart the backend later to demonstrate that progress resumes from stored observations.
 5. Open Analytics, choose a date range and species, then apply the filters. Compare GPS activity, alerts, estimated distance and zone dwell for that selection.
 6. Open Movement Network, sync if the projection is stale, filter connections by species/date, and select a corridor or zone to inspect contributors and disruption reach.

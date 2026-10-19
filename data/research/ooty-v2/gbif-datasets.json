@@ -1,0 +1,40 @@
+{
+  "datasets": [
+    {
+      "key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7",
+      "title": "iNaturalist Research-grade Observations",
+      "doi": "10.15468/ab3s5x",
+      "license": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+      "citation": {
+        "text": "iNaturalist contributors, iNaturalist (2026). iNaturalist Research-grade Observations. iNaturalist.org. Occurrence dataset https://doi.org/10.15468/ab3s5x accessed via GBIF.org on 2026-10-19.",
+        "citationProvidedBySource": false
+      },
+      "publishingOrganizationTitle": null,
+      "source_url": "https://api.gbif.org/v1/dataset/50c9509d-22c7-4a22-a47d-8c48425ef4a7"
+    },
+    {
+      "key": "8a863029-f435-446a-821e-275f4f641165",
+      "title": "Observation.org, Nature data from around the World",
+      "doi": "10.15468/5nilie",
+      "license": "http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+      "citation": {
+        "text": "Observation.org (2026). Observation.org, Nature data from around the World. Occurrence dataset https://doi.org/10.15468/5nilie accessed via GBIF.org on 2026-10-19.",
+        "citationProvidedBySource": false
+      },
+      "publishingOrganizationTitle": null,
+      "source_url": "https://api.gbif.org/v1/dataset/8a863029-f435-446a-821e-275f4f641165"
+    },
+    {
+      "key": "b219d9b5-ab67-46a2-85b6-278cd7e30f93",
+      "title": "Occurrence records of mammals from the Western Ghats (primarily Sakleshpur, Anamalais and Nilgiris, India) between November 2023 and February 2026",
+      "doi": "10.15468/yv8qss",
+      "license": "http://creativecommons.org/licenses/by/4.0/legalcode",
+      "citation": {
+        "text": "Raman T R S, Mudappa D (2026). Occurrence records of mammals from the Western Ghats (primarily Sakleshpur, Anamalais and Nilgiris, India) between November 2023 and February 2026. Nature Conservation Foundation. Occurrence dataset https://doi.org/10.15468/yv8qss accessed via GBIF.org on 2026-10-19.",
+        "citationProvidedBySource": false
+      },
+      "publishingOrganizationTitle": null,
+      "source_url": "https://api.gbif.org/v1/dataset/b219d9b5-ab67-46a2-85b6-278cd7e30f93"
+    }
+  ]
+}

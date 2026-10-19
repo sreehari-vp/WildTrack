@@ -77,6 +77,7 @@ const ForestMap = ({
   devices,
   zones,
   boundary,
+  studyRegions = [],
   alertsOpenAnimalIds = [],
   hideAlertSummary = false,
   alerts = [],
@@ -125,6 +126,7 @@ const ForestMap = ({
   const [drawDraft, setDrawDraft] = useState(null);
   const [zonePanel, setZonePanel] = useState(null);
   const [zoneHover, setZoneHover] = useState(null);
+  const [regionHover, setRegionHover] = useState(null);
   const { pushToast } = useToast();
   const allZones = zones;
   const fitOotyBoundary = () => {
@@ -227,6 +229,15 @@ const ForestMap = ({
           "line-dasharray": [2, 2]
         }
       });
+      map.addSource("study-regions", { type: "geojson", data: { type: "FeatureCollection", features: studyRegions } });
+      map.addLayer({
+        id: "study-regions-fill", type: "fill", source: "study-regions",
+        paint: { "fill-color": "#477858", "fill-opacity": 0.035 }
+      });
+      map.addLayer({
+        id: "study-regions-line", type: "line", source: "study-regions",
+        paint: { "line-color": "#315d40", "line-width": 1.6, "line-opacity": 0.85, "line-dasharray": [2, 1.5] }
+      });
       map.addSource("zones", { type: "geojson", data: zoneFeatureCollection(allZones), promoteId: "id" });
       map.addLayer({
         id: "zones-fill",
@@ -242,7 +253,7 @@ const ForestMap = ({
         type: "line",
         source: "zones",
         paint: {
-          "line-color": ["get", "color"],
+          "line-color": ["get", "statusColor"],
           "line-width": 1.1,
           "line-opacity": 0.76
         }
@@ -318,6 +329,7 @@ const ForestMap = ({
       setZoneHover({
         name: String(feature.properties?.name ?? "Zone"),
         type: String(feature.properties?.type ?? "tree_cover"),
+        risk: String(feature.properties?.risk ?? "info"),
         regionName: String(feature.properties?.regionName ?? ""),
         areaKm2: Number(feature.properties?.areaKm2 ?? 0),
         description: String(feature.properties?.description ?? ""),
@@ -333,6 +345,24 @@ const ForestMap = ({
       hoveredZoneId = void 0;
       setZoneHover(null);
     });
+      map.on("mousemove", "study-regions-fill", (event) => {
+        const props = event.features?.[0]?.properties;
+        if (!props) return;
+        map.getCanvas().style.cursor = "pointer";
+        setRegionHover({
+          name: String(props.name ?? "Ooty study region"),
+          boundaryType: String(props.boundary_type ?? "Forest analysis area"),
+          source: String(props.data_source ?? "Source-derived forest extent"),
+          legalStatus: String(props.legal_status ?? "Analysis extent; not a legal boundary"),
+          areaKm2: Number(props.area_sq_km ?? 0),
+          x: event.point.x + 12,
+          y: event.point.y + 12
+        });
+      });
+      map.on("mouseleave", "study-regions-fill", () => {
+        map.getCanvas().style.cursor = "";
+        setRegionHover(null);
+      });
     map.on("click", "zones-fill", (event) => {
       if (activeToolRef.current) return;
       const id = event.features?.[0]?.properties?.id;
@@ -408,12 +438,18 @@ const ForestMap = ({
           regionName: zone.regionName,
           areaKm2: zone.areaKm2,
           description: zone.description,
-          color: cssVar(zoneCssVar[zone.type], cssVar(riskCssVar(zone.risk), "currentColor"))
+          color: cssVar(zoneCssVar[zone.type], "currentColor"),
+          statusColor: cssVar(riskCssVar(zone.risk), cssVar("--risk-info", "currentColor"))
         },
         geometry: zone.geometry
       }))
     });
   }, [allZones, mapReady]);
+  useEffect(() => {
+    const source = mapRef.current?.getSource("study-regions");
+    if (!mapReady || !source) return;
+    source.setData({ type: "FeatureCollection", features: studyRegions });
+  }, [mapReady, studyRegions]);
   useEffect(() => {
     const map = mapRef.current;
     if (!mapReady || !map) return;
@@ -677,8 +713,16 @@ const ForestMap = ({
               <div className="font-medium">{zoneHover.name}</div>
               <div className="text-ink-600">{zoneLabels[zoneHover.type] ?? zoneHover.type.replaceAll("_", " ")}</div>
               {zoneHover.regionName ? <div className="text-ink-600">Region · {zoneHover.regionName}</div> : null}
-              {zoneHover.areaKm2 ? <div className="text-ink-600">{zoneHover.areaKm2.toFixed(2)} km² · risk not assessed</div> : null}
+              <div className="text-ink-600">Scenario status · {riskMeta[zoneHover.risk]?.label ?? "Unrated"}</div>
+              {zoneHover.areaKm2 ? <div className="text-ink-600">{zoneHover.areaKm2.toFixed(2)} km²</div> : null}
               {zoneHover.description ? <div className="max-w-64 text-ink-600">{zoneHover.description}</div> : null}
+            </div> : null}
+          {!zoneHover && regionHover ? <div className="zone-hover-tip" style={{ left: regionHover.x, top: regionHover.y }}>
+              <div className="font-medium">{regionHover.name}</div>
+              <div className="text-ink-600">{regionHover.boundaryType}</div>
+              {regionHover.areaKm2 ? <div className="text-ink-600">{regionHover.areaKm2.toFixed(2)} km²</div> : null}
+              <div className="text-ink-600">{regionHover.source}</div>
+              <div className="max-w-64 text-ink-600">{regionHover.legalStatus}</div>
             </div> : null}
           {location ? <LocationCard location={location} onClose={() => setLocation(null)} /> : null}
           {zonePanel ? <div className="absolute bottom-16 left-4 z-30 max-h-[65%] w-80 max-w-[calc(100%-32px)] overflow-auto rounded-panel border border-line bg-paper p-3 shadow-md">
@@ -702,12 +746,13 @@ const ForestMap = ({
                     <option value="bare_or_sparse_cover">Bare or sparse cover</option>
                     <option value="surface_water">Water or wetland</option>
                   </Select>
-                  <Select className="w-full" value={zonePanel.zone.risk} onChange={(event) => setZonePanel({ ...zonePanel, zone: { ...zonePanel.zone, risk: event.target.value } })}>
-                    <option value="safe">Safe</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
+          <Select className="w-full" value={zonePanel.zone.risk} onChange={(event) => setZonePanel({ ...zonePanel, zone: { ...zonePanel.zone, risk: event.target.value } })}>
+                    <option value="safe">Calm</option>
+                    <option value="low">OK</option>
+                    <option value="medium">Watch</option>
+                    <option value="high">Danger</option>
                     <option value="critical">Critical</option>
-                    <option value="info">Info</option>
+                    <option value="info">Unrated</option>
                   </Select>
                   <Input value={zonePanel.zone.description} onChange={(event) => setZonePanel({ ...zonePanel, zone: { ...zonePanel.zone, description: event.target.value } })} />
                   <div className="flex justify-end gap-2">
@@ -723,7 +768,7 @@ const ForestMap = ({
                 </div> : <>
                   <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
                     <div>
-                      <dt className="text-xs text-ink-400">Risk</dt>
+                      <dt className="text-xs text-ink-400">Scenario status</dt>
                       <dd className={`flex items-center gap-1 ${riskMeta[zonePanel.zone.risk].className}`}>
                         {(() => {
     const Icon = riskMeta[zonePanel.zone.risk].Icon;
@@ -829,11 +874,12 @@ const ForestMap = ({
                     <option value="surface_water">Water or wetland</option>
                   </Select>
                   <Select className="w-full" value={drawDraft.risk} onChange={(event) => setDrawDraft({ ...drawDraft, risk: event.target.value })}>
-                    <option value="high">High</option>
+                    <option value="safe">Calm</option>
+                    <option value="low">OK</option>
+                    <option value="medium">Watch</option>
+                    <option value="high">Danger</option>
                     <option value="critical">Critical</option>
-                    <option value="medium">Medium</option>
-                    <option value="safe">Safe</option>
-                    <option value="info">Info</option>
+                    <option value="info">Unrated</option>
                   </Select>
                   <div className="flex justify-end gap-2">
                     <Button variant="ghost" onClick={() => setDrawDraft(null)}>Back</Button>

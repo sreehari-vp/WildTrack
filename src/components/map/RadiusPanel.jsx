@@ -39,13 +39,14 @@ const RadiusPanel = ({
           </Select>
         </label>
         <label className="block text-xs text-ink-600">
-          Risk
+          Scenario status
           <Select className="mt-1 w-full" value={draft.risk} onChange={(event) => setDraft({ ...draft, risk: event.target.value })}>
-            <option value="medium">Medium</option>
-            <option value="safe">Safe</option>
-            <option value="high">High</option>
+            <option value="safe">Calm</option>
+            <option value="low">OK</option>
+            <option value="medium">Watch</option>
+            <option value="high">Danger</option>
             <option value="critical">Critical</option>
-            <option value="info">Info</option>
+            <option value="info">Unrated</option>
           </Select>
         </label>
       </div>

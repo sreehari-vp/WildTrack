@@ -48,12 +48,21 @@ def research_areas(
     ]
     if land_cover:
         zones = connection.execute(text("""
-            select code, study_region_code, zone_type, name, description, data_source,
-                   source_url, source_license, source_version, resolution_m, area_sq_km,
-                   ST_AsGeoJSON(geometry)::jsonb as geometry
-            from public.thematic_zones
-            where study_region_code = any(:selected_codes)
-            order by study_region_code, zone_type
+        select z.code, z.study_region_code, z.zone_type, z.name, z.description, z.data_source,
+               z.source_url, z.source_license, z.source_version, z.resolution_m, z.area_sq_km,
+               attention.risk_level, ST_AsGeoJSON(z.geometry)::jsonb as geometry
+        from public.thematic_zones z
+        left join lateral (
+            select active_zone.risk_level
+            from public.zones active_zone
+            where active_zone.study_region_code=z.study_region_code
+              and active_zone.zone_type=z.zone_type
+              and active_zone.created_in_app=false
+            order by active_zone.zone_id
+            limit 1
+        ) attention on true
+        where z.study_region_code = any(:selected_codes)
+        order by z.study_region_code, z.zone_type
         """), {"selected_codes": selected_codes}).mappings().all()
         features.extend(
             {

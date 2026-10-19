@@ -15,16 +15,17 @@ const Settings = lazyPage(() => import("./pages/Settings"), "Settings");
 const MovementHistory = lazyPage(() => import("./pages/MovementHistory"), "MovementHistory");
 const MovementNetwork = lazyPage(() => import("./pages/MovementNetwork"), "MovementNetwork");
 const FieldRecords = lazyPage(() => import("./pages/FieldRecords"), "FieldRecords");
+const Zones = lazyPage(() => import("./pages/Zones"), "Zones");
 const App = () => <ToastProvider>
     <AppShell>
       <Suspense fallback={<WildTrackLoader />}>
       <Routes>
-        <Route path="/" element={<FieldRecords defaultLandCover />} />
+        <Route path="/" element={<FieldRecords defaultLandCover title="Ooty Wildlife Map" description="Eight forest analysis regions, sourced mammal records, and 75 simulated wildlife trackers. Turn on land cover to compare ESA classes within each region." />} />
         <Route path="/overview" element={<Overview />} />
         <Route path="/monitor" element={<LiveMonitor />} />
         <Route path="/animals" element={<Animals />} />
         <Route path="/animals/:id" element={<AnimalDetail />} />
-        <Route path="/zones" element={<FieldRecords defaultLandCover />} />
+        <Route path="/zones" element={<Zones />} />
         <Route path="/alerts" element={<Alerts />} />
         <Route path="/alerts/:id" element={<Alerts />} />
         <Route path="/analytics" element={<Analytics />} />

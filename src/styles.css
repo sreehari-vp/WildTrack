@@ -24,6 +24,12 @@
   --risk-high: #d9691f;
   --risk-critical: #c2362f;
   --risk-info: #4b7f9e;
+  --landcover-tree: #3d7450;
+  --landcover-grass: #8f9e58;
+  --landcover-crop: #c1a15b;
+  --landcover-built: #a9785f;
+  --landcover-bare: #918475;
+  --landcover-water: #5a9db2;
   --zone-protected: #5b4b8a;
   --radius-control: 6px;
   --radius-panel: 10px;

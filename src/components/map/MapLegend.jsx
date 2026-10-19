@@ -1,6 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
-import { zoneCssVar, zoneLabels } from "../../utils/risk";
+import { riskCssVar, riskMeta, zoneCssVar, zoneLabels } from "../../utils/risk";
 import { SpeciesIcon } from "../animals/SpeciesIcon";
 const MapLegend = () => {
   const [open, setOpen] = useState(false);
@@ -22,6 +22,15 @@ const MapLegend = () => {
                 {label}
               </div>)}
             </div>
+          </div>
+          <div className="border-t border-line pt-3">
+            <div className="mb-2 text-[11px] font-semibold tracking-[0.08em] text-ink-400">SCENARIO STATUS</div>
+            <div className="grid grid-cols-2 gap-2">
+              {Object.entries(riskMeta).filter(([key]) => key !== "critical" && key !== "info").map(([key, item]) => <div key={key} className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full" style={{ background: `var(${riskCssVar(key)})` }} />{item.label}
+              </div>)}
+            </div>
+            <p className="mt-2 text-[10px] leading-snug">Illustrative monitoring labels; not official hazard ratings.</p>
           </div>
           <div className="border-t border-line pt-3">
             <div className="mb-2 text-[11px] font-semibold tracking-[0.08em] text-ink-400">ANIMALS</div>

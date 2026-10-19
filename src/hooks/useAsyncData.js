@@ -21,7 +21,9 @@ export const useAsyncData = (load, deps = [], options = {}) => {
         const data = await loader.current();
         if (active) setState({ data, loading: false, error: undefined, updatedAt: new Date() });
       } catch (error) {
-        if (active) setState((current) => ({ ...current, loading: false, error }));
+        if (active) setState((current) => current.data !== undefined && background
+          ? { ...current, error: undefined }
+          : { ...current, loading: false, error });
       } finally {
         // Wait for completion so slow requests cannot overlap or starve updates.
         if (active && intervalMs) timer = window.setTimeout(() => run(true), intervalMs);

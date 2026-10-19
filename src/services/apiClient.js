@@ -8,7 +8,8 @@ const apiUrl = (path) => {
 };
 const getApiJson = (path, options = {}) => sendApiJson(path, options);
 const sendApiJson = async (path, options = {}) => {
-  const { timeoutMs = 15000, ...fetchOptions } = options;
+  // Render free services can take several seconds to wake after inactivity.
+  const { timeoutMs = 60000, ...fetchOptions } = options;
   const timeout = AbortSignal.timeout(timeoutMs);
   const response = await fetch(apiUrl(path), {
     ...fetchOptions,
@@ -30,7 +31,7 @@ const sendApiJson = async (path, options = {}) => {
   return response.status === 204 ? null : response.json();
 };
 const risk = (value) => {
-  if (value === "safe" || value === "medium" || value === "high" || value === "critical" || value === "info") {
+  if (value === "safe" || value === "low" || value === "medium" || value === "high" || value === "critical" || value === "info") {
     return value;
   }
   return "info";

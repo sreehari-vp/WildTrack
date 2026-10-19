@@ -10,35 +10,45 @@ from backend.app.schemas.api import MapPreferences, PinWrite, ZoneWrite
 from backend.app.services.zones import get_zone
 
 
-def _validated_geometry(session: Session, geometry: dict) -> str:
+def _validated_geometry(session: Session, geometry: dict, region_code: str | None = None) -> tuple[str, str]:
     import json
 
     encoded = json.dumps(geometry)
     try:
-        valid = session.execute(text("""
-            SELECT ST_IsValid(g) AND NOT ST_IsEmpty(g)
-               AND ST_Area(g::geography) > 0
-               AND ST_Covers((SELECT ST_Union(geometry) FROM forest_boundaries), g)
-            FROM (SELECT ST_SetSRID(ST_GeomFromGeoJSON(:geometry), 4326) AS g) input
-        """), {"geometry": encoded}).scalar_one()
+        matched_region = session.execute(text("""
+            WITH input AS (
+                SELECT ST_SetSRID(ST_GeomFromGeoJSON(:geometry), 4326) AS geom
+            )
+            SELECT r.code
+            FROM input i JOIN study_regions r ON ST_Covers(r.geometry, i.geom)
+            WHERE ST_IsValid(i.geom) AND NOT ST_IsEmpty(i.geom)
+              AND ST_Area(i.geom::geography) > 0
+              AND ST_Covers((SELECT ST_Union(geometry) FROM forest_boundaries), i.geom)
+              AND (:region_code IS NULL OR r.code = :region_code)
+            ORDER BY ST_Area(r.geometry::geography), r.code
+            LIMIT 1
+        """), {"geometry": encoded, "region_code": region_code}).scalar_one_or_none()
     except DBAPIError:
         session.rollback()
         raise ValueError("Zone geometry is malformed") from None
-    if not valid:
-        raise ValueError("Zone must be a valid polygon inside the reserve boundary")
-    return encoded
+    if not matched_region:
+        if region_code:
+            raise ValueError("Zone geometry must remain fully inside its assigned Ooty region")
+        raise ValueError("Zone must be a valid polygon fully inside one Ooty region")
+    return encoded, matched_region
 
 
 def create_zone(session: Session, payload: ZoneWrite) -> dict:
-    geometry = _validated_geometry(session, payload.geometry)
+    geometry, region_code = _validated_geometry(session, payload.geometry)
     zone_id = f"ZONE-{uuid4().hex[:20].upper()}"
     try:
         session.execute(text("""
-            INSERT INTO zones (zone_id, zone_name, zone_type, risk_level, description, geometry, created_in_app)
+            INSERT INTO zones (zone_id, zone_name, zone_type, risk_level, description, geometry, created_in_app, study_region_code)
             VALUES (:id, :name, :type, :risk, :description,
-                    ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON(:geometry), 4326)), true)
+                    ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON(:geometry), 4326)), true, :region_code)
         """), {"id": zone_id, "name": payload.zone_name.strip(), "type": payload.zone_type,
-               "risk": payload.risk_level, "description": payload.description, "geometry": geometry})
+               "risk": payload.risk_level, "description": payload.description, "geometry": geometry,
+               "region_code": region_code})
         session.commit()
     except IntegrityError:
         session.rollback()
@@ -47,18 +57,20 @@ def create_zone(session: Session, payload: ZoneWrite) -> dict:
 
 
 def update_zone(session: Session, zone_id: str, payload: ZoneWrite) -> dict | None:
-    if not get_zone(session.connection(), zone_id):
+    existing = get_zone(session.connection(), zone_id)
+    if not existing:
         return None
-    geometry = _validated_geometry(session, payload.geometry)
+    geometry, region_code = _validated_geometry(session, payload.geometry, existing.get("study_region_code"))
     try:
         session.execute(text("""
             UPDATE zones SET zone_name=:name, zone_type=:type, risk_level=:risk,
                 description=:description,
                 geometry=ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON(:geometry), 4326)),
-                updated_at=now()
+                study_region_code=:region_code, updated_at=now()
             WHERE zone_id=:id
         """), {"id": zone_id, "name": payload.zone_name.strip(), "type": payload.zone_type,
-               "risk": payload.risk_level, "description": payload.description, "geometry": geometry})
+               "risk": payload.risk_level, "description": payload.description, "geometry": geometry,
+               "region_code": region_code})
         session.commit()
     except IntegrityError:
         session.rollback()

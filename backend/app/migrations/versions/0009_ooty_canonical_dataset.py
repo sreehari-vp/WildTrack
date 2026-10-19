@@ -102,19 +102,14 @@ def upgrade() -> None:
           (observation_id, animal_id, device_id, latitude, longitude, location, speed, observed_at)
         SELECT 'OBS-SIM-BOOT-' || right(a.animal_id, 3), a.animal_id, a.device_id,
                starter.latitude, starter.longitude,
-               ST_SetSRID(ST_MakePoint(starter.longitude, starter.latitude), 4326), 0, now()
+               ST_SetSRID(ST_MakePoint(starter.longitude, starter.latitude), 4326), 0, clock_timestamp()
         FROM animals a
         JOIN (VALUES {', '.join(starters)}) AS starter(animal_id, longitude, latitude)
           ON starter.animal_id = a.animal_id
         WHERE a.device_id IS NOT NULL
     """))
 
-    op.execute("""
-        INSERT INTO zone_versions
-          (zone_id, version_no, valid_from, zone_name, zone_type, risk_level, description, geometry)
-        SELECT zone_id, 1, now(), zone_name, zone_type, risk_level, description, geometry
-        FROM zones ORDER BY zone_id
-    """)
+    # The existing zone_version_after trigger creates version 1 per inserted zone.
     op.execute("DELETE FROM configuration_audit WHERE entity_type = 'zones'")
 
     # Retain source occurrences only when the Ooty V2 package assigned them to

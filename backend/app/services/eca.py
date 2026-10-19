@@ -44,10 +44,12 @@ def evaluate_observation_context(
     observation: dict[str, Any],
     current_zone: dict[str, Any] | None,
     previous_zone_id: str | None,
+    active_rules_by_event: dict[str, list[dict[str, Any]]] | None = None,
 ) -> list[dict[str, Any]]:
     alerts: list[dict[str, Any]] = []
     for event in observation_events(animal=animal, observation=observation, current_zone=current_zone, previous_zone_id=previous_zone_id):
-        alerts.extend(evaluate_event(conn, event))
+        event_rules = None if active_rules_by_event is None else active_rules_by_event.get(str(event["event_type"]), [])
+        alerts.extend(evaluate_event(conn, event, active_rules=event_rules))
     return alerts
 
 
@@ -100,9 +102,14 @@ def observation_events(
     return events
 
 
-def evaluate_event(conn: Connection, event: dict[str, Any]) -> list[dict[str, Any]]:
+def evaluate_event(
+    conn: Connection,
+    event: dict[str, Any],
+    active_rules: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
     created_or_existing: list[dict[str, Any]] = []
-    for rule in load_active_rules(conn, event_type=str(event["event_type"])):
+    rules = active_rules if active_rules is not None else load_active_rules(conn, event_type=str(event["event_type"]))
+    for rule in rules:
         if not conditions_match(rule.get("condition") or {}, event):
             continue
         action = rule.get("action") or {}

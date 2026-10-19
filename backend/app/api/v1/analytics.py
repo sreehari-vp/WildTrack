@@ -1,5 +1,6 @@
 """Operational aggregates computed from stored PostgreSQL/PostGIS records."""
 from datetime import datetime, timedelta, timezone
+import re
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -12,7 +13,7 @@ router = APIRouter(prefix="/analytics", tags=["analytics"])
 def analytics(
     start_time: datetime | None = None,
     end_time: datetime | None = None,
-    species_filter: str | None = Query(None, alias="species", pattern="^(elephant|tiger|deer)$"),
+    species_filter: str | None = Query(None, alias="species", min_length=1, max_length=80),
     session: Session = Depends(get_postgres_session),
 ):
     end = end_time or datetime.now(timezone.utc)
@@ -38,16 +39,27 @@ def analytics(
     """), params).scalar_one()
     hourly = conn.execute(text("""
         SELECT extract(hour FROM o.observed_at AT TIME ZONE 'UTC')::int AS hour,
-               count(*) FILTER (WHERE a.species = 'elephant') AS elephants,
-               count(*) FILTER (WHERE a.species = 'tiger') AS tigers,
-               count(*) FILTER (WHERE a.species = 'deer') AS deer
+               initcap(a.species) AS species_name, count(*) AS observations
         FROM observations o JOIN animals a USING(animal_id)
         WHERE o.observed_at >= :start AND o.observed_at < :end
           AND (CAST(:species AS varchar) IS NULL OR a.species = :species)
-        GROUP BY 1 ORDER BY 1
+        GROUP BY 1, 2 ORDER BY 1, 2
     """), params).mappings().all()
-    by_hour = {row["hour"]: dict(row) for row in hourly}
-    hours = [dict(by_hour.get(hour, {"elephants": 0, "tigers": 0, "deer": 0}), hour=f"{hour:02d}") for hour in range(24)]
+    species_activity = [dict(row) for row in conn.execute(text("""
+        SELECT a.species AS species, initcap(a.species) AS name, count(*) AS value
+        FROM observations o JOIN animals a USING(animal_id)
+        WHERE observed_at >= :start AND observed_at < :end
+          AND (CAST(:species AS varchar) IS NULL OR a.species = :species)
+        GROUP BY a.species ORDER BY a.species
+    """), params).mappings()]
+    for item in species_activity:
+        item["dataKey"] = re.sub(r"[^a-z0-9]+", "_", item["species"].lower()).strip("_")
+    series_keys = {item["name"]: item["dataKey"] for item in species_activity}
+    hours = [{"hour": f"{hour:02d}", **{key: 0 for key in series_keys.values()}} for hour in range(24)]
+    for row in hourly:
+        key = series_keys.get(row["species_name"])
+        if key:
+            hours[row["hour"]][key] = row["observations"]
     trend = [dict(row) for row in conn.execute(text("""
         WITH days AS (
             SELECT generate_series(
@@ -72,13 +84,6 @@ def analytics(
                coalesce(daily.medium, 0) AS medium, coalesce(daily.high, 0) AS high,
                coalesce(daily.critical, 0) AS critical
         FROM days LEFT JOIN daily USING(day) ORDER BY days.day
-    """), params).mappings()]
-    species_activity = [dict(row) for row in conn.execute(text("""
-        SELECT initcap(a.species) AS name, count(*) AS value
-        FROM observations o JOIN animals a USING(animal_id)
-        WHERE observed_at >= :start AND observed_at < :end
-          AND (CAST(:species AS varchar) IS NULL OR a.species = :species)
-        GROUP BY a.species ORDER BY a.species
     """), params).mappings()]
     distance = conn.execute(text("""
         WITH points AS (
@@ -124,7 +129,7 @@ def analytics(
         WHERE i.interval_end > i.interval_start
         GROUP BY z.zone_type ORDER BY value DESC
     """), params).mappings()]
-    peak = max(hours, key=lambda row: row["elephants"] + row["tigers"] + row["deer"])
+    peak = max(hours, key=lambda row: sum(value for key, value in row.items() if key != "hour"))
     return {
         "metrics": [
             {"key": "total-alerts", "label": "Alerts in range", "value": summary["total"]},

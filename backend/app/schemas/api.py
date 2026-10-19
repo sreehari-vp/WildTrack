@@ -166,6 +166,8 @@ class ZoneOut(BaseModel):
     risk_level: str
     description: str | None
     geometry: dict[str, Any]
+    study_region_code: str | None = None
+    study_region_name: str | None = None
     created_in_app: bool = False
     version_no: int = 1
 
@@ -187,7 +189,7 @@ class ZoneWrite(BaseModel):
     @field_validator("zone_type")
     @classmethod
     def valid_type(cls, value: str) -> str:
-        if value not in {"safe", "buffer", "restricted", "high-risk", "water-source", "protected"}:
+        if value not in {"tree_cover", "grassland", "cultivated_land", "built_up", "bare_or_sparse_cover", "surface_water"}:
             raise ValueError("Unknown zone type")
         return value
 

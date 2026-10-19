@@ -6,6 +6,7 @@ import { useAnalytics } from "../hooks/useAnalytics";
 import { Button } from "../components/common/Button";
 import { Select } from "../components/common/Select";
 import { DataState } from "./PageState";
+import { useAnimals } from "../hooks/useAnimals";
 
 const localDate = (date) => {
   const year = date.getFullYear();
@@ -25,7 +26,9 @@ const Analytics = () => {
   const [filters, setFilters] = useState(initialFilters);
   const [draft, setDraft] = useState(filters);
   const [rangeError, setRangeError] = useState("");
+  const animals = useAnimals();
   const analytics = useAnalytics(filters);
+  const speciesOptions = [...new Set((animals.data ?? []).map((animal) => animal.species).filter(Boolean))].sort();
   const applyPreset = (days) => {
     const end = new Date();
     const start = new Date(end);
@@ -52,7 +55,7 @@ const Analytics = () => {
   const filtersForm = <form onSubmit={applyFilters} className="flex flex-wrap items-end gap-3 rounded-panel border border-line bg-paper p-4">
     <label className="grid gap-1 text-xs text-ink-600">From<input aria-label="Analytics start date" className="min-h-9 rounded-control border border-line bg-paper px-3 text-sm text-ink-900" type="date" value={draft.start} onChange={(event) => setDraft({ ...draft, start: event.target.value })} /></label>
     <label className="grid gap-1 text-xs text-ink-600">To<input aria-label="Analytics end date" className="min-h-9 rounded-control border border-line bg-paper px-3 text-sm text-ink-900" type="date" value={draft.end} onChange={(event) => setDraft({ ...draft, end: event.target.value })} /></label>
-    <label className="grid gap-1 text-xs text-ink-600">Species<Select value={draft.species} onChange={(event) => setDraft({ ...draft, species: event.target.value })}><option value="">All species</option><option value="elephant">Elephants</option><option value="tiger">Tigers</option><option value="deer">Deer</option></Select></label>
+    <label className="grid gap-1 text-xs text-ink-600">Species<Select value={draft.species} onChange={(event) => setDraft({ ...draft, species: event.target.value })}><option value="">All species</option>{speciesOptions.map((species) => <option value={species} key={species}>{species}</option>)}</Select></label>
     <Button type="submit" variant="primary">Apply range</Button>
     <div className="flex gap-2">{[7, 30, 90].map((days) => <Button key={days} type="button" onClick={() => applyPreset(days)}>Last {days} days</Button>)}</div>
     {rangeError && <p role="alert" className="w-full text-xs text-[color:var(--risk-critical)]">{rangeError}</p>}
@@ -66,7 +69,7 @@ const Analytics = () => {
   }
   const startLabel = new Date(`${filters.start}T12:00:00`).toLocaleDateString();
   const endLabel = new Date(`${filters.end}T12:00:00`).toLocaleDateString();
-  const speciesLabel = { elephant: "Elephants", tiger: "Tigers", deer: "Deer" }[filters.species] ?? "All species";
+  const speciesLabel = filters.species || "All species";
   return <div className="space-y-5 p-6">
       <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="font-display text-2xl">Analytics</h2><p className="mt-1 text-sm text-ink-600">{startLabel} – {endLabel} · {speciesLabel} · {analytics.data.source}</p><p className="mt-1 text-xs text-ink-400">{analytics.data.note}</p></div><Link to="/movement-network" className="rounded-control border border-line bg-paper px-3 py-2 text-sm font-medium text-forest-700 hover:bg-moss-100">Explore movement corridors →</Link></div>
       {filtersForm}

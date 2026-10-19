@@ -19,7 +19,7 @@ const App = () => <ToastProvider>
     <AppShell>
       <Suspense fallback={<WildTrackLoader />}>
       <Routes>
-        <Route path="/" element={<FieldRecords />} />
+        <Route path="/" element={<FieldRecords defaultLandCover />} />
         <Route path="/overview" element={<Overview />} />
         <Route path="/monitor" element={<LiveMonitor />} />
         <Route path="/animals" element={<Animals />} />
@@ -31,7 +31,7 @@ const App = () => <ToastProvider>
         <Route path="/settings" element={<Settings />} />
         <Route path="/movement-history" element={<MovementHistory />} />
         <Route path="/movement-network" element={<MovementNetwork />} />
-        <Route path="/field-records" element={<FieldRecords />} />
+        <Route path="/field-records" element={<FieldRecords defaultLandCover />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </Suspense>

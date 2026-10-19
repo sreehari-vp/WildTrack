@@ -30,12 +30,12 @@ const RadiusPanel = ({
         <label className="block text-xs text-ink-600">
           Zone type
           <Select className="mt-1 w-full" value={draft.type} onChange={(event) => setDraft({ ...draft, type: event.target.value })}>
-            <option value="restricted">Restricted</option>
-            <option value="safe">Safe</option>
-            <option value="buffer">Buffer</option>
-            <option value="high-risk">High risk</option>
-            <option value="water-source">Water source</option>
-            <option value="protected">Protected</option>
+            <option value="tree_cover">Tree cover</option>
+            <option value="grassland">Grassland</option>
+            <option value="cultivated_land">Cultivated land</option>
+            <option value="built_up">Built-up</option>
+            <option value="bare_or_sparse_cover">Bare or sparse cover</option>
+            <option value="surface_water">Surface water</option>
           </Select>
         </label>
         <label className="block text-xs text-ink-600">

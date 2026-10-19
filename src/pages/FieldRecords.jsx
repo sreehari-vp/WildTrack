@@ -21,7 +21,7 @@ const readableDate = (value) => {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString();
 };
 
-export const FieldRecords = ({ defaultLandCover = false }) => {
+export const FieldRecords = ({ defaultLandCover = false, title = "Ooty Forest Map", description = "Green dots are dated public mammal sightings. Coloured dots are synthetic trackers; their positions and movement are simulated." }) => {
   const areas = useAsyncData(() => researchService.getAreas(), []);
   const records = useAsyncData(researchService.getOccurrences, []);
   const simulated = useAsyncData(animalService.getAnimals, [], { intervalMs: 3000 });
@@ -58,6 +58,7 @@ export const FieldRecords = ({ defaultLandCover = false }) => {
   }, [landCoverVisible, landCover.data]);
 
   const regions = useMemo(() => areas.data?.features ?? [], [areas.data]);
+  const regionNameByCode = useMemo(() => new Map(regions.map((region) => [region.properties.code, region.properties.name])), [regions]);
   const occurrences = useMemo(() => records.data?.occurrences ?? [], [records.data]);
   const simulationAnimals = useMemo(() => (simulated.data ?? []).filter((animal) => animal.id.startsWith("SIM-V2-")), [simulated.data]);
   const simulationSpeciesOptions = useMemo(() => [...new Set(simulationAnimals.map((animal) => animal.species))].sort(), [simulationAnimals]);
@@ -80,7 +81,9 @@ export const FieldRecords = ({ defaultLandCover = false }) => {
   recordsByIdRef.current = new Map(occurrences.map((item) => [String(item.id), item]));
   const selected = filtered.find((item) => String(item.id) === selectedId);
   const distinctSpecies = new Set(occurrences.map((item) => item.species)).size;
-  const areaFeatures = landCoverVisible && landCover.data ? landCover.data.features : regions;
+  const areaFeatures = landCoverVisible && landCover.data
+    ? [...regions, ...landCover.data.features.filter((feature) => feature.properties?.kind === "land_cover")]
+    : regions;
   const clearFilters = () => { setRegionCode("all"); setSpeciesSearch(""); setClassName("all"); setYear("all"); setInsideOnly(false); setSimulationSpecies("all"); };
   const toggleSimulation = async () => {
     if (simulationBusy) return;
@@ -164,6 +167,40 @@ export const FieldRecords = ({ defaultLandCover = false }) => {
       popupRef.current?.setLngLat(event.lngLat).setDOMContent(content).addTo(map);
     });
     map.on("mouseleave", "simulated-dots", () => { map.getCanvas().style.cursor = ""; popupRef.current?.remove(); });
+    for (const layer of ["region-fill", "land-cover-fill"]) {
+      map.on("mousemove", layer, (event) => {
+        const feature = event.features?.[0];
+        if (!feature) return;
+        map.getCanvas().style.cursor = "pointer";
+        const props = feature.properties ?? {};
+        const card = document.createElement("div");
+        card.className = "grid gap-1 text-xs leading-snug";
+        const title = document.createElement("strong");
+        title.className = "text-sm";
+        title.textContent = props.name ?? "Ooty forest feature";
+        card.appendChild(title);
+        const addLine = (label, value) => {
+          if (!value) return;
+          const line = document.createElement("span");
+          line.textContent = `${label}: ${value}`;
+          card.appendChild(line);
+        };
+        if (props.kind === "land_cover") {
+          addLine("Land cover", String(props.zone_type ?? "").replaceAll("_", " "));
+          addLine("Region", regionNameByCode.get(props.region_code));
+          addLine("Area", `${Number(props.area_sq_km).toFixed(2)} km²`);
+          addLine("Source", "ESA WorldCover 2021 · 10 m");
+          addLine("Assessment", "Land cover only; hazard is not assessed");
+        } else {
+          addLine("Forest area", props.boundary_type);
+          addLine("Area", `${Number(props.area_sq_km).toFixed(2)} km²`);
+          addLine("Source", props.source_name ?? props.data_source);
+          addLine("Boundary status", props.legal_status);
+        }
+        popupRef.current?.setLngLat(event.lngLat).setDOMContent(card).addTo(map);
+      });
+      map.on("mouseleave", layer, () => { map.getCanvas().style.cursor = ""; popupRef.current?.remove(); });
+    }
     return () => { popupRef.current?.remove(); map.remove(); mapRef.current = null; setMapReady(false); };
   }, [regions.length]);
 
@@ -207,8 +244,8 @@ export const FieldRecords = ({ defaultLandCover = false }) => {
   }
   return <div className="space-y-5 p-6">
     <header className="flex flex-wrap items-end justify-between gap-3">
-      <div><p className="text-xs font-semibold uppercase tracking-[.16em] text-forest-700">Source-backed Ooty geography</p><h1 className="font-display text-3xl text-ink-900">Ooty Forest Map</h1><p className="mt-1 text-sm text-ink-600">Green dots are dated public mammal sightings. Coloured dots are synthetic trackers; their positions and movement are simulated.</p></div>
-      <div className="flex flex-wrap gap-2 text-xs"><span className="rounded-control border border-line bg-paper px-3 py-2">{regions.length} forest regions</span><span className="rounded-control border border-line bg-paper px-3 py-2">{occurrences.length} sightings · {distinctSpecies} species</span><span className="rounded-control border border-line bg-paper px-3 py-2">{simulationAnimals.length} simulated mammals</span></div>
+      <div><p className="text-xs font-semibold uppercase tracking-[.16em] text-forest-700">Eight forest regions · ESA WorldCover zones</p><h1 className="font-display text-3xl text-ink-900">{title}</h1><p className="mt-1 text-sm text-ink-600">{description}</p></div>
+      <div className="flex flex-wrap gap-2 text-xs"><span className="rounded-control border border-line bg-paper px-3 py-2">{regions.length} forest regions</span><span className="rounded-control border border-line bg-paper px-3 py-2">{landCover.data?.features.filter((feature) => feature.properties?.kind === "land_cover").length ?? 30} land-cover zones</span><span className="rounded-control border border-line bg-paper px-3 py-2">{occurrences.length} sightings · {distinctSpecies} species</span><span className="rounded-control border border-line bg-paper px-3 py-2">{simulationAnimals.length} simulated mammals</span></div>
     </header>
     <section className="rounded-panel border border-line bg-paper shadow-sm" aria-label="Historical sighting map">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line p-3">

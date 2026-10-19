@@ -40,6 +40,7 @@ logs/
 *.db
 *.dump
 *.backup
+/data/archive/
 historical_exports/
 
 # IDE / editor

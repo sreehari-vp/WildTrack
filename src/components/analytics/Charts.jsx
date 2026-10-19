@@ -23,7 +23,9 @@ const colors = {
   moss: "var(--moss-300)",
   protected: "var(--zone-protected)"
 };
-const AnalyticsCharts = ({ analytics }) => <div className="grid gap-4 xl:grid-cols-2">
+const AnalyticsCharts = ({ analytics }) => {
+  const colors = ["var(--forest-700)", "var(--risk-high)", "var(--risk-safe)", "var(--risk-medium)", "var(--risk-info)", "var(--risk-critical)"];
+  return <div className="grid gap-4 xl:grid-cols-2">
     <ChartPanel title="GPS observations by hour (UTC)">
       <div className="h-72">
         <ResponsiveContainer>
@@ -32,9 +34,7 @@ const AnalyticsCharts = ({ analytics }) => <div className="grid gap-4 xl:grid-co
             <XAxis dataKey="hour" tickLine={false} axisLine={false} />
             <YAxis tickLine={false} axisLine={false} />
             <Tooltip />
-            <Area type="monotone" dataKey="elephants" stackId="1" stroke={colors.forest} fill={colors.forest} fillOpacity={0.28} />
-            <Area type="monotone" dataKey="tigers" stackId="1" stroke={colors.high} fill={colors.high} fillOpacity={0.22} />
-            <Area type="monotone" dataKey="deer" stackId="1" stroke={colors.safe} fill={colors.safe} fillOpacity={0.22} />
+            {(analytics.speciesActivity ?? []).map((species, index) => <Area key={species.dataKey} type="monotone" dataKey={species.dataKey} name={species.name} stackId="1" stroke={colors[index % colors.length]} fill={colors[index % colors.length]} fillOpacity={0.22} />)}
           </AreaChart>
         </ResponsiveContainer>
       </div>
@@ -82,6 +82,7 @@ const AnalyticsCharts = ({ analytics }) => <div className="grid gap-4 xl:grid-co
       </div>
     </ChartPanel>
   </div>;
+};
 export {
   AnalyticsCharts
 };

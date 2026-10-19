@@ -21,20 +21,20 @@ const severityMeta = {
   critical: { label: "Critical", risk: "critical", Icon: AlertOctagon }
 };
 const zoneLabels = {
-  safe: "Safe",
-  buffer: "Buffer",
-  restricted: "Restricted",
-  "high-risk": "High risk",
-  "water-source": "Water source",
-  protected: "Protected"
+  tree_cover: "Tree cover",
+  grassland: "Grassland",
+  cultivated_land: "Cultivated land",
+  built_up: "Built-up",
+  bare_or_sparse_cover: "Bare or sparse cover",
+  surface_water: "Water or wetland"
 };
 const zoneCssVar = {
-  safe: "--risk-safe",
-  buffer: "--risk-medium",
-  restricted: "--risk-high",
-  "high-risk": "--risk-critical",
-  "water-source": "--risk-info",
-  protected: "--zone-protected"
+  tree_cover: "--forest-700",
+  grassland: "--risk-safe",
+  cultivated_land: "--risk-medium",
+  built_up: "--risk-high",
+  bare_or_sparse_cover: "--risk-critical",
+  surface_water: "--risk-info"
 };
 const cssVar = (name, fallback) => {
   if (typeof window === "undefined") return fallback;

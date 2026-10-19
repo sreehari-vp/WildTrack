@@ -63,6 +63,15 @@ const moveMarkerSmoothly = (entry, destination, duration = 2600) => {
   };
   entry.animationFrame = requestAnimationFrame(animate);
 };
+const geometryBounds = (geometry) => {
+  const bounds = new maplibregl.LngLatBounds();
+  const visit = (coordinates) => {
+    if (typeof coordinates?.[0] === "number") bounds.extend(coordinates);
+    else coordinates?.forEach(visit);
+  };
+  if (geometry?.coordinates) visit(geometry.coordinates);
+  return bounds;
+};
 const ForestMap = ({
   animals,
   devices,
@@ -118,6 +127,10 @@ const ForestMap = ({
   const [zoneHover, setZoneHover] = useState(null);
   const { pushToast } = useToast();
   const allZones = zones;
+  const fitOotyBoundary = () => {
+    const bounds = geometryBounds(boundary);
+    if (!bounds.isEmpty()) mapRef.current?.fitBounds(bounds, { padding: 54, maxZoom: 10.5, duration: 500 });
+  };
   useEffect(() => {
     if (preview) return;
     let active = true;
@@ -170,8 +183,7 @@ const ForestMap = ({
     if (!mapReady || !selectedZoneId) return;
     const zone = allZones.find((item) => item.id === selectedZoneId);
     if (!zone) return;
-    const points = zone.geometry.type === "MultiPolygon" ? zone.geometry.coordinates.flat(2) : zone.geometry.coordinates.flat();
-    const bounds = points.reduce((result, point) => result.extend(point), new maplibregl.LngLatBounds());
+    const bounds = geometryBounds(zone.geometry);
     mapRef.current.fitBounds(bounds, { padding: 80, duration: 650 });
     setZonePanel({ zone, point: { x: 16, y: 140 } });
   }, [mapReady, selectedZoneId, allZones]);
@@ -305,7 +317,10 @@ const ForestMap = ({
       }
       setZoneHover({
         name: String(feature.properties?.name ?? "Zone"),
-        type: String(feature.properties?.type ?? "safe"),
+        type: String(feature.properties?.type ?? "tree_cover"),
+        regionName: String(feature.properties?.regionName ?? ""),
+        areaKm2: Number(feature.properties?.areaKm2 ?? 0),
+        description: String(feature.properties?.description ?? ""),
         x: event.point.x + 12,
         y: event.point.y + 12
       });
@@ -350,7 +365,7 @@ const ForestMap = ({
         return;
       }
       if (activeToolRef.current === "radius") {
-        setRadiusDraft({ center: point, radius: 500, name: "New restricted zone", type: "restricted", risk: "high" });
+        setRadiusDraft({ center: point, radius: 500, name: "New land-cover area", type: "tree_cover", risk: "info" });
         setLocation(null);
         return;
       }
@@ -390,6 +405,9 @@ const ForestMap = ({
           name: zone.name,
           type: zone.type,
           risk: zone.risk,
+          regionName: zone.regionName,
+          areaKm2: zone.areaKm2,
+          description: zone.description,
           color: cssVar(zoneCssVar[zone.type], cssVar(riskCssVar(zone.risk), "currentColor"))
         },
         geometry: zone.geometry
@@ -637,7 +655,7 @@ const ForestMap = ({
           <MapControls
     onZoomIn={() => mapRef.current?.zoomIn()}
     onZoomOut={() => mapRef.current?.zoomOut()}
-    onFit={() => mapRef.current?.fitBounds([[76.584, 11.354], [76.762, 11.486]], { padding: 40, duration: 650 })}
+      onFit={fitOotyBoundary}
     onFullscreen={() => containerRef.current?.requestFullscreen?.()}
     layerMode={layerMode}
     setLayerMode={setLayerMode}
@@ -657,13 +675,16 @@ const ForestMap = ({
           <MapLegend />
           {zoneHover ? <div className="zone-hover-tip" style={{ left: zoneHover.x, top: zoneHover.y }}>
               <div className="font-medium">{zoneHover.name}</div>
-              <div className="text-ink-600">{zoneLabels[zoneHover.type]}</div>
+              <div className="text-ink-600">{zoneLabels[zoneHover.type] ?? zoneHover.type.replaceAll("_", " ")}</div>
+              {zoneHover.regionName ? <div className="text-ink-600">Region · {zoneHover.regionName}</div> : null}
+              {zoneHover.areaKm2 ? <div className="text-ink-600">{zoneHover.areaKm2.toFixed(2)} km² · risk not assessed</div> : null}
+              {zoneHover.description ? <div className="max-w-64 text-ink-600">{zoneHover.description}</div> : null}
             </div> : null}
           {location ? <LocationCard location={location} onClose={() => setLocation(null)} /> : null}
           {zonePanel ? <div className="absolute bottom-16 left-4 z-30 max-h-[65%] w-80 max-w-[calc(100%-32px)] overflow-auto rounded-panel border border-line bg-paper p-3 shadow-md">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-xs text-ink-400">{zoneLabels[zonePanel.zone.type]} zone</div>
+                  <div className="text-xs text-ink-400">{zoneLabels[zonePanel.zone.type] ?? zonePanel.zone.type.replaceAll("_", " ")} · {zonePanel.zone.regionName ?? "Unassigned region"}</div>
                   {zonePanel.editing ? <Input
     className="mt-1"
     value={zonePanel.zone.name}
@@ -674,12 +695,12 @@ const ForestMap = ({
               </div>
               {zonePanel.editing ? <div className="mt-3 space-y-3">
                   <Select className="w-full" value={zonePanel.zone.type} onChange={(event) => setZonePanel({ ...zonePanel, zone: { ...zonePanel.zone, type: event.target.value } })}>
-                    <option value="safe">Safe</option>
-                    <option value="buffer">Buffer</option>
-                    <option value="restricted">Restricted</option>
-                    <option value="high-risk">High risk</option>
-                    <option value="water-source">Water source</option>
-                    <option value="protected">Protected</option>
+                    <option value="tree_cover">Tree cover</option>
+                    <option value="grassland">Grassland</option>
+                    <option value="cultivated_land">Cultivated land</option>
+                    <option value="built_up">Built-up</option>
+                    <option value="bare_or_sparse_cover">Bare or sparse cover</option>
+                    <option value="surface_water">Water or wetland</option>
                   </Select>
                   <Select className="w-full" value={zonePanel.zone.risk} onChange={(event) => setZonePanel({ ...zonePanel, zone: { ...zonePanel.zone, risk: event.target.value } })}>
                     <option value="safe">Safe</option>
@@ -800,12 +821,12 @@ const ForestMap = ({
               {drawDraft ? <div className="mt-3 space-y-3">
                   <Input value={drawDraft.name} onChange={(event) => setDrawDraft({ ...drawDraft, name: event.target.value })} />
                   <Select className="w-full" value={drawDraft.type} onChange={(event) => setDrawDraft({ ...drawDraft, type: event.target.value })}>
-                    <option value="protected">Protected</option>
-                    <option value="restricted">Restricted</option>
-                    <option value="safe">Safe</option>
-                    <option value="buffer">Buffer</option>
-                    <option value="high-risk">High risk</option>
-                    <option value="water-source">Water source</option>
+                    <option value="tree_cover">Tree cover</option>
+                    <option value="grassland">Grassland</option>
+                    <option value="cultivated_land">Cultivated land</option>
+                    <option value="built_up">Built-up</option>
+                    <option value="bare_or_sparse_cover">Bare or sparse cover</option>
+                    <option value="surface_water">Water or wetland</option>
                   </Select>
                   <Select className="w-full" value={drawDraft.risk} onChange={(event) => setDrawDraft({ ...drawDraft, risk: event.target.value })}>
                     <option value="high">High</option>
@@ -839,7 +860,7 @@ const ForestMap = ({
                   </div>
                 </div> : <div className="mt-3 flex flex-wrap gap-2">
                   <Button disabled={!drawPoints.length} onClick={() => setDrawPoints((current) => current.slice(0, -1))}>Undo point</Button>
-                  <Button disabled={drawPoints.length < 3} variant="primary" onClick={() => setDrawDraft({ name: "Custom protected zone", type: "protected", risk: "high", description: "Custom zone created on the monitoring map." })}>Finish polygon</Button>
+                  <Button disabled={drawPoints.length < 3} variant="primary" onClick={() => setDrawDraft({ name: "Custom land-cover zone", type: "tree_cover", risk: "info", description: "Custom mapped area; land cover and risk need independent verification." })}>Finish polygon</Button>
                   <Button variant="ghost" onClick={() => {
     setDrawPoints([]);
     setDrawDraft(null);

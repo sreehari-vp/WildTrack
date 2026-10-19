@@ -1,7 +1,9 @@
 # Ooty forest dataset V2 — candidate package
 
-This package is **additive**. It does not replace the existing database or the
-Phase 1/2 files. The original Desktop project imported this version after archiving its previous database state. Earlier records remain available through the API.
+This package is the canonical geography and wildlife scenario for the original
+Desktop project. A one-time database migration replaces the legacy operational
+zones and simulation history with these Ooty records. A pre-reset database dump
+must be retained before applying that migration.
 
 ## Geography
 
@@ -36,10 +38,12 @@ Do not fabricate sightings to make region counts even.
 
 `simulated-mammals.json` is separate: 75 synthetic tracker identities across
 16 regionally referenced mammal species, balanced at 9–10 per forest region.
-Starting points and short local routes lie inside tree or grassland zone
-geometries. The species checklist is regional context only; placement does not
-assert a real sighting or local population abundance. Seven of the 75 scenario
-trackers are Asian elephants. Generated IDs use the `SIM-V2-` prefix.
+Every 16-fix route crosses at least two adjacent, mapped land-cover zones; each
+fix is inside its assigned ESA WorldCover polygon. At a three-second GPS
+interval, each route lasts 45 seconds. The species checklist is regional
+context only; placement does not assert a real sighting or local population
+abundance. Seven of the 75 scenario trackers are Asian elephants. Generated
+IDs use the `SIM-V2-` prefix.
 
 ## Rebuild
 

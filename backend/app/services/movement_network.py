@@ -23,7 +23,7 @@ from backend.app.db.postgres.session import engine
 logger = logging.getLogger(__name__)
 _sync_lock = threading.Lock()
 MAX_TRANSITION_GAP_SECONDS = 6 * 60 * 60
-PROJECTION_VERSION = "1"
+PROJECTION_VERSION = "2"
 
 ZONE_SQL = """
     SELECT DISTINCT ON (v.zone_id) v.zone_id, v.zone_name, v.zone_type,
@@ -31,7 +31,7 @@ ZONE_SQL = """
     FROM zone_versions v LEFT JOIN zones z ON z.zone_id=v.zone_id
     ORDER BY v.zone_id, v.version_no DESC
 """
-ANIMAL_SQL = "SELECT animal_id, animal_code, name, species FROM animals ORDER BY animal_id"
+ANIMAL_SQL = "SELECT animal_id, animal_code, name, species FROM animals WHERE animal_id LIKE 'SIM-V2-%' ORDER BY animal_id"
 FIX_SQL = """
     SELECT o.observation_id, o.animal_id, a.species, o.observed_at,
            z.zone_id
@@ -45,6 +45,7 @@ FIX_SQL = """
                  WHEN 'medium' THEN 2 ELSE 3 END,
                  ST_Area(v.geometry), v.zone_id LIMIT 1
     ) z ON true
+    WHERE a.animal_id LIKE 'SIM-V2-%'
     ORDER BY o.animal_id, o.observed_at, o.observation_id
 """
 SIGNATURE_SQL = """

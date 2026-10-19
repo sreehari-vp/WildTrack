@@ -41,6 +41,13 @@ test("API mapping preserves multipolygons and their area", () => {
   assert.equal(findZoneForPoint([11,11], [zone]).id, "Z");
 });
 
+test("Ooty land-cover classes and region names survive API mapping", () => {
+  const zone = apiZoneToZone({ zone_id: "OTY-001", zone_type: "surface_water", study_region_code: "kundah", study_region_name: "Kundah", geometry: { type: "MultiPolygon", coordinates: [] } });
+  assert.equal(zone.type, "surface_water");
+  assert.equal(zone.regionCode, "kundah");
+  assert.equal(zone.regionName, "Kundah");
+});
+
 test("polygon holes are excluded", () => {
   const zone = { id: "Z", geometry: { type: "Polygon", coordinates: [
     [[0,0],[10,0],[10,10],[0,10],[0,0]],

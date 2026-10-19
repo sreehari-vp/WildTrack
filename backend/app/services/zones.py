@@ -8,11 +8,12 @@ def list_zones(conn: Connection) -> list[dict[str, object]]:
     rows = conn.execute(
         text(
             """
-            SELECT zone_id, zone_name, zone_type, risk_level, description, created_in_app, version_no,
-                   ST_AsGeoJSON(geometry)::json AS geometry,
-                   ST_Area(geometry::geography) / 1000000.0 AS area_km2
-            FROM zones
-            ORDER BY zone_name
+            SELECT z.zone_id, z.zone_name, z.zone_type, z.risk_level, z.description, z.created_in_app, z.version_no,
+                   z.study_region_code, r.name AS study_region_name,
+                   ST_AsGeoJSON(z.geometry)::json AS geometry,
+                   ST_Area(z.geometry::geography) / 1000000.0 AS area_km2
+            FROM zones z LEFT JOIN study_regions r ON r.code=z.study_region_code
+            ORDER BY z.zone_name
             """
         )
     ).mappings()
@@ -23,11 +24,12 @@ def get_zone(conn: Connection, zone_id: str) -> dict[str, object] | None:
     row = conn.execute(
         text(
             """
-            SELECT zone_id, zone_name, zone_type, risk_level, description, created_in_app, version_no,
-                   ST_AsGeoJSON(geometry)::json AS geometry,
-                   ST_Area(geometry::geography) / 1000000.0 AS area_km2
-            FROM zones
-            WHERE zone_id = :zone_id
+            SELECT z.zone_id, z.zone_name, z.zone_type, z.risk_level, z.description, z.created_in_app, z.version_no,
+                   z.study_region_code, r.name AS study_region_name,
+                   ST_AsGeoJSON(z.geometry)::json AS geometry,
+                   ST_Area(z.geometry::geography) / 1000000.0 AS area_km2
+            FROM zones z LEFT JOIN study_regions r ON r.code=z.study_region_code
+            WHERE z.zone_id = :zone_id
             """
         ),
         {"zone_id": zone_id},

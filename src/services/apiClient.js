@@ -36,10 +36,10 @@ const risk = (value) => {
   return "info";
 };
 const zoneType = (value) => {
-  if (value === "safe" || value === "buffer" || value === "restricted" || value === "high-risk" || value === "water-source" || value === "protected") {
+  if (["tree_cover", "grassland", "cultivated_land", "built_up", "bare_or_sparse_cover", "surface_water"].includes(value)) {
     return value;
   }
-  return "buffer";
+  return "tree_cover";
 };
 const apiAnimalToAnimal = (item) => ({
   id: item.animal_id,
@@ -91,6 +91,8 @@ const apiZoneToZone = (item) => {
     type: zoneType(item.zone_type),
     risk: risk(item.risk_level),
     areaKm2: item.area_km2 ?? 0,
+    regionCode: item.study_region_code ?? null,
+    regionName: item.study_region_name ?? null,
     createdInApp: item.created_in_app ?? false,
     description: item.description ?? "",
     geometry: item.geometry

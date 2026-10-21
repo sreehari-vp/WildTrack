@@ -29,8 +29,8 @@ const Zones = () => {
   const selectedZoneAlerts = alerts.data?.filter((alert) => alert.zoneId === selectedZone?.id) ?? [];
   const zoneAnimals = useZoneAnimals(selectedZone?.id);
   const zoneTransitions = useZoneTransitions(selectedZone?.id);
-  const loading = zones.loading || animals.loading || alerts.loading || boundary.loading || areas.loading;
-  const error = zones.error || animals.error || alerts.error || boundary.error || areas.error;
+  const loading = zones.loading || boundary.loading || areas.loading;
+  const error = zones.error || boundary.error || areas.error;
 
   useEffect(() => {
     if (!filteredZones.some((zone) => zone.id === selectedZoneId)) {
@@ -38,7 +38,7 @@ const Zones = () => {
     }
   }, [filteredZones, selectedZoneId]);
 
-  if (loading || error || !zones.data || !animals.data || !alerts.data || !boundary.data || !areas.data
+  if (loading || error || !zones.data || !boundary.data || !areas.data
   ) {
     return <div className="p-6"><DataState loading={loading} error={error} onRetry={() => {
       zones.retry(); animals.retry(); alerts.retry(); boundary.retry(); areas.retry();
@@ -68,19 +68,20 @@ const Zones = () => {
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line p-3">
         <div className="text-sm font-medium text-ink-900">Ooty regions and zones</div>
         <div className="flex flex-wrap items-center gap-3 text-xs text-ink-600">
-          <span>Dashed outline: source-derived region</span>
-          <span>Zone fill: land cover</span>
-          <span>Zone edge: scenario status</span>
+          <span className="flex items-center gap-1.5"><i className="h-3 w-5 rounded-sm bg-[#327a52]/70" /> Satellite land cover</span>
+          <span className="flex items-center gap-1.5"><i className="h-0.5 w-5 bg-[#214b35]" /> Study region boundary</span>
+          <span>Outlined overlay: operational status</span>
         </div>
       </div>
       <ForestMap
-        animals={animals.data}
+        animals={animals.data ?? []}
         devices={[]}
         zones={zones.data}
         boundary={boundary.data}
         studyRegions={regionFeatures}
-        alerts={alerts.data}
+        alerts={alerts.data ?? []}
         hideAlertSummary
+        scrollZoomEnabled={false}
         selectedZoneId={selectedZone?.id}
         onZonesChanged={zones.refresh}
         className="h-[min(68vh,680px)] min-h-[480px]"
@@ -143,7 +144,7 @@ const Zones = () => {
       </div>
     </section> : null}
 
-    <ZoneList zones={filteredZones} animals={animals.data} alerts={alerts.data} selectedZoneId={selectedZone?.id} onSelectZone={(zone) => setSelectedZoneId(zone.id)} />
+    <ZoneList zones={filteredZones} animals={animals.data ?? []} alerts={alerts.data ?? []} selectedZoneId={selectedZone?.id} onSelectZone={(zone) => setSelectedZoneId(zone.id)} />
   </div>;
 };
 

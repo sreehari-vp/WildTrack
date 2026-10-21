@@ -1,7 +1,6 @@
-import asyncio
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.gzip import GZipMiddleware
 
 from backend.app.api.v1.router import api_router
 from backend.app.core.config import get_settings
@@ -12,6 +11,7 @@ from backend.app.services.movement_network import network_sync_worker
 
 
 app = FastAPI(title="WildTrack Backend", version="0.2.0")
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 settings = get_settings()
 origins = [origin.strip() for origin in settings.app_cors_origins.split(",") if origin.strip()]
 app.add_middleware(
@@ -39,6 +39,5 @@ async def shutdown() -> None:
 
 @app.on_event("startup")
 async def startup() -> None:
-    await asyncio.to_thread(simulator.restore_progress)
     await outbox_worker.start()
     await network_sync_worker.start()

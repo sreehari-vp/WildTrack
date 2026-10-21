@@ -35,7 +35,7 @@ const ZoneList = ({ zones, animals, alerts, selectedZoneId, onSelectZone }) => {
               <td className="px-4 py-3 font-mono tabular">{zone.areaKm2.toFixed(1)} km²</td>
               <td className="px-4 py-3 text-right"><Button icon={<MapPinned className="h-4 w-4" strokeWidth={1.75} />} onClick={(event) => {
                 event.stopPropagation();
-                navigate(`/monitor?zone=${zone.id}`);
+                navigate(`/?zone=${zone.id}`);
               }}>View on map</Button></td>
             </tr>)
           ])}

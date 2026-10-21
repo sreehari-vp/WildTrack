@@ -249,14 +249,32 @@ button:disabled {
   pointer-events: none;
   position: absolute;
   z-index: 60;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-control);
-  background: var(--paper);
-  padding: 6px 8px;
+  width: min(292px, calc(100% - 16px));
+  border: 1px solid color-mix(in srgb, var(--forest-700) 18%, var(--line));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--paper) 97%, white);
+  padding: 12px 14px;
   color: var(--ink-900);
   font-size: 12px;
-  box-shadow: 0 8px 24px rgba(15, 31, 23, 0.1);
+  line-height: 1.4;
+  box-shadow: 0 12px 32px rgba(15, 31, 23, 0.18);
+  backdrop-filter: blur(10px);
 }
+
+.zone-hover-kicker { color: var(--forest-700); font-size: 9px; font-weight: 800; letter-spacing: .12em; }
+.zone-hover-title { margin-top: 2px; font-size: 14px; font-weight: 700; line-height: 1.25; }
+.zone-hover-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 10px; margin-top: 8px; color: var(--ink-600); font-size: 11px; }
+.zone-hover-parent { margin-top: 7px; border-top: 1px solid var(--line); padding-top: 7px; color: var(--ink-600); font-size: 11px; }
+.zone-hover-parent strong { color: var(--ink-900); }
+.zone-hover-risk { margin-top: 5px; color: var(--ink-600); font-size: 11px; }
+.zone-hover-description { margin-top: 6px; color: var(--ink-600); font-size: 11px; }
+.landcover-swatch-tree_cover { background: #327a52; }
+.landcover-swatch-shrubland { background: #91a954; }
+.landcover-swatch-grassland { background: #d5b75d; }
+.landcover-swatch-cultivated_land { background: #c58b53; }
+.landcover-swatch-built_up { background: #b96055; }
+.landcover-swatch-bare_or_sparse_cover { background: #b8a990; }
+.landcover-swatch-surface_water { background: #4d91b4; }
 
 .battery-bar {
   width: 58px;
@@ -360,7 +378,7 @@ button:disabled {
 .wildtrack-loading__message { margin: 8px 0 12px; color: var(--ink-600); font-size: 12px; }
 .wildtrack-loading__progress { height: 3px; overflow: hidden; background: #e3ebe4; }
 .wildtrack-loading__progress span { display: block; width: 38%; height: 100%; background: var(--forest-600); animation: loader-progress 1.7s ease-in-out infinite; }
-.wildtrack-loading.is-compact { min-height: 190px; padding: 14px; background-size: 28px 28px, 28px 28px, auto; }
+.wildtrack-loading.is-compact { min-height: max(190px, calc(100dvh - 114px)); padding: 14px; background-size: 28px 28px, 28px 28px, auto; }
 .data-state--loading { display: grid; min-height: calc(100dvh - 108px); place-items: center; }
 .data-state--loading .wildtrack-loading { width: 100%; min-height: min(460px, calc(100dvh - 108px)); }
 .wildtrack-loading.is-compact .wildtrack-loading__panel { width: min(100%, 390px); min-height: 138px; gap: 18px; padding: 18px 22px; }
@@ -372,7 +390,7 @@ button:disabled {
 @keyframes radar-ping { 70%, 100% { box-shadow: 0 0 0 10px rgba(192,164,91,0); } }
 @keyframes loader-progress { 0% { transform: translateX(-115%); } 100% { transform: translateX(290%); } }
 @media (max-width: 900px) { .top-nav-link { gap: 0; width: 56px; padding: 0 8px; } .top-nav-link span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; } }
-@media (max-width: 560px) { .app-masthead { height: 60px; gap: 8px; padding: 0 10px; } .app-masthead__identity, .app-masthead__actions { gap: 9px; } .brand-mark__location, .app-masthead__divider, .app-masthead__section, .masthead-search span, .masthead-search kbd { display: none; } .brand-mark__icon { width: 34px; height: 34px; } .brand-mark__name { font-size: 17px; } .masthead-search { width: 36px; min-width: 36px; justify-content: center; padding: 0; } .top-navigation { height: 44px; } .app-main { min-height: calc(100dvh - 104px); } .wildtrack-loading { min-height: calc(100dvh - 104px); padding: 16px; } .wildtrack-loading__panel { gap: 15px; padding: 20px 16px; } .wildtrack-loading__radar { width: 72px; height: 72px; } .wildtrack-loading__content h2 { font-size: 25px; } }
+@media (max-width: 560px) { .app-masthead { height: 60px; gap: 8px; padding: 0 10px; } .app-masthead__identity, .app-masthead__actions { gap: 9px; } .brand-mark__location, .app-masthead__divider, .app-masthead__section, .masthead-search span, .masthead-search kbd { display: none; } .brand-mark__icon { width: 34px; height: 34px; } .brand-mark__name { font-size: 17px; } .masthead-search { width: 36px; min-width: 36px; justify-content: center; padding: 0; } .top-navigation { height: 44px; } .app-main { min-height: calc(100dvh - 104px); } .wildtrack-loading, .wildtrack-loading.is-compact { min-height: calc(100dvh - 104px); padding: 16px; } .wildtrack-loading__panel { gap: 15px; padding: 20px 16px; } .wildtrack-loading__radar { width: 72px; height: 72px; } .wildtrack-loading__content h2 { font-size: 25px; } }
 @media (prefers-reduced-motion: reduce) { .radar-sweep, .radar-ping, .wildtrack-loading__progress span { animation-duration: .01ms; animation-iteration-count: 1; } }
 .app-masthead__actions button[aria-label="Notifications"] { color: var(--forest-700); }
 

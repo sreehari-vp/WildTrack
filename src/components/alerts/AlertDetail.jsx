@@ -33,7 +33,7 @@ const AlertDetail = ({
         <div><dt className="text-xs text-ink-400">Status</dt><dd>{titleCase(alert.status)}</dd></div>
       </dl>
       <div className="mt-6 flex flex-wrap gap-2">
-        <Button icon={<MapPinned className="h-4 w-4" strokeWidth={1.75} />} onClick={() => navigate(`/monitor?animal=${alert.animalId}`)}>View on map</Button>
+      <Button icon={<MapPinned className="h-4 w-4" strokeWidth={1.75} />} onClick={() => navigate(`/?animal=${alert.animalId}`)}>View on map</Button>
         <Button icon={<PawPrint className="h-4 w-4" strokeWidth={1.75} />} onClick={() => navigate(`/animals/${alert.animalId}`)}>View animal</Button>
         <Button variant="primary" icon={<RotateCcw className="h-4 w-4" strokeWidth={1.75} />} onClick={onResolve} disabled={alert.status === "resolved"}>Resolve</Button>
       </div>

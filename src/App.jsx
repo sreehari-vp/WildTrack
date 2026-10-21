@@ -1,12 +1,11 @@
 import { lazy, Suspense } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AppShell } from "./components/layout/AppShell";
 import { ToastViewport } from "./components/common/Toast";
 import { ToastProvider } from "./hooks/useToast";
 import { WildTrackLoader } from "./components/common/WildTrackLoader";
 const lazyPage = (loader, name) => lazy(() => loader().then((module) => ({ default: module[name] })));
 const Overview = lazyPage(() => import("./pages/Overview"), "Overview");
-const LiveMonitor = lazyPage(() => import("./pages/LiveMonitor"), "LiveMonitor");
 const Animals = lazyPage(() => import("./pages/Animals"), "Animals");
 const AnimalDetail = lazyPage(() => import("./pages/AnimalDetail"), "AnimalDetail");
 const Alerts = lazyPage(() => import("./pages/Alerts"), "Alerts");
@@ -16,13 +15,15 @@ const MovementHistory = lazyPage(() => import("./pages/MovementHistory"), "Movem
 const MovementNetwork = lazyPage(() => import("./pages/MovementNetwork"), "MovementNetwork");
 const FieldRecords = lazyPage(() => import("./pages/FieldRecords"), "FieldRecords");
 const Zones = lazyPage(() => import("./pages/Zones"), "Zones");
-const App = () => <ToastProvider>
+const App = () => {
+  const location = useLocation();
+  return <ToastProvider>
     <AppShell>
-      <Suspense fallback={<WildTrackLoader />}>
+      <Suspense fallback={<WildTrackLoader compact />}>
       <Routes>
-        <Route path="/" element={<FieldRecords defaultLandCover title="Ooty Wildlife Map" description="Eight forest analysis regions, sourced mammal records, and 75 simulated wildlife trackers. Turn on land cover to compare ESA classes within each region." />} />
+        <Route path="/" element={<FieldRecords defaultLandCover title="Ooty Map & Simulation" description="Sourced wildlife records and 75 simulated trackers across Ooty forest regions. Use Land Cover to compare ESA habitat classes." />} />
         <Route path="/overview" element={<Overview />} />
-        <Route path="/monitor" element={<LiveMonitor />} />
+        <Route path="/monitor" element={<Navigate to={{ pathname: "/", search: location.search }} replace />} />
         <Route path="/animals" element={<Animals />} />
         <Route path="/animals/:id" element={<AnimalDetail />} />
         <Route path="/zones" element={<Zones />} />
@@ -39,6 +40,7 @@ const App = () => <ToastProvider>
     </AppShell>
     <ToastViewport />
   </ToastProvider>;
+};
 export {
   App
 };

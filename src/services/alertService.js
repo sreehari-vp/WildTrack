@@ -20,10 +20,10 @@ const apiAlertToAlert = (item) => ({
 
 const alertService = {
   getAlerts: async () => {
-    const alerts = await getApiJson("/alerts?limit=200");
+    const alerts = await getApiJson("/alerts?limit=200", { cacheMs: 0 });
     return alerts.map(apiAlertToAlert);
   },
-  getAlert: async (id) => apiAlertToAlert(await getApiJson(`/alerts/${id}`)),
+  getAlert: async (id) => apiAlertToAlert(await getApiJson(`/alerts/${id}`, { cacheMs: 0 })),
   resolveAlert: async (id) => apiAlertToAlert(await sendApiJson(`/alerts/${id}`, {
     method: "PATCH",
     body: JSON.stringify({ status: "resolved" })

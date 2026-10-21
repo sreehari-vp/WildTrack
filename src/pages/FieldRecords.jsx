@@ -1,11 +1,12 @@
 import maplibregl from "maplibre-gl";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useAsyncData } from "../hooks/useAsyncData";
 import { researchService } from "../services/researchService";
 import { animalService } from "../services/animalService";
 import { monitoringService } from "../services/monitoringService";
+import { apiUrl } from "../services/apiClient";
 import { riskMeta } from "../utils/risk";
-import { DataState } from "./PageState";
 
 const emptyCollection = { type: "FeatureCollection", features: [] };
 const landCoverColor = ["match", ["get", "zone_type"],
@@ -23,52 +24,69 @@ const readableDate = (value) => {
 };
 
 export const FieldRecords = ({ defaultLandCover = false, title = "Ooty Forest Map", description = "Green dots are dated public mammal sightings. Coloured dots are synthetic trackers; their positions and movement are simulated." }) => {
-  const areas = useAsyncData(() => researchService.getAreas(), []);
+  const areas = useAsyncData(() => researchService.getAreas(false), []);
   const records = useAsyncData(researchService.getOccurrences, []);
-  const simulated = useAsyncData(animalService.getAnimals, [], { intervalMs: 3000 });
-  const simulation = useAsyncData(monitoringService.getSimulationStatus, [], { intervalMs: 3000 });
+  const simulated = useAsyncData(animalService.getAnimals, []);
+  const simulation = useAsyncData(monitoringService.getSimulationStatus, [], { intervalMs: 1000 });
   const [simulationBusy, setSimulationBusy] = useState(false);
   const [simulationError, setSimulationError] = useState(null);
   const [simulationVisible, setSimulationVisible] = useState(true);
   const [simulationSpecies, setSimulationSpecies] = useState("all");
-  const [selectedAnimalId, setSelectedAnimalId] = useState(null);
   const [landCoverVisible, setLandCoverVisible] = useState(defaultLandCover);
   const [landCover, setLandCover] = useState({ data: null, loading: false, error: null });
+  const [landCoverRetry, setLandCoverRetry] = useState(0);
+  const landCoverRequestedRef = useRef(false);
   const [regionCode, setRegionCode] = useState("all");
   const [speciesSearch, setSpeciesSearch] = useState("");
   const [className, setClassName] = useState("all");
   const [year, setYear] = useState("all");
   const [insideOnly, setInsideOnly] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-  const [selectedArea, setSelectedArea] = useState(null);
   const [mapReady, setMapReady] = useState(false);
+  const [searchParams] = useSearchParams();
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const popupRef = useRef(null);
+  const regionNameByCodeRef = useRef(new Map());
   const recordsByIdRef = useRef(new Map());
   const animalsByIdRef = useRef(new Map());
+  const focusedSearchRef = useRef("");
 
   useEffect(() => {
-    if (!landCoverVisible || landCover.data || landCover.loading) return;
-    setLandCover((current) => ({ ...current, loading: true, error: null }));
-    researchService.getAreas(true).then((data) => {
+    if (!landCoverVisible || landCoverRequestedRef.current) return;
+    landCoverRequestedRef.current = true;
+    setLandCover({ data: null, loading: true, error: null });
+    researchService.getLandCoverAreas().then((data) => {
       setLandCover({ data, loading: false, error: null });
     }).catch((error) => {
       setLandCover({ data: null, loading: false, error });
     });
-  }, [landCoverVisible, landCover.data]);
+  }, [landCoverVisible, landCoverRetry]);
 
-  const regions = useMemo(() => areas.data?.features ?? [], [areas.data]);
+  const regions = useMemo(() => areas.data?.features?.filter((feature) => feature.properties?.kind === "region") ?? [], [areas.data]);
   const regionNameByCode = useMemo(() => new Map(regions.map((region) => [region.properties.code, region.properties.name])), [regions]);
+  regionNameByCodeRef.current = regionNameByCode;
   const occurrences = useMemo(() => records.data?.occurrences ?? [], [records.data]);
-  const simulationAnimals = useMemo(() => (simulated.data ?? []).filter((animal) => animal.id.startsWith("SIM-V2-")), [simulated.data]);
+  const simulationAnimals = useMemo(() => {
+    const metadata = new Map((simulated.data ?? []).map((animal) => [animal.id, animal]));
+    return Object.entries(simulation.data?.animals ?? {})
+      .filter(([id]) => id.startsWith("SIM-V2-"))
+      .map(([id, live]) => ({
+        ...(metadata.get(id) ?? { id, name: id, species: "Wildlife", coordinates: [null, null] }),
+        coordinates: live.coordinates ?? metadata.get(id)?.coordinates ?? [null, null]
+      }));
+  }, [simulated.data, simulation.data?.animals]);
   const simulationSpeciesOptions = useMemo(() => [...new Set(simulationAnimals.map((animal) => animal.species))].sort(), [simulationAnimals]);
   const visibleSimulationAnimals = useMemo(() => simulationAnimals.filter((animal) =>
     simulationVisible && (simulationSpecies === "all" || animal.species === simulationSpecies)
     && animal.coordinates.every(Number.isFinite)
   ), [simulationAnimals, simulationVisible, simulationSpecies]);
   animalsByIdRef.current = new Map(simulationAnimals.map((animal) => [animal.id, animal]));
-  const selectedAnimal = simulationAnimals.find((animal) => animal.id === selectedAnimalId);
+  const simulationStatus = simulation.data;
+  const simulationStatusRef = useRef(simulationStatus);
+  simulationStatusRef.current = simulationStatus;
+  const routeCount = simulationStatus?.total_routes ?? 0;
+  const completedRoutes = simulationStatus?.completed_routes ?? 0;
   const classes = useMemo(() => [...new Set(occurrences.map((item) => item.taxonomic_class).filter(Boolean))].sort(), [occurrences]);
   const years = useMemo(() => [...new Set(occurrences.map((item) => item.source_observed_at.slice(0, 4)))].sort().reverse(), [occurrences]);
   const filtered = useMemo(() => occurrences.filter((item) => {
@@ -80,12 +98,41 @@ export const FieldRecords = ({ defaultLandCover = false, title = "Ooty Forest Ma
       && (!insideOnly || memberships.some((region) => !region.uncertainty_crosses_boundary));
   }), [occurrences, regionCode, speciesSearch, className, year, insideOnly]);
   recordsByIdRef.current = new Map(occurrences.map((item) => [String(item.id), item]));
-  const selected = filtered.find((item) => String(item.id) === selectedId);
   const distinctSpecies = new Set(occurrences.map((item) => item.species)).size;
-  const areaFeatures = landCoverVisible && landCover.data
-    ? [...regions, ...landCover.data.features.filter((feature) => feature.properties?.kind === "land_cover")]
-    : regions;
+  const areaFeatures = useMemo(() => landCoverVisible && landCover.data
+    ? [...regions, ...landCover.data.features]
+    : regions, [landCoverVisible, landCover.data, regions]);
   const clearFilters = () => { setRegionCode("all"); setSpeciesSearch(""); setClassName("all"); setYear("all"); setInsideOnly(false); setSimulationSpecies("all"); };
+  useEffect(() => {
+    if (!mapReady || !mapRef.current) return;
+    const animalId = searchParams.get("animal");
+    const zoneId = searchParams.get("zone");
+    const focusKey = `${animalId ?? ""}|${zoneId ?? ""}`;
+    if (focusKey === focusedSearchRef.current || (!animalId && !zoneId)) return;
+    if (animalId) {
+      const animal = simulationAnimals.find((item) => item.id === animalId);
+      if (!animal?.coordinates?.every(Number.isFinite)) return;
+      mapRef.current.flyTo({ center: animal.coordinates, zoom: Math.max(mapRef.current.getZoom(), 13), duration: 500 });
+      focusedSearchRef.current = focusKey;
+      return;
+    }
+    const area = areaFeatures.find((feature) => feature.id === `land-cover:${zoneId}`
+      || feature.properties?.code === zoneId || feature.properties?.zone_id === zoneId);
+    if (!area?.geometry) return;
+    const bounds = new maplibregl.LngLatBounds();
+    extendGeometry(bounds, area.geometry.coordinates);
+    if (!bounds.isEmpty()) mapRef.current.fitBounds(bounds, { padding: 60, maxZoom: 13, duration: 500 });
+    focusedSearchRef.current = focusKey;
+  }, [mapReady, searchParams, simulationAnimals, areaFeatures]);
+  useEffect(() => {
+    const stopOnRefreshOrClose = () => {
+      if (!simulationStatusRef.current?.running || !navigator.sendBeacon) return;
+      navigator.sendBeacon(apiUrl("/simulation/stop"), new Blob([], { type: "text/plain" }));
+    };
+    window.addEventListener("pagehide", stopOnRefreshOrClose);
+    return () => window.removeEventListener("pagehide", stopOnRefreshOrClose);
+  }, []);
+
   const toggleSimulation = async () => {
     if (simulationBusy) return;
     setSimulationBusy(true);
@@ -93,7 +140,7 @@ export const FieldRecords = ({ defaultLandCover = false, title = "Ooty Forest Ma
     try {
       if (simulation.data?.running) await monitoringService.stopSimulation();
       else await monitoringService.startSimulation();
-      await Promise.allSettled([simulation.refresh(), simulated.refresh()]);
+      await simulation.refresh();
     } catch (error) {
       setSimulationError(error.message);
     } finally {
@@ -102,7 +149,7 @@ export const FieldRecords = ({ defaultLandCover = false, title = "Ooty Forest Ma
   };
 
   useEffect(() => {
-    if (!regions.length || !containerRef.current || mapRef.current) return;
+    if (!containerRef.current || mapRef.current) return;
     const map = new maplibregl.Map({
       container: containerRef.current, center: [76.7, 11.4], zoom: 10,
       attributionControl: { compact: true },
@@ -114,12 +161,15 @@ export const FieldRecords = ({ defaultLandCover = false, title = "Ooty Forest Ma
       }, layers: [{ id: "osm", type: "raster", source: "osm" }] }
     });
     mapRef.current = map;
+    map.scrollZoom.disable();
     popupRef.current = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 10 });
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
     map.on("load", () => {
       map.addLayer({ id: "region-fill", type: "fill", source: "areas", filter: ["==", ["get", "kind"], "region"], paint: { "fill-color": "#53745d", "fill-opacity": 0.08 } });
-      map.addLayer({ id: "land-cover-fill", type: "fill", source: "areas", filter: ["==", ["get", "kind"], "land_cover"], paint: { "fill-color": landCoverColor, "fill-opacity": 0.4 } });
-      map.addLayer({ id: "region-line", type: "line", source: "areas", filter: ["==", ["get", "kind"], "region"], paint: { "line-color": "#315d40", "line-width": 1.5 } });
+      map.addLayer({ id: "land-cover-fill", type: "fill", source: "areas", filter: ["==", ["get", "kind"], "land_cover"], paint: { "fill-color": landCoverColor, "fill-opacity": 0.48 } });
+      map.addLayer({ id: "region-casing", type: "line", source: "areas", filter: ["==", ["get", "kind"], "region"], paint: { "line-color": "#f7f6ef", "line-width": 6, "line-opacity": 0.96 } });
+      map.addLayer({ id: "region-line", type: "line", source: "areas", filter: ["==", ["get", "kind"], "region"], paint: { "line-color": "#214b35", "line-width": 3.5, "line-opacity": 0.98 } });
+      map.addLayer({ id: "land-cover-outline", type: "line", source: "areas", filter: ["==", ["get", "kind"], "land_cover"], paint: { "line-color": "#425747", "line-width": 0.65, "line-opacity": 0.62 } });
       map.addLayer({ id: "record-dots", type: "circle", source: "records", paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 2.3, 13, 3.4, 16, 4.2], "circle-color": "#22573b", "circle-stroke-color": "#fff8e6", "circle-stroke-width": 1 } });
       map.addLayer({ id: "simulated-dots", type: "circle", source: "simulated", paint: {
         "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 2.5, 13, 4, 16, 5],
@@ -127,25 +177,28 @@ export const FieldRecords = ({ defaultLandCover = false, title = "Ooty Forest Ma
         "circle-stroke-color": "#102e25", "circle-stroke-width": 0.8
       } });
       map.addLayer({ id: "selected-record", type: "circle", source: "records", filter: ["==", ["get", "record_id"], ""], paint: { "circle-radius": 7, "circle-color": "#123b2b", "circle-stroke-color": "#eacb74", "circle-stroke-width": 2.5 } });
-      map.getSource("areas").setData({ type: "FeatureCollection", features: regions });
-      const bounds = new maplibregl.LngLatBounds();
-      regions.forEach((region) => extendGeometry(bounds, region.geometry.coordinates));
-      if (!bounds.isEmpty()) map.fitBounds(bounds, { padding: 48, maxZoom: 12, duration: 0 });
       setMapReady(true);
     });
     map.on("click", "record-dots", (event) => {
       const id = event.features?.[0]?.properties?.record_id;
-      if (id != null) { setSelectedId(String(id)); setSelectedArea(null); setSelectedAnimalId(null); }
+      if (id != null) setSelectedId(String(id));
     });
     map.on("click", "simulated-dots", (event) => {
-      const id = event.features?.[0]?.properties?.animal_id;
-      if (id != null) { setSelectedAnimalId(String(id)); setSelectedId(null); setSelectedArea(null); }
+      const coordinates = event.features?.[0]?.geometry?.coordinates;
+      if (Array.isArray(coordinates)) {
+        setSelectedId(null);
+        map.flyTo({ center: coordinates, zoom: Math.max(map.getZoom(), 13), duration: 450 });
+      }
     });
     for (const layer of ["region-fill", "land-cover-fill"]) {
       map.on("click", layer, (event) => {
         if (map.queryRenderedFeatures(event.point, { layers: ["record-dots", "simulated-dots"] }).length) return;
         const feature = event.features?.[0];
-        if (feature) { setSelectedArea(feature.properties); setSelectedId(null); }
+        if (feature?.geometry) {
+          const bounds = geometryBounds(feature.geometry);
+          if (!bounds.isEmpty()) map.fitBounds(bounds, { padding: 60, maxZoom: 13, duration: 450 });
+          setSelectedId(null);
+        }
       });
     }
     map.on("mousemove", "record-dots", (event) => {
@@ -188,7 +241,7 @@ export const FieldRecords = ({ defaultLandCover = false, title = "Ooty Forest Ma
         };
         if (props.kind === "land_cover") {
           addLine("Land cover", String(props.zone_type ?? "").replaceAll("_", " "));
-          addLine("Region", regionNameByCode.get(props.region_code));
+          addLine("Region", regionNameByCodeRef.current.get(props.region_code));
           addLine("Area", `${Number(props.area_sq_km).toFixed(2)} km²`);
           addLine("Source", "ESA WorldCover 2021 · 10 m");
           addLine("Scenario status", riskMeta[props.risk_level]?.label ?? "Unrated");
@@ -204,7 +257,7 @@ export const FieldRecords = ({ defaultLandCover = false, title = "Ooty Forest Ma
       map.on("mouseleave", layer, () => { map.getCanvas().style.cursor = ""; popupRef.current?.remove(); });
     }
     return () => { popupRef.current?.remove(); map.remove(); mapRef.current = null; setMapReady(false); };
-  }, [regions.length]);
+  }, []);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -213,13 +266,24 @@ export const FieldRecords = ({ defaultLandCover = false, title = "Ooty Forest Ma
   }, [mapReady, areaFeatures]);
   useEffect(() => {
     const map = mapRef.current;
+    if (!mapReady || !map || !regions.length || regionCode !== "all") return;
+    const bounds = new maplibregl.LngLatBounds();
+    regions.forEach((region) => extendGeometry(bounds, region.geometry.coordinates));
+    if (!bounds.isEmpty()) map.fitBounds(bounds, { padding: 48, maxZoom: 12, duration: 0 });
+  }, [mapReady, regions, regionCode]);
+  useEffect(() => {
+    const map = mapRef.current;
     if (!mapReady || !map) return;
     map.getSource("records")?.setData({ type: "FeatureCollection", features: filtered.map((item) => ({
       type: "Feature", properties: { record_id: String(item.id) },
       geometry: { type: "Point", coordinates: [item.longitude, item.latitude] }
     })) });
+  }, [mapReady, filtered]);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!mapReady || !map) return;
     map.setFilter("selected-record", ["==", ["get", "record_id"], selectedId ?? ""]);
-  }, [mapReady, filtered, selectedId]);
+  }, [mapReady, selectedId]);
   useEffect(() => {
     const map = mapRef.current;
     if (!mapReady || !map) return;
@@ -241,18 +305,15 @@ export const FieldRecords = ({ defaultLandCover = false, title = "Ooty Forest Ma
     if (!bounds.isEmpty()) map.fitBounds(bounds, { padding: 55, maxZoom: 13, duration: 500 });
   }, [mapReady, regionCode, regions]);
 
-  if (areas.loading || records.loading || areas.error || records.error || !areas.data || !records.data) {
-    return <div className="p-6"><DataState loading={areas.loading || records.loading} error={areas.error || records.error} onRetry={() => { areas.retry(); records.retry(); }} /></div>;
-  }
-  return <div className="space-y-5 p-6">
+  return <div className="flex h-[calc(100dvh-108px)] min-h-[460px] flex-col gap-3 overflow-hidden p-4 sm:min-h-[560px]">
     <header className="flex flex-wrap items-end justify-between gap-3">
       <div><p className="text-xs font-semibold uppercase tracking-[.16em] text-forest-700">Eight forest regions · ESA WorldCover zones</p><h1 className="font-display text-3xl text-ink-900">{title}</h1><p className="mt-1 text-sm text-ink-600">{description}</p></div>
-      <div className="flex flex-wrap gap-2 text-xs"><span className="rounded-control border border-line bg-paper px-3 py-2">{regions.length} forest regions</span><span className="rounded-control border border-line bg-paper px-3 py-2">{landCover.data?.features.filter((feature) => feature.properties?.kind === "land_cover").length ?? 30} land-cover zones</span><span className="rounded-control border border-line bg-paper px-3 py-2">{occurrences.length} sightings · {distinctSpecies} species</span><span className="rounded-control border border-line bg-paper px-3 py-2">{simulationAnimals.length} simulated mammals</span></div>
+      <div className="flex flex-wrap gap-2 text-xs"><span className="rounded-control border border-line bg-paper px-3 py-2">{regions.length} forest regions</span><span className="rounded-control border border-line bg-paper px-3 py-2">{landCover.data?.features.filter((feature) => feature.properties?.kind === "land_cover").length ?? 30} land-cover zones</span><span className="rounded-control border border-line bg-paper px-3 py-2">{records.loading ? "Loading sightings…" : records.error ? "Sightings unavailable" : `${occurrences.length} sightings · ${distinctSpecies} species`}</span><span className="rounded-control border border-line bg-paper px-3 py-2">{simulated.loading ? "Loading trackers…" : `${simulationAnimals.length} simulated mammals`}</span></div>
     </header>
-    <section className="rounded-panel border border-line bg-paper shadow-sm" aria-label="Historical sighting map">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line p-3">
-        <label className="flex items-center gap-2 text-sm text-ink-600">Region <select className="rounded-control border border-line bg-paper px-2 py-1 text-ink-900" value={regionCode} onChange={(event) => { setRegionCode(event.target.value); setSelectedArea(null); }}><option value="all">All regions</option>{regions.map((region) => <option key={region.id} value={region.properties.code}>{region.properties.name}</option>)}</select></label>
-        <div className="flex items-center gap-3"><span className="text-xs text-ink-600">{filtered.length} sightings · {visibleSimulationAnimals.length} simulated</span><button type="button" disabled={simulationBusy || !simulationAnimals.length} onClick={toggleSimulation} className="rounded-control border border-line px-3 py-1.5 text-sm text-forest-700 disabled:opacity-50">{simulation.data?.running ? "Stop movement" : "Start movement"}</button><details className="relative"><summary className="cursor-pointer rounded-control border border-line px-3 py-1.5 text-sm text-forest-700">Filters & layers</summary><div className="absolute right-0 top-full z-50 mt-2 grid w-[min(320px,calc(100vw-48px))] gap-3 rounded-panel border border-line bg-paper p-4 shadow-md">
+    <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-panel border border-line bg-paper shadow-sm" aria-label="Historical sighting map">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-line p-3">
+        <label className="flex items-center gap-2 text-sm text-ink-600">Region <select className="rounded-control border border-line bg-paper px-2 py-1 text-ink-900" value={regionCode} onChange={(event) => setRegionCode(event.target.value)}><option value="all">All regions</option>{regions.map((region) => <option key={region.id} value={region.properties.code}>{region.properties.name}</option>)}</select></label>
+        <div className="flex items-center gap-3"><span className="text-xs text-ink-600">{records.loading ? "Loading sightings" : records.error ? "Sightings unavailable" : `${filtered.length} sightings`} · {visibleSimulationAnimals.length} simulated</span><details className="relative"><summary className="cursor-pointer rounded-control border border-line px-3 py-1.5 text-sm text-forest-700">Filters & layers</summary><div className="absolute right-0 top-full z-50 mt-2 grid w-[min(320px,calc(100vw-48px))] gap-3 rounded-panel border border-line bg-paper p-4 shadow-md">
           <label className="grid gap-1 text-xs text-ink-600">Species <input className="rounded-control border border-line px-2 py-1.5 text-sm text-ink-900" value={speciesSearch} onChange={(event) => setSpeciesSearch(event.target.value)} placeholder="Search species" /></label>
           <label className="grid gap-1 text-xs text-ink-600">Group <select className="rounded-control border border-line px-2 py-1.5 text-sm text-ink-900" value={className} onChange={(event) => setClassName(event.target.value)}><option value="all">All groups</option>{classes.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
           <label className="grid gap-1 text-xs text-ink-600">Year <select className="rounded-control border border-line px-2 py-1.5 text-sm text-ink-900" value={year} onChange={(event) => setYear(event.target.value)}><option value="all">All years</option>{years.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
@@ -260,19 +321,39 @@ export const FieldRecords = ({ defaultLandCover = false, title = "Ooty Forest Ma
           <label className="flex items-center gap-2 text-xs text-ink-600"><input type="checkbox" checked={landCoverVisible} onChange={(event) => setLandCoverVisible(event.target.checked)} /> Show 2021 land cover</label>
           <label className="flex items-center gap-2 text-xs text-ink-600"><input type="checkbox" checked={simulationVisible} onChange={(event) => setSimulationVisible(event.target.checked)} /> Show simulated mammals</label>
           <label className="grid gap-1 text-xs text-ink-600">Simulated species <select className="rounded-control border border-line px-2 py-1.5 text-sm text-ink-900" value={simulationSpecies} onChange={(event) => setSimulationSpecies(event.target.value)}><option value="all">All species</option>{simulationSpeciesOptions.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
-          {landCover.loading && <span className="text-xs text-ink-600">Loading land cover…</span>}{landCover.error && <span className="text-xs text-risk-high">Land cover could not load.</span>}
-          {simulationError && <span className="text-xs text-risk-high">Simulation: {simulationError}</span>}
+          {landCover.loading && <span className="text-xs text-ink-600">Loading land cover…</span>}{landCover.error && <button type="button" className="text-xs text-risk-high underline" onClick={() => { landCoverRequestedRef.current = false; setLandCoverRetry((value) => value + 1); }}>Land cover could not load · Retry</button>}
           <button className="justify-self-start text-xs text-forest-700 underline" type="button" onClick={clearFilters}>Clear filters</button>
         </div></details></div>
       </div>
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_340px]">
-        <div className="relative min-h-[480px]"><div ref={containerRef} className="absolute inset-0" />{filtered.length === 0 && <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-control border border-line bg-paper/95 p-3 text-sm text-ink-600">No sightings match these filters.</div>}</div>
-        <aside className="max-h-[560px] overflow-auto border-t border-line p-4 lg:border-l lg:border-t-0" aria-label="Sighting details">
-          {selectedAnimal ? <div className="space-y-3"><p className="text-xs font-semibold uppercase tracking-wide text-forest-700">Simulated mammal</p><h2 className="font-display text-xl">{selectedAnimal.name}</h2><p className="text-sm text-ink-600">{selectedAnimal.species} · {selectedAnimal.id}</p><p className="text-xs text-ink-600">Generated GPS position: {selectedAnimal.coordinates[1]?.toFixed(5)}, {selectedAnimal.coordinates[0]?.toFixed(5)}</p><p className="text-xs text-ink-600">This is a scenario tracker, not a real animal or field observation.</p></div> : selected ? <div className="space-y-3"><p className="text-xs font-semibold uppercase tracking-wide text-forest-700">Historical sighting</p><h2 className="font-display text-xl">{selected.species}</h2><p className="text-sm text-ink-600">{readableDate(selected.source_observed_at)} · {selected.regions.map((region) => region.name).join(", ")}</p><p className="text-xs text-ink-600">Reported point: {selected.latitude.toFixed(5)}, {selected.longitude.toFixed(5)} · ±{Math.round(Number(selected.coordinate_uncertainty_m))} m</p>{selected.regions.some((region) => region.uncertainty_crosses_boundary) && <p className="text-xs text-ink-600">The location uncertainty crosses a study-region edge.</p>}<div className="border-t border-line pt-3 text-xs text-ink-600"><p>{selected.dataset_title}</p><p>DOI: {selected.dataset_doi}</p><p>Licence: {selected.license_uri}{selected.noncommercial_only ? " · non-commercial use" : ""}</p></div><a className="inline-block text-sm text-forest-700 underline" href={selected.source_url} target="_blank" rel="noreferrer">Open source record</a></div>
-            : selectedArea ? <div className="space-y-2"><p className="text-xs font-semibold uppercase tracking-wide text-forest-700">{selectedArea.kind === "region" ? "Study region" : "2021 land cover"}</p><h2 className="font-display text-xl">{selectedArea.name}</h2><p className="text-sm text-ink-600">{selectedArea.description}</p>{selectedArea.kind === "land_cover" && <p className="text-xs text-ink-600">Scenario status: {riskMeta[selectedArea.risk_level]?.label ?? "Unrated"} · illustrative land-cover label, not an official hazard rating.</p>}<p className="text-xs text-ink-600">Area: {Number(selectedArea.area_sq_km).toFixed(2)} km² · {selectedArea.data_source}</p><a className="text-sm text-forest-700 underline" href={selectedArea.source_url} target="_blank" rel="noreferrer">Source details</a></div>
-            : <div className="space-y-2"><p className="text-xs font-semibold uppercase tracking-wide text-forest-700">Explore the evidence</p><h2 className="font-display text-xl">Select a sighting</h2><p className="text-sm text-ink-600">Small dots mark published observation coordinates. Select one for its date, uncertainty, dataset and licence.</p></div>}
-          <div className="mt-5 border-t border-line pt-3"><h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-600">Matching records</h3><div className="max-h-56 space-y-1 overflow-auto">{filtered.map((item) => <button key={item.id} type="button" onClick={() => { setSelectedId(String(item.id)); setSelectedArea(null); mapRef.current?.flyTo({ center: [item.longitude, item.latitude], zoom: Math.max(mapRef.current.getZoom(), 12), duration: 450 }); }} className={`flex w-full justify-between gap-2 rounded-control px-2 py-1.5 text-left text-xs hover:bg-moss-100 ${selectedId === String(item.id) ? "bg-moss-100" : ""}`}><span className="truncate">{item.species}</span><span className="shrink-0 text-ink-600">{readableDate(item.source_observed_at)}</span></button>)}</div></div>
-        </aside>
+      <div className="relative min-h-0 flex-1">
+        <div ref={containerRef} className="absolute inset-0" />
+        {areas.loading && !regions.length && <div className="pointer-events-none absolute left-1/2 top-4 z-10 -translate-x-1/2 rounded-control border border-line bg-paper/95 px-3 py-2 text-xs text-ink-600">Loading forest regions…</div>}
+        {areas.error && <button type="button" onClick={areas.retry} className="absolute left-1/2 top-4 z-10 -translate-x-1/2 rounded-control border border-line bg-paper/95 px-3 py-2 text-xs text-risk-high">Forest regions unavailable · Retry</button>}
+        {records.loading && <div className="pointer-events-none absolute left-1/2 top-14 z-10 -translate-x-1/2 rounded-control border border-line bg-paper/95 px-3 py-2 text-xs text-ink-600">Loading sourced sightings…</div>}
+        {records.error && <button type="button" onClick={records.retry} className="absolute left-1/2 top-14 z-10 -translate-x-1/2 rounded-control border border-line bg-paper/95 px-3 py-2 text-xs text-risk-high">Sightings unavailable · Retry</button>}
+        {!records.loading && !records.error && filtered.length === 0 && <div className="pointer-events-none absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-control border border-line bg-paper/95 p-3 text-sm text-ink-600">No sightings match these filters.</div>}
+        <section aria-label="Movement simulation" className="absolute bottom-4 left-3 right-16 z-30 overflow-hidden rounded-xl border border-white/80 bg-paper/90 shadow-lg backdrop-blur-xl sm:left-1/2 sm:right-auto sm:w-[min(760px,calc(100%-96px))] sm:-translate-x-1/2">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 sm:px-5">
+            <span className={`relative flex h-3 w-3 shrink-0 rounded-full ${simulationStatus?.running ? "bg-forest-500" : "bg-ink-400"}`} aria-hidden="true">
+              {simulationStatus?.running && <span className="absolute inset-0 animate-ping rounded-full bg-forest-500 opacity-40" />}
+            </span>
+            <div className="min-w-[180px] flex-1" aria-live="polite">
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-forest-700">Movement simulation</div>
+              <div className="text-sm font-semibold text-ink-900">{simulation.loading && !simulationStatus ? "Connecting to simulator…" : simulation.error ? "Simulator unavailable" : simulationStatus?.last_error ? `GPS update failed (${simulationStatus.last_error})` : simulationStatus?.running ? "Animals are moving live on the map" : simulationStatus?.finished ? "All journeys complete · ready to replay" : "Simulation stopped"}</div>
+              <div className="text-xs text-ink-600">{routeCount ? `${completedRoutes}/${routeCount} journeys complete · ` : ""}{simulationStatus?.interval_seconds ? `GPS updates every ${simulationStatus.interval_seconds} seconds` : "Live positions refresh automatically"}</div>
+            </div>
+            <div className="flex flex-wrap gap-1.5 text-[10px] font-medium sm:text-[11px]">
+              <span className="rounded-full bg-moss-100 px-2.5 py-1 text-forest-700">{visibleSimulationAnimals.length} trackers</span>
+              {simulationStatus && <><span className="rounded-full bg-[#e9f2e9] px-2.5 py-1 text-[#275e3c]">Zones · {simulationStatus.last_zone_crossings ?? 0}</span><span className="rounded-full bg-[#e8eef3] px-2.5 py-1 text-[#355a72]">Regions · {simulationStatus.last_region_crossings ?? 0}</span></>}
+            </div>
+            <button type="button" disabled={simulationBusy || simulation.loading || !!simulation.error || !simulationStatus} onClick={toggleSimulation} className={`rounded-control shrink-0 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 ${simulationStatus?.running ? "bg-ink-700" : "bg-forest-700"}`}>
+              {simulationBusy ? "Updating…" : simulationStatus?.running ? "Stop" : simulationStatus?.finished ? "Replay" : "Start"}
+            </button>
+          </div>
+          {routeCount > 0 && <div role="progressbar" aria-label="Completed animal journeys" aria-valuemin={0} aria-valuemax={routeCount} aria-valuenow={completedRoutes} className="h-1 bg-moss-100"><div className="h-full bg-forest-500 transition-[width] duration-500" style={{ width: `${Math.min(100, completedRoutes / routeCount * 100)}%` }} /></div>}
+          {simulation.error && <button type="button" onClick={simulation.retry} className="px-5 pb-3 text-xs text-risk-high underline">Could not load simulator · Retry</button>}
+          {simulationError && <p role="alert" className="px-5 pb-3 text-xs text-risk-high">Simulation action failed: {simulationError}</p>}
+        </section>
       </div>
     </section>
   </div>;

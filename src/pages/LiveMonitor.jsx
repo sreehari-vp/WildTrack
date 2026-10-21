@@ -113,6 +113,10 @@ const LiveMonitor = () => {
               <div className="text-xs font-semibold uppercase tracking-wide text-ink-600">Movement simulation</div>
               <div className="truncate text-sm font-semibold text-ink-900">{simulationState}</div>
               <div className="text-xs text-ink-600">{routeCount ? `${completedRoutes}/${routeCount} journeys complete · ` : ""}{simulation.data?.interval_seconds ? `GPS every ${simulation.data.interval_seconds} seconds` : "Waiting for backend"}</div>
+              {simulation.data?.last_zone_crossings !== undefined ? <div className="mt-1 flex flex-wrap gap-1.5 text-[10px] font-medium" aria-live="polite">
+                <span title="Operational zone entries and exits in the latest GPS update" className="rounded-full bg-[#e9f2e9] px-2 py-0.5 text-[#275e3c]">Zone crossings · {simulation.data.last_zone_crossings}</span>
+                <span title="Study-region boundary transitions in the latest GPS update" className="rounded-full bg-[#e8eef3] px-2 py-0.5 text-[#355a72]">Region crossings · {simulation.data.last_region_crossings}</span>
+              </div> : null}
             </div>
             <Button variant={simulation.data?.running ? "secondary" : "primary"} className="min-w-24 shrink-0" icon={simulation.data?.running ? <Square size={14} fill="currentColor" /> : <Play size={16} fill="currentColor" />} disabled={simulationBusy || simulation.loading || !!simulation.error || !!simulatorNeedsRestart || !!simulation.data?.finished || !simulation.data} onClick={changeSimulation}>{simulationBusy ? "Working…" : simulation.data?.running ? "Stop" : "Start"}</Button>
           </div>

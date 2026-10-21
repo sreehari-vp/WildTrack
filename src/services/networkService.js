@@ -10,8 +10,8 @@ const query = (filters = {}) => {
 };
 
 export const networkService = {
-  getSnapshot: (filters) => getApiJson(`/network${query(filters)}`),
-  getCorridor: (from, to, filters) => getApiJson(`/network/corridors/${encodeURIComponent(from)}/${encodeURIComponent(to)}${query(filters)}`),
-  getImpact: (zone, maxHops = 3) => getApiJson(`/network/impact/${encodeURIComponent(zone)}?max_hops=${maxHops}`),
+  getSnapshot: (filters) => getApiJson(`/network${query(filters)}`, { cacheMs: 30000 }),
+  getCorridor: (from, to, filters) => getApiJson(`/network/corridors/${encodeURIComponent(from)}/${encodeURIComponent(to)}${query(filters)}`, { cacheMs: 60000 }),
+  getImpact: (zone, maxHops = 3) => getApiJson(`/network/impact/${encodeURIComponent(zone)}?max_hops=${maxHops}`, { cacheMs: 60000 }),
   sync: () => sendApiJson("/network/sync", { method: "POST", timeoutMs: 120000 }),
 };

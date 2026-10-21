@@ -317,6 +317,8 @@ class RuleOut(RuleWrite):
 class SimulationAnimalStatus(BaseModel):
     current_step: int
     current_zone: str | None = None
+    current_region: str | None = None
+    coordinates: list[float] | None = None
 
 
 class SimulationStatus(BaseModel):
@@ -327,3 +329,6 @@ class SimulationStatus(BaseModel):
     finished: bool = False
     completed_routes: int = 0
     total_routes: int = 0
+    last_zone_crossings: int = 0
+    last_region_crossings: int = 0
+    last_error: str | None = None

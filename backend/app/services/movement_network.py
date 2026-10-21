@@ -23,12 +23,21 @@ from backend.app.db.postgres.session import engine
 logger = logging.getLogger(__name__)
 _sync_lock = threading.Lock()
 MAX_TRANSITION_GAP_SECONDS = 6 * 60 * 60
-PROJECTION_VERSION = "2"
+PROJECTION_VERSION = "3"
 
 ZONE_SQL = """
     SELECT DISTINCT ON (v.zone_id) v.zone_id, v.zone_name, v.zone_type,
-           v.risk_level, v.version_no, z.zone_id IS NULL AS retired
-    FROM zone_versions v LEFT JOIN zones z ON z.zone_id=v.zone_id
+           v.risk_level, v.version_no, z.zone_id IS NULL AS retired,
+           coalesce(z.study_region_code, historical_region.code) AS study_region_code,
+           coalesce(live_region.name, historical_region.name) AS study_region_name
+    FROM zone_versions v
+    LEFT JOIN zones z ON z.zone_id=v.zone_id
+    LEFT JOIN study_regions live_region ON live_region.code=z.study_region_code
+    LEFT JOIN LATERAL (
+        SELECT r.code, r.name FROM study_regions r
+        WHERE ST_Covers(r.geometry, ST_PointOnSurface(v.geometry))
+        ORDER BY ST_Area(r.geometry::geography), r.code LIMIT 1
+    ) historical_region ON true
     ORDER BY v.zone_id, v.version_no DESC
 """
 ANIMAL_SQL = "SELECT animal_id, animal_code, name, species FROM animals WHERE animal_id LIKE 'SIM-V2-%' ORDER BY animal_id"
@@ -252,7 +261,9 @@ def sync_projection(*, force: bool = False) -> dict:
                     UNWIND $rows AS row MERGE (n:WildTrackZone {key:row.key})
                     SET n.generation=row.generation, n.zone_id=row.zone_id,
                         n.name=row.zone_name, n.zone_type=row.zone_type,
-                        n.risk_level=row.risk_level, n.retired=row.retired
+                        n.risk_level=row.risk_level, n.retired=row.retired,
+                        n.study_region_code=row.study_region_code,
+                        n.study_region_name=row.study_region_name
                 """, rows=batch)
             for batch in _chunks(animals):
                 _run(session, """
@@ -342,7 +353,9 @@ def network_snapshot(*, species: str | None = None, start_date: str | None = Non
         zones = [dict(row) for row in session.run("""
             MATCH (z:WildTrackZone {generation:$generation})
             RETURN z.zone_id AS zone_id, z.name AS name, z.zone_type AS zone_type,
-                   z.risk_level AS risk_level, z.retired AS retired ORDER BY z.name
+                   z.risk_level AS risk_level, z.retired AS retired,
+                   z.study_region_code AS study_region_code, z.study_region_name AS study_region_name
+            ORDER BY z.study_region_name, z.name
         """, generation=generation)]
         species_list = [row["species"] for row in session.run("""
             MATCH (a:WildTrackAnimal {generation:$generation})

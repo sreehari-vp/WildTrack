@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { apiAnimalToAnimal, apiZoneToZone, getApiJson, apiUrl } from "../services/apiClient.js";
+import { apiAnimalToAnimal, apiZoneToZone, getApiJson, apiUrl, sendApiJson } from "../services/apiClient.js";
 import { analyticsService } from "../services/analyticsService.js";
-import { findZoneForPoint } from "../utils/geo.js";
+import { findZoneForPoint, zoneFeatureCollection } from "../utils/geo.js";
 import { formatCoordinate, formatRelative } from "../utils/format.js";
 
 test("missing GPS and timestamps remain unknown rather than fabricated", () => {
@@ -48,6 +48,16 @@ test("Ooty land-cover classes and region names survive API mapping", () => {
   assert.equal(zone.regionName, "Kundah");
 });
 
+test("map operational zones keep class fill and risk outline colors", () => {
+  const [feature] = zoneFeatureCollection([{
+    id: "OTY-001", name: "Forest edge", type: "tree_cover", risk: "high",
+    regionName: "Kundah", areaKm2: 4.2, description: "Tree cover"
+  }]).features;
+  assert.equal(feature.properties.color, "#327a52");
+  assert.equal(feature.properties.statusColor, "#d9691f");
+  assert.equal(feature.properties.regionName, "Kundah");
+});
+
 test("polygon holes are excluded", () => {
   const zone = { id: "Z", geometry: { type: "Polygon", coordinates: [
     [[0,0],[10,0],[10,10],[0,10],[0,0]],
@@ -65,6 +75,47 @@ test("API failures are surfaced and receive a timeout signal", async () => {
   };
   try { await assert.rejects(getApiJson("/animals"), /Database unavailable/); }
   finally { globalThis.fetch = original; }
+});
+
+test("GET requests are shared briefly and successful writes invalidate cached reads", async () => {
+  const original = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async (_url, options) => {
+    calls += 1;
+    const method = options.method ?? "GET";
+    return new Response(JSON.stringify({ method, call: calls }), { status: 200 });
+  };
+  try {
+    const [first, shared] = await Promise.all([
+      getApiJson("/cache-contract-test"),
+      getApiJson("/cache-contract-test")
+    ]);
+    assert.deepEqual(first, shared);
+    assert.equal(calls, 1);
+    assert.deepEqual(await getApiJson("/cache-contract-test"), first);
+    assert.equal(calls, 1);
+    await sendApiJson("/cache-contract-test", { method: "POST" });
+    const refreshed = await getApiJson("/cache-contract-test");
+    assert.equal(calls, 3);
+    assert.equal(refreshed.call, 3);
+  } finally { globalThis.fetch = original; }
+});
+
+test("simulation actions keep sourced map data cached", async () => {
+  const original = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls += 1;
+    return new Response(JSON.stringify({ call: calls }), { status: 200 });
+  };
+  try {
+    const areas = await getApiJson("/research/areas?land_cover=true", { cacheMs: 300000 });
+    await sendApiJson("/simulation/start", { method: "POST" });
+    assert.deepEqual(await getApiJson("/research/areas?land_cover=true", { cacheMs: 300000 }), areas);
+    assert.equal(calls, 2);
+    await sendApiJson("/zones", { method: "POST" });
+    assert.equal((await getApiJson("/research/areas?land_cover=true", { cacheMs: 300000 })).call, 4);
+  } finally { globalThis.fetch = original; }
 });
 
 test("versioned paths do not duplicate the API prefix", () => {

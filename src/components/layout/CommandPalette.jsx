@@ -17,7 +17,7 @@ const CommandPalette = ({ open, onClose }) => {
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
     const animalResults = animals.filter((animal) => [animal.id, animal.name, animal.species].join(" ").toLowerCase().includes(q)).slice(0, 5).map((animal) => ({ group: "Animals", label: `${animal.id} \xB7 ${animal.name}`, path: `/animals/${animal.id}` }));
-    const zoneResults = zones.filter((zone) => [zone.name, zone.type].join(" ").toLowerCase().includes(q)).slice(0, 5).map((zone) => ({ group: "Zones", label: zone.name, path: `/monitor?zone=${zone.id}` }));
+    const zoneResults = zones.filter((zone) => [zone.name, zone.type].join(" ").toLowerCase().includes(q)).slice(0, 5).map((zone) => ({ group: "Zones", label: zone.name, path: `/?zone=${zone.id}` }));
     const alertResults = alerts.filter((alert) => [alert.id, alert.title, alert.severity].join(" ").toLowerCase().includes(q)).slice(0, 5).map((alert) => ({ group: "Alerts", label: `${alert.id} \xB7 ${alert.title}`, path: `/alerts/${alert.id}` }));
     return q ? [...animalResults, ...zoneResults, ...alertResults] : [];
   }, [animals, alerts, query, zones]);

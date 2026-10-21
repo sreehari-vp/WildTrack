@@ -7,28 +7,65 @@ const apiUrl = (path) => {
   return `${API_BASE_URL}${apiPath}`;
 };
 const getApiJson = (path, options = {}) => sendApiJson(path, options);
+const API_CACHE_TTL_MS = 60000;
+const apiResponseCache = new Map();
+const apiInFlight = new Map();
+let apiCacheGeneration = 0;
 const sendApiJson = async (path, options = {}) => {
   // Render free services can take several seconds to wake after inactivity.
-  const { timeoutMs = 60000, ...fetchOptions } = options;
-  const timeout = AbortSignal.timeout(timeoutMs);
-  const response = await fetch(apiUrl(path), {
-    ...fetchOptions,
-    signal: options.signal ? AbortSignal.any([timeout, options.signal]) : timeout,
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      ...(options.headers ?? {})
-    }
-  });
-  if (!response.ok) {
-    let detail;
-    try { detail = (await response.json()).detail; } catch { /* The server may return HTML. */ }
-    if (response.status === 405) {
-      throw new Error("This API does not support this save action. Restart the WildTrack backend from the same project folder as the frontend.");
-    }
-    throw new Error(typeof detail === "string" ? detail : `The server could not complete this request (${response.status}).`);
+  const { timeoutMs = 60000, cacheMs, ...fetchOptions } = options;
+  const method = (fetchOptions.method ?? "GET").toUpperCase();
+  const url = apiUrl(path);
+  const ttl = cacheMs ?? (method === "GET" ? API_CACHE_TTL_MS : 0);
+  const cacheable = method === "GET" && ttl > 0 && !fetchOptions.signal;
+  const requestGeneration = apiCacheGeneration;
+  const cacheKey = `${method}:${url}`;
+  if (cacheable) {
+    const cached = apiResponseCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) return cached.value;
+    if (cached) apiResponseCache.delete(cacheKey);
+    if (apiInFlight.has(cacheKey)) return apiInFlight.get(cacheKey);
   }
-  return response.status === 204 ? null : response.json();
+  const request = (async () => {
+    const timeout = AbortSignal.timeout(timeoutMs);
+    const response = await fetch(url, {
+      ...fetchOptions,
+      signal: options.signal ? AbortSignal.any([timeout, options.signal]) : timeout,
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        ...(options.headers ?? {})
+      }
+    });
+    if (!response.ok) {
+      let detail;
+      try { detail = (await response.json()).detail; } catch { /* The server may return HTML. */ }
+      if (response.status === 405) {
+        throw new Error("This API does not support this save action. Restart the WildTrack backend from the same project folder as the frontend.");
+      }
+      throw new Error(typeof detail === "string" ? detail : `The server could not complete this request (${response.status}).`);
+    }
+    const payload = response.status === 204 ? null : await response.json();
+    if (method !== "GET") {
+      apiCacheGeneration += 1;
+      // Simulation and alert writes do not change sourced Ooty geography or sightings.
+      // Keep those larger responses warm while invalidating live operational data.
+      const zoneWrite = url.startsWith(`${API_BASE_URL}/zones`);
+      for (const key of apiResponseCache.keys()) {
+        const staticSightings = key.startsWith(`GET:${API_BASE_URL}/research/occurrences`);
+        const staticAreas = key.startsWith(`GET:${API_BASE_URL}/research/areas`) && !zoneWrite;
+        if (!staticSightings && !staticAreas) apiResponseCache.delete(key);
+      }
+      apiInFlight.clear();
+    } else if (cacheable && requestGeneration === apiCacheGeneration) {
+      apiResponseCache.set(cacheKey, { value: payload, expiresAt: Date.now() + ttl });
+    }
+    return payload;
+  })();
+  if (!cacheable) return request;
+  apiInFlight.set(cacheKey, request);
+  try { return await request; }
+  finally { if (apiInFlight.get(cacheKey) === request) apiInFlight.delete(cacheKey); }
 };
 const risk = (value) => {
   if (value === "safe" || value === "low" || value === "medium" || value === "high" || value === "critical" || value === "info") {

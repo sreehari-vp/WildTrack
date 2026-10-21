@@ -1,10 +1,15 @@
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
-import { riskCssVar, riskMeta, zoneCssVar, zoneLabels } from "../../utils/risk";
+import { riskCssVar, riskMeta, zoneLabels } from "../../utils/risk";
 import { SpeciesIcon } from "../animals/SpeciesIcon";
 const MapLegend = () => {
   const [open, setOpen] = useState(false);
   const zoneTypes = Object.entries(zoneLabels);
+  const zoneColors = {
+    tree_cover: "#327a52", shrubland: "#91a954", grassland: "#d5b75d",
+    cultivated_land: "#c58b53", built_up: "#b96055", bare_or_sparse_cover: "#b8a990",
+    surface_water: "#4d91b4"
+  };
   return <div className={`absolute bottom-4 left-4 z-20 ${open ? "w-64" : "w-28"} rounded-panel border border-line bg-paper/95 p-3 shadow-md`}>
       <button aria-expanded={open} className="flex w-full items-center justify-between text-sm font-medium" onClick={() => setOpen((current) => !current)}>
         Legend
@@ -17,11 +22,13 @@ const MapLegend = () => {
             {zoneTypes.map(([type, label]) => <div key={type} className="flex items-center gap-2">
                 <span
     className="h-3 w-5 rounded-[3px] border"
-    style={{ background: `color-mix(in srgb, var(${zoneCssVar[type]}) 24%, transparent)`, borderColor: `var(${zoneCssVar[type]})` }}
+                style={{ background: `color-mix(in srgb, ${zoneColors[type] ?? "#788b7b"} 42%, transparent)`, borderColor: zoneColors[type] ?? "#788b7b" }}
   />
                 {label}
               </div>)}
             </div>
+            <div className="mt-3 flex items-center gap-2 border-t border-line pt-3"><span className="h-0.5 w-6 rounded bg-[#214b35] ring-2 ring-[#f7f6ef]" />Thick outline · study region</div>
+            <p className="mt-1 text-[10px] leading-snug">Land-cover colors follow mapped class shapes inside each region.</p>
           </div>
           <div className="border-t border-line pt-3">
             <div className="mb-2 text-[11px] font-semibold tracking-[0.08em] text-ink-400">SCENARIO STATUS</div>

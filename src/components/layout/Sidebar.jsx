@@ -1,9 +1,8 @@
-import { BarChart3, Bell, CircleDotDashed, Cog, Map, MapPinned, Network, PawPrint, Route, Trees } from "lucide-react";
+import { BarChart3, Bell, CircleDotDashed, Cog, MapPinned, Network, PawPrint, Route, Trees } from "lucide-react";
 import { NavLink } from "react-router-dom";
 const nav = [
-  { label: "Ooty Map", path: "/", icon: MapPinned },
+  { label: "Ooty Map & Simulation", path: "/", icon: MapPinned },
   { label: "Overview", path: "/overview", icon: BarChart3 },
-  { label: "Simulation", path: "/monitor", icon: Map },
   { label: "Animals", path: "/animals", icon: PawPrint },
   { label: "Land Cover", path: "/zones", icon: Trees },
   { label: "Alerts", path: "/alerts", icon: Bell },

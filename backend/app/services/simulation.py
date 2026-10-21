@@ -36,6 +36,13 @@ class MovementSimulator:
         self._lock = asyncio.Lock()
         self._steps = {animal_id: 0 for animal_id in SIMULATION_PATHS}
         self._current_zones: dict[str, str | None] = {animal_id: None for animal_id in SIMULATION_PATHS}
+        self._current_regions: dict[str, str | None] = {animal_id: None for animal_id in SIMULATION_PATHS}
+        self._current_coordinates: dict[str, SimulationPoint] = {
+            animal_id: path[0] for animal_id, path in SIMULATION_PATHS.items() if path
+        }
+        self._last_zone_crossings = 0
+        self._last_region_crossings = 0
+        self._last_error: str | None = None
         self._restored = False
 
     @property
@@ -50,8 +57,13 @@ class MovementSimulator:
         """Resume one-way journeys at the next waypoint after a backend restart."""
         with engine.connect() as conn:
             rows = conn.execute(text("""
-                SELECT DISTINCT ON (animal_id) animal_id, longitude, latitude
+                SELECT DISTINCT ON (animal_id) animal_id, longitude, latitude, region.code AS region_code
                 FROM observations
+                LEFT JOIN LATERAL (
+                    SELECT code FROM study_regions
+                    WHERE ST_Covers(geometry, observations.location)
+                    ORDER BY ST_Area(geometry::geography), code LIMIT 1
+                ) region ON true
                 WHERE animal_id = ANY(:animal_ids) AND observation_id LIKE 'OBS-SIM-%'
                 ORDER BY animal_id, observed_at DESC, observation_id DESC
             """), {"animal_ids": list(SIMULATION_PATHS)}).mappings()
@@ -61,6 +73,8 @@ class MovementSimulator:
                 closest = min(range(len(path)), key=lambda index: distance_meters(observed, path[index]))
                 if distance_meters(observed, path[closest]) <= 80:
                     self._steps[row["animal_id"]] = closest + 1
+                self._current_coordinates[row["animal_id"]] = observed
+                self._current_regions[row["animal_id"]] = row["region_code"]
         self._restored = True
 
     def status(self) -> SimulationStatus:
@@ -72,9 +86,16 @@ class MovementSimulator:
             completed_routes=sum(self._steps[animal_id] >= len(path) for animal_id, path in SIMULATION_PATHS.items()),
             total_routes=len(SIMULATION_PATHS),
             animals={
-                animal_id: {"current_step": step, "current_zone": self._current_zones.get(animal_id)}
+                animal_id: {"current_step": step, "current_zone": self._current_zones.get(animal_id),
+                            "current_region": self._current_regions.get(animal_id),
+                            "coordinates": [self._current_coordinates[animal_id].longitude,
+                                            self._current_coordinates[animal_id].latitude]
+                            if animal_id in self._current_coordinates else None}
                 for animal_id, step in self._steps.items()
             },
+            last_zone_crossings=self._last_zone_crossings,
+            last_region_crossings=self._last_region_crossings,
+            last_error=self._last_error,
         )
 
     async def start(self) -> bool:
@@ -84,7 +105,15 @@ class MovementSimulator:
             if not self._restored:
                 await asyncio.to_thread(self.restore_progress)
             if self.finished:
-                return False
+                # Completed routes can be replayed by pressing Start again.
+                self._reset_progress_state()
+            self._last_error = None
+            # The route's first point is the animal's starting position. Begin
+            # the first simulated GPS fix at the next waypoint so movement is
+            # visible on the very first tick.
+            for animal_id, path in SIMULATION_PATHS.items():
+                if self._steps[animal_id] == 0 and len(path) > 1:
+                    self._steps[animal_id] = 1
             self._task = asyncio.create_task(self._run(), name="wildtrack-gps-simulator")
             return True
 
@@ -103,8 +132,17 @@ class MovementSimulator:
     async def reset(self) -> None:
         if self.running:
             await self.stop()
+        self._reset_progress_state()
+
+    def _reset_progress_state(self) -> None:
         self._steps = {animal_id: 0 for animal_id in SIMULATION_PATHS}
         self._current_zones = {animal_id: None for animal_id in SIMULATION_PATHS}
+        self._current_regions = {animal_id: None for animal_id in SIMULATION_PATHS}
+        self._current_coordinates = {
+            animal_id: path[0] for animal_id, path in SIMULATION_PATHS.items() if path
+        }
+        self._last_zone_crossings = 0
+        self._last_region_crossings = 0
         self._restored = True
 
     async def _run(self) -> None:
@@ -112,8 +150,10 @@ class MovementSimulator:
             tick_started = asyncio.get_running_loop().time()
             try:
                 await self.step_once()
+                self._last_error = None
             except Exception as exc:
-                logger.error("Simulation tick failed (%s); retrying next interval", type(exc).__name__)
+                self._last_error = type(exc).__name__
+                logger.exception("Simulation GPS tick failed; retrying next interval")
             if not self.finished:
                 elapsed = asyncio.get_running_loop().time() - tick_started
                 await asyncio.sleep(max(0, self.interval_seconds - elapsed))
@@ -150,9 +190,14 @@ class MovementSimulator:
         longitudes = [item["point"].longitude for item in candidates]
         latitudes = [item["point"].latitude for item in candidates]
         known_zone_ids = [self._current_zones.get(animal_id) for animal_id in animal_ids]
+        known_region_codes = [self._current_regions.get(animal_id) for animal_id in animal_ids]
         fix_at = observed_at or datetime.now(timezone.utc)
         pending_steps = {}
+        pending_coordinates = {}
         pending_zones = {}
+        pending_regions = {}
+        zone_crossing_count = 0
+        region_crossing_count = 0
         emitted: list[dict[str, Any]] = []
         with engine.begin() as conn:
             rows = [dict(row) for row in conn.execute(text("""
@@ -160,8 +205,9 @@ class MovementSimulator:
                     SELECT * FROM unnest(CAST(:animal_ids AS varchar[]),
                                          CAST(:longitudes AS double precision[]),
                                          CAST(:latitudes AS double precision[]),
-                                         CAST(:known_zone_ids AS varchar[]))
-                         AS r(animal_id, longitude, latitude, known_zone_id)
+                                         CAST(:known_zone_ids AS varchar[]),
+                                         CAST(:known_region_codes AS text[]))
+                         AS r(animal_id, longitude, latitude, known_zone_id, known_region_code)
                 ), rules AS (
                     SELECT coalesce(jsonb_agg(jsonb_build_object(
                         'rule_id', rule_id, 'rule_name', rule_name, 'event_type', event_type,
@@ -177,6 +223,8 @@ class MovementSimulator:
                        current_zone.zone_type AS current_zone_type,
                        current_zone.risk_level AS current_zone_risk,
                        coalesce(r.known_zone_id, previous_zone.zone_id) AS previous_zone_id,
+                       current_region.code AS current_region_code,
+                       coalesce(r.known_region_code, previous_region.code) AS previous_region_code,
                        rules.active_rules
                 FROM routes r
                 JOIN animals a ON a.animal_id=r.animal_id AND a.device_id IS NOT NULL
@@ -201,9 +249,26 @@ class MovementSimulator:
                     ORDER BY o.observed_at DESC, o.observation_id DESC
                     LIMIT 1
                 ) previous_zone ON true
+                LEFT JOIN LATERAL (
+                    SELECT code FROM study_regions
+                    WHERE ST_Covers(geometry, ST_SetSRID(ST_MakePoint(r.longitude, r.latitude), 4326))
+                    ORDER BY ST_Area(geometry::geography), code LIMIT 1
+                ) current_region ON true
+                LEFT JOIN LATERAL (
+                    SELECT region.code
+                    FROM observations o
+                    LEFT JOIN LATERAL (
+                        SELECT code FROM study_regions
+                        WHERE ST_Covers(geometry, o.location)
+                        ORDER BY ST_Area(geometry::geography), code LIMIT 1
+                    ) region ON true
+                    WHERE r.known_region_code IS NULL AND o.animal_id=a.animal_id
+                    ORDER BY o.observed_at DESC, o.observation_id DESC LIMIT 1
+                ) previous_region ON true
                 CROSS JOIN rules
             """), {"animal_ids": animal_ids, "longitudes": longitudes,
-                  "latitudes": latitudes, "known_zone_ids": known_zone_ids}).mappings()]
+                  "latitudes": latitudes, "known_zone_ids": known_zone_ids,
+                  "known_region_codes": known_region_codes}).mappings()]
             if not rows:
                 return []
 
@@ -225,13 +290,15 @@ class MovementSimulator:
                     "observation_id": f"OBS-SIM-{uuid4().hex[:18].upper()}",
                     "current_zone_id": str(row["current_zone_id"]) if row["current_zone_id"] else None,
                     "previous_zone_id": str(row["previous_zone_id"]) if row["previous_zone_id"] else None,
+                    "current_region_code": str(row["current_region_code"]) if row["current_region_code"] else None,
+                    "previous_region_code": str(row["previous_region_code"]) if row["previous_region_code"] else None,
                     "current_zone": {
                         "zone_id": row["current_zone_id"], "zone_name": row["current_zone_name"],
                         "zone_type": row["current_zone_type"], "risk_level": row["current_zone_risk"],
                     } if row["current_zone_id"] else None,
                 })
 
-            conn.execute(text("""
+            result = conn.execute(text("""
                 WITH fixes AS (
                     SELECT * FROM unnest(CAST(:observation_ids AS varchar[]),
                                          CAST(:animal_ids AS varchar[]),
@@ -242,9 +309,13 @@ class MovementSimulator:
                                          CAST(:observed_ats AS timestamptz[]),
                                          CAST(:previous_zone_ids AS varchar[]),
                                          CAST(:current_zone_ids AS varchar[]),
-                                         CAST(:boundary_event_ids AS varchar[]))
+                                         CAST(:boundary_event_ids AS varchar[]),
+                                         CAST(:previous_region_codes AS text[]),
+                                         CAST(:current_region_codes AS text[]),
+                                         CAST(:region_event_ids AS varchar[]))
                          AS f(observation_id, animal_id, device_id, latitude, longitude, speed,
-                              observed_at, previous_zone_id, current_zone_id, boundary_event_id)
+                              observed_at, previous_zone_id, current_zone_id, boundary_event_id,
+                              previous_region_code, current_region_code, region_event_id)
                 ), inserted AS (
                 INSERT INTO observations
                   (observation_id, animal_id, device_id, latitude, longitude, speed, observed_at, location)
@@ -257,7 +328,7 @@ class MovementSimulator:
                 ), boundary_events AS (
                     INSERT INTO event_outbox (event_id, collection_name, payload)
                     SELECT f.boundary_event_id, 'boundary_events', jsonb_build_object(
-                        'event_type', 'boundary_crossing', 'animal_id', f.animal_id,
+                        'event_type', 'boundary_crossing', 'boundary_level', 'zone', 'animal_id', f.animal_id,
                         'timestamp', f.observed_at, 'from_zone_id', f.previous_zone_id,
                         'to_zone_id', f.current_zone_id,
                         'location', jsonb_build_object('lat', f.latitude, 'lng', f.longitude),
@@ -265,10 +336,22 @@ class MovementSimulator:
                     )
                     FROM fixes f WHERE f.current_zone_id IS DISTINCT FROM f.previous_zone_id
                     RETURNING event_id
+                ), region_events AS (
+                    INSERT INTO event_outbox (event_id, collection_name, payload)
+                    SELECT f.region_event_id, 'boundary_events', jsonb_build_object(
+                        'event_type', 'region_boundary_crossing', 'boundary_level', 'region',
+                        'animal_id', f.animal_id, 'timestamp', f.observed_at,
+                        'from_region_code', f.previous_region_code, 'to_region_code', f.current_region_code,
+                        'location', jsonb_build_object('lat', f.latitude, 'lng', f.longitude),
+                        'metadata', jsonb_build_object('speed', f.speed, 'source', 'simulator')
+                    )
+                    FROM fixes f WHERE f.current_region_code IS DISTINCT FROM f.previous_region_code
+                    RETURNING event_id
                 )
                 SELECT (SELECT count(*) FROM inserted),
                        (SELECT count(*) FROM updated_devices),
-                       (SELECT count(*) FROM boundary_events)
+                       (SELECT count(*) FROM boundary_events),
+                       (SELECT count(*) FROM region_events)
             """), {
                 "observation_ids": [item["observation_id"] for item in ready],
                 "animal_ids": [item["animal_id"] for item in ready],
@@ -280,7 +363,12 @@ class MovementSimulator:
                 "previous_zone_ids": [item["previous_zone_id"] for item in ready],
                 "current_zone_ids": [item["current_zone_id"] for item in ready],
                 "boundary_event_ids": [str(uuid4()) for _ in ready],
-            })
+                "previous_region_codes": [item["previous_region_code"] for item in ready],
+                "current_region_codes": [item["current_region_code"] for item in ready],
+                "region_event_ids": [str(uuid4()) for _ in ready],
+            }).one()
+            zone_crossing_count = int(result[2])
+            region_crossing_count = int(result[3])
 
             for item in ready:
                 animal_id = item["animal_id"]
@@ -302,11 +390,17 @@ class MovementSimulator:
                     active_rules_by_event=active_rules_by_event,
                 )
                 pending_zones[animal_id] = current_zone_id
+                pending_regions[animal_id] = item["current_region_code"]
                 pending_steps[animal_id] = item["step_index"] + 1
+                pending_coordinates[animal_id] = point
                 emitted.append({"animal_id": animal_id, "observation": observation, "zone_id": current_zone_id})
         # Update process state only after PostgreSQL has committed every observation.
         self._current_zones.update(pending_zones)
+        self._current_regions.update(pending_regions)
         self._steps.update(pending_steps)
+        self._current_coordinates.update(pending_coordinates)
+        self._last_zone_crossings = zone_crossing_count
+        self._last_region_crossings = region_crossing_count
         return emitted
 
     def _speed_for(self, species: str, previous_point: SimulationPoint, current_point: SimulationPoint) -> float:

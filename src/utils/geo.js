@@ -48,7 +48,21 @@ const zoneFeatureCollection = (zones) => ({
       id: zone.id,
       name: zone.name,
       type: zone.type,
-      risk: zone.risk
+      risk: zone.risk,
+      color: ({
+        safe: "#4f8c65", buffer: "#d1ae50", restricted: "#b85c52",
+        "high-risk": "#d9691f", "water-source": "#4d91b4", protected: "#327a52",
+        tree_cover: "#327a52", shrubland: "#91a954", grassland: "#d5b75d",
+        cultivated_land: "#c58b53", built_up: "#b96055", bare_or_sparse_cover: "#b8a990",
+        surface_water: "#4d91b4"
+      })[zone.type] ?? "#788b7b",
+      statusColor: ({
+        safe: "#3f8f5b", low: "#6d9b5f", medium: "#c99a2e", high: "#d9691f",
+        critical: "#c2362f", info: "#4b7f9e"
+      })[zone.risk] ?? "#4b7f9e",
+      regionName: zone.regionName,
+      areaKm2: zone.areaKm2,
+      description: zone.description
     },
     geometry: zone.geometry
   }))

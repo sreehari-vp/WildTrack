@@ -11,6 +11,11 @@ const riskColor = {
   safe: "#3f8f5b", info: "#4b7f9e", low: "#6d9b5f",
   medium: "#c99a2e", high: "#d9691f", critical: "#c2362f"
 };
+const landCoverColor = {
+  tree_cover: "#327a52", shrubland: "#91a954", grassland: "#d5b75d",
+  cultivated_land: "#c58b53", built_up: "#b96055", bare_or_sparse_cover: "#b8a990",
+  surface_water: "#4d91b4"
+};
 
 const cutoff = (days) => {
   if (days === "all") return null;
@@ -23,7 +28,9 @@ const layoutZones = (zones, corridors) => {
     degree.set(corridor.from_zone_id, (degree.get(corridor.from_zone_id) ?? 0) + corridor.crossings);
     degree.set(corridor.to_zone_id, (degree.get(corridor.to_zone_id) ?? 0) + corridor.crossings);
   });
-  const ordered = [...zones].sort((a, b) => (degree.get(b.zone_id) ?? 0) - (degree.get(a.zone_id) ?? 0) || a.name.localeCompare(b.name));
+  const ordered = [...zones].sort((a, b) =>
+    (degree.get(b.zone_id) ?? 0) - (degree.get(a.zone_id) ?? 0) || a.name.localeCompare(b.name)
+  );
   return new Map(ordered.map((zone, index) => {
     const angle = -Math.PI / 2 + index * Math.PI * 2 / Math.max(ordered.length, 1);
     return [zone.zone_id, { x: 500 + Math.cos(angle) * 335, y: 300 + Math.sin(angle) * 215 }];
@@ -38,8 +45,11 @@ const curve = (a, b) => {
   const ny = dx / length;
   const ux = dx / length;
   const uy = dy / length;
-  return `M ${a.x + ux * 29} ${a.y + uy * 29} Q ${(a.x + b.x) / 2 + nx * 25} ${(a.y + b.y) / 2 + ny * 25} ${b.x - ux * 33} ${b.y - uy * 33}`;
+  const bend = 25;
+  return `M ${a.x + ux * 20} ${a.y + uy * 20} Q ${(a.x + b.x) / 2 + nx * bend} ${(a.y + b.y) / 2 + ny * bend} ${b.x - ux * 20} ${b.y - uy * 20}`;
 };
+
+const shortLabel = (value) => value.length > 12 ? `${value.slice(0, 11)}…` : value;
 
 const label = (value) => value ? new Date(value).toLocaleString() : "Unknown";
 
@@ -48,7 +58,7 @@ export const MovementNetwork = () => {
   const [days, setDays] = useState("30");
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
-  const [view, setView] = useState("routes");
+  const [view, setView] = useState("diagram");
   const [detail, setDetail] = useState({ loading: false, data: null, error: null });
   const [syncBusy, setSyncBusy] = useState(false);
   const [syncError, setSyncError] = useState("");
@@ -177,9 +187,9 @@ export const MovementNetwork = () => {
             </div> : <div>
               <p className="px-4 pt-3 text-xs text-ink-600">Hover to trace a link. Select a link or zone to inspect it.</p>
               <div className="overflow-x-auto">
-                <svg viewBox="0 0 1000 600" className="block min-w-[700px] w-full" aria-label="Interactive network diagram of zones and observed movements">
-                  <defs><marker id="network-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="3" markerHeight="3" orient="auto"><path d="M 1 1 L 7 4 L 1 7" fill="none" stroke="#547663" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /></marker></defs>
+                <svg viewBox="0 0 1000 600" className="block min-w-[760px] w-full bg-[radial-gradient(#dbe5dc_0.65px,transparent_0.65px)] [background-size:18px_18px]" aria-label="Interactive movement network">
                   <ellipse cx="500" cy="300" rx="335" ry="215" fill="none" stroke="#dce7dd" strokeDasharray="5 9" />
+                  <defs><marker id="network-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="2.2" markerHeight="2.2" orient="auto"><path d="M 1 1 L 7 4 L 1 7" fill="none" stroke="#547663" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" /></marker></defs>
                   {corridors.map((edge) => {
                     const from = positions.get(edge.from_zone_id);
                     const to = positions.get(edge.to_zone_id);
@@ -195,9 +205,10 @@ export const MovementNetwork = () => {
                         : false;
                     const muted = Boolean(focus && !emphasized);
                     const d = curve(from, to);
+                    const baseWidth = 0.8 + Math.sqrt(edge.crossings / maxCrossings) * 1.25;
                     const choose = () => setSelected({ kind: "corridor", from: edge.from_zone_id, to: edge.to_zone_id });
                     return <g key={key}>
-                      <path d={d} fill="none" stroke={active || emphasized ? "#1f4a33" : "#8aa696"} strokeWidth={active || emphasized ? 2.2 : 1.25} strokeOpacity={muted ? 0.12 : emphasized || active ? 0.95 : 0.48} markerEnd={muted ? undefined : "url(#network-arrow)"} className="pointer-events-none transition-opacity" />
+                      <path d={d} fill="none" stroke={active || emphasized ? "#1f4a33" : "#718b79"} strokeWidth={active || emphasized ? 2.3 : baseWidth} strokeOpacity={muted ? 0.08 : emphasized || active ? 0.96 : 0.34} markerEnd={muted ? undefined : "url(#network-arrow)"} className="pointer-events-none transition-opacity" />
                       <path d={d} fill="none" stroke="transparent" strokeWidth="18" className="cursor-pointer" role="button" tabIndex="0" aria-label={`${byId.get(edge.from_zone_id)?.name} to ${byId.get(edge.to_zone_id)?.name}, ${edge.crossings} crossings by ${edge.animals} animals`} onMouseEnter={() => setHovered({ kind: "corridor", from: edge.from_zone_id, to: edge.to_zone_id })} onMouseLeave={() => setHovered(null)} onFocus={() => setHovered({ kind: "corridor", from: edge.from_zone_id, to: edge.to_zone_id })} onBlur={() => setHovered(null)} onClick={choose} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); choose(); } }}><title>{edge.crossings} crossings by {edge.animals} animals</title></path>
                     </g>;
                   })}
@@ -208,17 +219,21 @@ export const MovementNetwork = () => {
                     const related = !focusZones || focusZones.has(zone.zone_id) || (focus?.kind === "zone" && (focus.zone_id === selected?.zone_id && impactedZoneIds.has(zone.zone_id) || corridors.some((edge) => (edge.from_zone_id === focus.zone_id && edge.to_zone_id === zone.zone_id) || (edge.to_zone_id === focus.zone_id && edge.from_zone_id === zone.zone_id))));
                     const choose = () => setSelected({ kind: "zone", zone_id: zone.zone_id });
                     return <g key={zone.zone_id} role="button" tabIndex="0" className="cursor-pointer transition-opacity" opacity={related ? 1 : 0.28} aria-label={`Inspect ${zone.name}`} onMouseEnter={() => setHovered({ kind: "zone", zone_id: zone.zone_id })} onMouseLeave={() => setHovered(null)} onFocus={() => setHovered({ kind: "zone", zone_id: zone.zone_id })} onBlur={() => setHovered(null)} onClick={choose} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); choose(); } }}>
-                      <circle cx={point.x} cy={point.y} r={active ? 31 : 27} fill="#fbfcfa" stroke={active || impacted.has(zone.zone_id) ? "#1f4a33" : riskColor[zone.risk_level] ?? "#6d9b5f"} strokeWidth={active ? 5 : 3} />
-                      <text x={point.x} y={point.y + 4} textAnchor="middle" fontSize="12" fontWeight="700" fill="#16201a">{zone.zone_id.slice(-3)}</text>
-                      <text x={point.x} y={point.y + 48} textAnchor="middle" fontSize="14" fontWeight={active ? "700" : "500"} fill="#16201a">{zone.name.length > 20 ? `${zone.name.slice(0, 18)}…` : zone.name}</text>
-                      <title>{zone.name} · {zone.risk_level} risk</title>
+                      <circle cx={point.x} cy={point.y} r={active ? 20 : 18} fill={landCoverColor[zone.zone_type] ?? "#fbfcfa"} fillOpacity={landCoverColor[zone.zone_type] ? 0.94 : 1} stroke={active || impacted.has(zone.zone_id) ? "#1f4a33" : riskColor[zone.risk_level] ?? "#6d9b5f"} strokeWidth={active ? 4 : 2.4} />
+                      <circle cx={point.x} cy={point.y} r="3" fill="#fffdf5" />
+                      <text x={point.x} y={point.y + 34} textAnchor="middle" fontSize="9.5" fontWeight={active ? "700" : "500"} fill="#26382c">{shortLabel(zone.name)}</text>
+                      <title>{zone.name} · {zone.study_region_name || "Unassigned region"} · {zone.zone_type.replaceAll("_", " ")} · {zone.risk_level} risk</title>
                     </g>;
                   })}
                 </svg>
               </div>
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line px-4 py-3 text-xs text-ink-600">
-                <span>Thin arrows show observed direction</span>
-                <span>Selected links are highlighted</span>
+                <span>Node fill = zone class · ring = risk level</span>
+                <span>Arrow direction = observed movement</span>
+                <span>Thicker line = more crossings</span>
+              </div>
+              <div className="flex flex-wrap gap-x-3 gap-y-1 border-t border-line px-4 py-2 text-[10px] text-ink-600">
+                {Object.entries(landCoverColor).map(([type, color]) => <span key={type} className="flex items-center gap-1"><i className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />{type.replaceAll("_", " ")}</span>)}
               </div>
             </div>}
           </div>

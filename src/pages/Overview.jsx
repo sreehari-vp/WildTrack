@@ -9,7 +9,7 @@ import { researchService } from "../services/researchService";
 import { riskMeta } from "../utils/risk";
 
 const Overview = () => {
-  const areas = useAsyncData(() => researchService.getAreas(true), []);
+  const areas = useAsyncData(() => researchService.getAreas(false), []);
   const animals = useAnimals();
   const zones = useZones();
   const alerts = useAlerts();
@@ -24,7 +24,7 @@ const Overview = () => {
   }
 
   const regions = areas.data.features.filter((feature) => feature.properties?.kind === "region");
-  const landCoverZones = areas.data.features.filter((feature) => feature.properties?.kind === "land_cover");
+  const landCoverZones = zones.data;
   const openAlerts = alerts.data.filter((alert) => alert.status !== "resolved");
   const regionCards = regions.map((region) => {
     const code = region.properties.code;
@@ -90,7 +90,7 @@ const Overview = () => {
         <h2 className="font-display text-xl text-ink-900">Land-cover classes</h2>
         <p className="mt-1 text-sm text-ink-600">Mapped classes describe satellite land cover. Scenario status is illustrative, not an official hazard rating.</p>
         <div className="mt-4 flex flex-wrap gap-2">
-          {[...new Set(landCoverZones.map((feature) => feature.properties.zone_type))].sort().map((type) => <span key={type} className="rounded-control border border-line bg-moss-100 px-3 py-2 text-xs text-ink-700">{type.replaceAll("_", " ")}</span>)}
+          {[...new Set(landCoverZones.map((zone) => zone.type))].sort().map((type) => <span key={type} className="rounded-control border border-line bg-moss-100 px-3 py-2 text-xs text-ink-700">{type.replaceAll("_", " ")}</span>)}
         </div>
         <Link to="/zones" className="mt-4 inline-block text-sm font-medium text-forest-700 underline">Explore zones and region boundaries</Link>
       </div>

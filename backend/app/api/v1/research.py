@@ -27,25 +27,28 @@ def selected_region_codes(connection, dataset: str) -> set[str]:
 @router.get("/areas")
 def research_areas(
     land_cover: bool = False,
+    include_regions: bool = True,
     dataset: Literal["current", "previous", "all"] = "current",
     session: Session = Depends(get_postgres_session),
 ) -> dict[str, object]:
     connection = session.connection()
     selected_codes = sorted(selected_region_codes(connection, dataset))
-    regions = connection.execute(text("""
-        select code, name, boundary_type, description, data_source, source_url,
-               source_license, source_version, selection_radius_m,
-               round((ST_Area(geometry::geography) / 1000000)::numeric, 3) as area_sq_km,
-               ST_AsGeoJSON(geometry)::jsonb as geometry
-        from public.study_regions where code = any(:selected_codes) order by name
-    """), {"selected_codes": selected_codes}).mappings().all()
-    features = [
-        {
-            "type": "Feature", "id": f"region:{row['code']}", "geometry": row["geometry"],
-            "properties": {**{key: value for key, value in row.items() if key != "geometry"}, "kind": "region"},
-        }
-        for row in regions
-    ]
+    features = []
+    if include_regions:
+        regions = connection.execute(text("""
+            select code, name, boundary_type, description, data_source, source_url,
+                   source_license, source_version, selection_radius_m,
+                   round((ST_Area(geometry::geography) / 1000000)::numeric, 3) as area_sq_km,
+                   ST_AsGeoJSON(geometry)::jsonb as geometry
+            from public.study_regions where code = any(:selected_codes) order by name
+        """), {"selected_codes": selected_codes}).mappings().all()
+        features = [
+            {
+                "type": "Feature", "id": f"region:{row['code']}", "geometry": row["geometry"],
+                "properties": {**{key: value for key, value in row.items() if key != "geometry"}, "kind": "region"},
+            }
+            for row in regions
+        ]
     if land_cover:
         zones = connection.execute(text("""
         select z.code, z.study_region_code, z.zone_type, z.name, z.description, z.data_source,

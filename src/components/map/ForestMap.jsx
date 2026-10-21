@@ -3,7 +3,7 @@ import { MapPin, Pencil, Trash2 } from "lucide-react";
 import { createRoot } from "react-dom/client";
 import { useEffect, useRef, useState } from "react";
 import { boundaryFeature, circlePolygon, mapLocationFromPoint, reserveCenter, zoneFeatureCollection } from "../../utils/geo";
-import { cssVar, riskCssVar, riskMeta, zoneCssVar, zoneLabels } from "../../utils/risk";
+import { cssVar, riskCssVar, riskMeta, zoneLabels } from "../../utils/risk";
 import { SpeciesIcon } from "../animals/SpeciesIcon";
 import { AnimalPopup } from "../animals/AnimalPopup";
 import { MapControls } from "./MapControls";
@@ -83,6 +83,7 @@ const ForestMap = ({
   alerts = [],
   movementPaths = [],
   preview = false,
+  scrollZoomEnabled = true,
   selectedAnimalId,
   selectedZoneId,
   selectedMovementSummary,
@@ -217,6 +218,7 @@ const ForestMap = ({
       interactive: !preview
     });
     mapRef.current = map;
+    if (!scrollZoomEnabled) map.scrollZoom.disable();
     map.on("load", () => {
       map.addSource("boundary", { type: "geojson", data: boundaryFeature(boundary) });
       map.addLayer({
@@ -232,11 +234,15 @@ const ForestMap = ({
       map.addSource("study-regions", { type: "geojson", data: { type: "FeatureCollection", features: studyRegions } });
       map.addLayer({
         id: "study-regions-fill", type: "fill", source: "study-regions",
-        paint: { "fill-color": "#477858", "fill-opacity": 0.035 }
+        paint: { "fill-color": "#477858", "fill-opacity": 0.105 }
+      });
+      map.addLayer({
+        id: "study-regions-casing", type: "line", source: "study-regions",
+        paint: { "line-color": "#f7f6ef", "line-width": 7, "line-opacity": 0.96 }
       });
       map.addLayer({
         id: "study-regions-line", type: "line", source: "study-regions",
-        paint: { "line-color": "#315d40", "line-width": 1.6, "line-opacity": 0.85, "line-dasharray": [2, 1.5] }
+        paint: { "line-color": "#214b35", "line-width": 3.5, "line-opacity": 0.98 }
       });
       map.addSource("zones", { type: "geojson", data: zoneFeatureCollection(allZones), promoteId: "id" });
       map.addLayer({
@@ -245,7 +251,7 @@ const ForestMap = ({
         source: "zones",
         paint: {
           "fill-color": ["get", "color"],
-          "fill-opacity": ["case", ["boolean", ["feature-state", "hover"], false], 0.18, 0.04]
+      "fill-opacity": ["case", ["boolean", ["feature-state", "hover"], false], 0.30, 0.14]
         }
       });
       map.addLayer({
@@ -254,10 +260,12 @@ const ForestMap = ({
         source: "zones",
         paint: {
           "line-color": ["get", "statusColor"],
-          "line-width": 1.1,
-          "line-opacity": 0.76
+          "line-width": ["case", ["boolean", ["feature-state", "hover"], false], 2.3, 1.35],
+          "line-opacity": 0.90
         }
       });
+      map.addLayer({ id: "study-regions-top-casing", type: "line", source: "study-regions", paint: { "line-color": "#f7f6ef", "line-width": 7, "line-opacity": 0.98 } });
+      map.addLayer({ id: "study-regions-top-line", type: "line", source: "study-regions", paint: { "line-color": "#214b35", "line-width": 3.5, "line-opacity": 1 } });
       map.addSource("movement-paths", {
         type: "geojson",
         data: {
@@ -333,8 +341,9 @@ const ForestMap = ({
         regionName: String(feature.properties?.regionName ?? ""),
         areaKm2: Number(feature.properties?.areaKm2 ?? 0),
         description: String(feature.properties?.description ?? ""),
-        x: event.point.x + 12,
-        y: event.point.y + 12
+        color: String(feature.properties?.type ?? ""),
+        x: Math.min(event.point.x + 14, Math.max(8, (containerRef.current?.clientWidth ?? 900) - 310)),
+        y: Math.min(event.point.y + 14, Math.max(8, (containerRef.current?.clientHeight ?? 600) - 160))
       });
     });
     map.on("mouseleave", "zones-fill", () => {
@@ -355,8 +364,8 @@ const ForestMap = ({
           source: String(props.data_source ?? "Source-derived forest extent"),
           legalStatus: String(props.legal_status ?? "Analysis extent; not a legal boundary"),
           areaKm2: Number(props.area_sq_km ?? 0),
-          x: event.point.x + 12,
-          y: event.point.y + 12
+          x: Math.min(event.point.x + 14, Math.max(8, (containerRef.current?.clientWidth ?? 900) - 310)),
+          y: Math.min(event.point.y + 14, Math.max(8, (containerRef.current?.clientHeight ?? 600) - 150))
         });
       });
       map.on("mouseleave", "study-regions-fill", () => {
@@ -425,25 +434,7 @@ const ForestMap = ({
     const map = mapRef.current;
     if (!mapReady || !map) return;
     const source = map.getSource("zones");
-    source.setData({
-      type: "FeatureCollection",
-      features: allZones.map((zone) => ({
-        type: "Feature",
-        id: zone.id,
-        properties: {
-          id: zone.id,
-          name: zone.name,
-          type: zone.type,
-          risk: zone.risk,
-          regionName: zone.regionName,
-          areaKm2: zone.areaKm2,
-          description: zone.description,
-          color: cssVar(zoneCssVar[zone.type], "currentColor"),
-          statusColor: cssVar(riskCssVar(zone.risk), cssVar("--risk-info", "currentColor"))
-        },
-        geometry: zone.geometry
-      }))
-    });
+    source.setData(zoneFeatureCollection(allZones));
   }, [allZones, mapReady]);
   useEffect(() => {
     const source = mapRef.current?.getSource("study-regions");
@@ -710,19 +701,24 @@ const ForestMap = ({
   />
           <MapLegend />
           {zoneHover ? <div className="zone-hover-tip" style={{ left: zoneHover.x, top: zoneHover.y }}>
-              <div className="font-medium">{zoneHover.name}</div>
-              <div className="text-ink-600">{zoneLabels[zoneHover.type] ?? zoneHover.type.replaceAll("_", " ")}</div>
-              {zoneHover.regionName ? <div className="text-ink-600">Region · {zoneHover.regionName}</div> : null}
-              <div className="text-ink-600">Scenario status · {riskMeta[zoneHover.risk]?.label ?? "Unrated"}</div>
-              {zoneHover.areaKm2 ? <div className="text-ink-600">{zoneHover.areaKm2.toFixed(2)} km²</div> : null}
-              {zoneHover.description ? <div className="max-w-64 text-ink-600">{zoneHover.description}</div> : null}
+              <div className="flex items-start gap-2.5">
+                <span className={`mt-0.5 h-3.5 w-3.5 shrink-0 rounded-sm border border-white/80 shadow-sm ${zoneHover.kind === "land_cover" ? `landcover-swatch-${zoneHover.color}` : "bg-forest-600"}`} />
+                <div className="min-w-0">
+                  <div className="zone-hover-kicker">{zoneHover.kind === "land_cover" ? "LAND-COVER ZONE" : "OPERATIONAL ZONE"}</div>
+                  <div className="zone-hover-title">{zoneHover.name}</div>
+                </div>
+              </div>
+              <div className="zone-hover-meta"><span>{zoneLabels[zoneHover.type] ?? zoneHover.type.replaceAll("_", " ")}</span>{zoneHover.areaKm2 ? <span>{zoneHover.areaKm2.toFixed(2)} km²</span> : null}</div>
+              {zoneHover.regionName ? <div className="zone-hover-parent">Within <strong>{zoneHover.regionName}</strong></div> : null}
+              {zoneHover.kind !== "land_cover" ? <div className="zone-hover-risk">Scenario status · {riskMeta[zoneHover.risk]?.label ?? "Unrated"}</div> : null}
+              {zoneHover.description ? <div className="zone-hover-description">{zoneHover.description}</div> : null}
             </div> : null}
           {!zoneHover && regionHover ? <div className="zone-hover-tip" style={{ left: regionHover.x, top: regionHover.y }}>
-              <div className="font-medium">{regionHover.name}</div>
-              <div className="text-ink-600">{regionHover.boundaryType}</div>
-              {regionHover.areaKm2 ? <div className="text-ink-600">{regionHover.areaKm2.toFixed(2)} km²</div> : null}
-              <div className="text-ink-600">{regionHover.source}</div>
-              <div className="max-w-64 text-ink-600">{regionHover.legalStatus}</div>
+              <div className="zone-hover-kicker">STUDY REGION</div>
+              <div className="zone-hover-title">{regionHover.name}</div>
+              <div className="zone-hover-meta"><span>{regionHover.boundaryType}</span>{regionHover.areaKm2 ? <span>{regionHover.areaKm2.toFixed(2)} km²</span> : null}</div>
+              <div className="zone-hover-description">{regionHover.source}</div>
+              <div className="zone-hover-description">{regionHover.legalStatus}</div>
             </div> : null}
           {location ? <LocationCard location={location} onClose={() => setLocation(null)} /> : null}
           {zonePanel ? <div className="absolute bottom-16 left-4 z-30 max-h-[65%] w-80 max-w-[calc(100%-32px)] overflow-auto rounded-panel border border-line bg-paper p-3 shadow-md">
